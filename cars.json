@@ -1,0 +1,47 @@
+[
+  {
+    "id": 1,
+    "make": "Toyota",
+    "model": "Camry",
+    "year": 2022,
+    "pricePerDay": 50,
+    "available": true,
+    "imageUrl": "https://via.placeholder.com/150/FF0000/FFFFFF?Text=ToyotaCamry"
+  },
+  {
+    "id": 2,
+    "make": "Honda",
+    "model": "Civic",
+    "year": 2023,
+    "pricePerDay": 45,
+    "available": true,
+    "imageUrl": "https://via.placeholder.com/150/0000FF/FFFFFF?Text=HondaCivic"
+  },
+  {
+    "id": 3,
+    "make": "Ford",
+    "model": "Ranger",
+    "year": 2022,
+    "pricePerDay": 40,
+    "available": false,
+    "imageUrl": "https://via.placeholder.com/150/FF0000/FFFFFF?Text=FordRangerUpdated"
+  },
+  {
+    "id": 4,
+    "make": "Toyota",
+    "model": "Vios",
+    "year": 2023,
+    "pricePerDay": 45,
+    "available": false,
+    "imageUrl": "https://via.placeholder.com/150/FF0000/FFFFFF?Text=ToyotaViosUpdated"
+  },
+  {
+    "id": 5,
+    "make": "VinFast",
+    "model": "VF8",
+    "year": 2024,
+    "pricePerDay": 80,
+    "available": true,
+    "imageUrl": "https://via.placeholder.com/150/AA00AA/FFFFFF?Text=VinFastVF8"
+  }
+]
