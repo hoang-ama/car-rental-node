@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Rental System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Rent-A-Car</h1>
+    </header>
+
+    <main>
+        <section id="cars-section">
+            <h2>Available Cars</h2>
+            <div id="cars-list" class="grid-container">
+                </div>
+        </section>
+
+        <section id="booking-section">
+            <h2>Make a Booking</h2>
+            <form id="booking-form">
+                <div>
+                    <label for="car-select">Select Car:</label>
+                    <select id="car-select" name="carId" required>
+                        </select>
+                </div>
+                <div>
+                    <label for="customer-name">Your Name:</label>
+                    <input type="text" id="customer-name" name="customerName" required>
+                </div>
+                <div>
+                    <label for="start-date">Start Date:</label>
+                    <input type="date" id="start-date" name="startDate" required>
+                </div>
+                <div>
+                    <label for="end-date">End Date:</label>
+                    <input type="date" id="end-date" name="endDate" required>
+                </div>
+                <button type="submit">Book Now</button>
+            </form>
+            <div id="booking-message"></div>
+        </section>
+
+        <section id="bookings-list-section">
+            <h2>Current Bookings</h2>
+            <ul id="bookings-list">
+                </ul>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Simple Car Rental</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
