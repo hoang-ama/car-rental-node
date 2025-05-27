@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Xe - Admin</title>
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+    <header>
+        <h1>Trang Quản Trị Xe</h1>
+        </header>
+
+    <main>
+        <section id="add-car-section">
+            <h2>Thêm Xe Mới / Cập Nhật Xe</h2>
+            <form id="car-form">
+                <input type="hidden" id="car-id" name="carId"> <div>
+                    <label for="make">Hãng xe (Make):</label>
+                    <input type="text" id="make" name="make" required>
+                </div>
+                <div>
+                    <label for="model">Mẫu xe (Model):</label>
+                    <input type="text" id="model" name="model" required>
+                </div>
+                <div>
+                    <label for="year">Năm sản xuất:</label>
+                    <input type="number" id="year" name="year" required>
+                </div>
+                <div>
+                    <label for="pricePerDay">Giá thuê/ngày ($):</label>
+                    <input type="number" id="pricePerDay" name="pricePerDay" step="0.01" required>
+                </div>
+                <div>
+                    <label for="imageUrl">Link hình ảnh:</label>
+                    <input type="url" id="imageUrl" name="imageUrl">
+                </div>
+                <div>
+                    <label for="available">Tình trạng (Available):</label>
+                    <select id="available" name="available">
+                        <option value="true">Có sẵn (Available)</option>
+                        <option value="false">Không có sẵn (Unavailable)</option>
+                    </select>
+                </div>
+                <button type="submit" id="submit-car-button">Thêm Xe</button>
+                <button type="button" id="cancel-edit-button" style="display:none;">Hủy Cập Nhật</button>
+            </form>
+            <div id="form-message"></div>
+        </section>
+
+        <section id="cars-list-section">
+            <h2>Danh Sách Xe Hiện Tại</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Hãng</th>
+                        <th>Mẫu</th>
+                        <th>Năm</th>
+                        <th>Giá/ngày</th>
+                        <th>Hình ảnh</th>
+                        <th>Tình trạng</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="cars-table-body">
+                    </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Car Rental Admin</p>
+    </footer>
+
+    <script src="admin-cars-script.js"></script>
+</body>
+</html>

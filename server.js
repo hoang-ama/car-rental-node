@@ -6,8 +6,15 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(express.json());
+app.use(express.json()); 
+// Middleware to serve static files (HTML, CSS, JS) from the 'public' directory for CLIENT
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Middleware to serve static files from the 'admin-public' directory for ADMIN
+// Các file trong admin-public sẽ được truy cập qua /admin/ten-file.html
+app.use('/admin', express.static(path.join(__dirname, 'admin-public')));
+
+
 
 // Đường dẫn tới file JSON
 const CARS_FILE_PATH = path.join(__dirname, 'cars.json');

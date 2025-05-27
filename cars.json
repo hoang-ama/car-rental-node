@@ -6,7 +6,7 @@
     "year": 2022,
     "pricePerDay": 50,
     "available": true,
-    "imageUrl": "https://via.placeholder.com/150/FF0000/FFFFFF?Text=ToyotaCamry"
+    "imageUrl": "https://proauto.vn/wp-content/uploads/2024/09/gia-lan-banh-xe-toyota-camry-2025.png"
   },
   {
     "id": 2,
@@ -15,7 +15,7 @@
     "year": 2023,
     "pricePerDay": 45,
     "available": true,
-    "imageUrl": "https://via.placeholder.com/150/0000FF/FFFFFF?Text=HondaCivic"
+    "imageUrl": "https://media.auto5.vn/files/quanganh/2024/08/03/2025-honda-civic-rs-jdm%20(6)-184359.jpg"
   },
   {
     "id": 3,
@@ -24,7 +24,7 @@
     "year": 2022,
     "pricePerDay": 40,
     "available": false,
-    "imageUrl": "https://via.placeholder.com/150/FF0000/FFFFFF?Text=FordRangerUpdated"
+    "imageUrl": "https://vcdn1-vnexpress.vnecdn.net/2023/05/11/Ford-Ranger-1-5137-1683786232.jpg?w=460&h=0&q=100&dpr=2&fit=crop&s=PjdQsFGf5Ou2VgCfi34igg"
   },
   {
     "id": 4,
@@ -33,15 +33,96 @@
     "year": 2023,
     "pricePerDay": 45,
     "available": false,
-    "imageUrl": "https://via.placeholder.com/150/FF0000/FFFFFF?Text=ToyotaViosUpdated"
+    "imageUrl": "https://imgcdnblog.carbay.com/wp-content/uploads/2020/07/24191559/6-19.jpg"
   },
   {
     "id": 5,
     "make": "VinFast",
-    "model": "VF8",
+    "model": "VF 8 Eco",
     "year": 2024,
     "pricePerDay": 80,
     "available": true,
-    "imageUrl": "https://via.placeholder.com/150/AA00AA/FFFFFF?Text=VinFastVF8"
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf8eco01.jpg&w=750&q=75"
+  },
+  {
+    "id": 6,
+    "make": "VinFast",
+    "model": "VF 9 Plus",
+    "year": 2024,
+    "pricePerDay": 120,
+    "available": true,
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf9-plus-10.jpg&w=750&q=75"
+  },
+  {
+    "id": 7,
+    "make": "VinFast",
+    "model": "VF 3",
+    "year": 2025,
+    "pricePerDay": 30,
+    "available": true,
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf305.jpg&w=1080&q=75"
+  },
+  {
+    "id": 8,
+    "make": "VinFast",
+    "model": "VF 6 Plus",
+    "year": 2024,
+    "pricePerDay": 55,
+    "available": true,
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf6plus001.png&w=750&q=75"
+  },
+  {
+    "id": 9,
+    "make": "VinFast",
+    "model": "VF 8 Plus",
+    "year": 2024,
+    "pricePerDay": 90,
+    "available": true,
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf8plus01.jpg&w=750&q=75"
+  },
+  {
+    "id": 10,
+    "make": "VinFast",
+    "model": "VF 9 Eco",
+    "year": 2024,
+    "pricePerDay": 100,
+    "available": true,
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf9-eco-09.jpg&w=2048&q=75"
+  },
+  {
+    "id": 11,
+    "make": "VinFast",
+    "model": "VF 7S",
+    "year": 2024,
+    "pricePerDay": 60,
+    "available": true,
+    "imageUrl": "https://vinfast-longbien.com.vn/OTO3602400604/files/san_pham/vf7_do.webp"
+  },
+  {
+    "id": 12,
+    "make": "VinFast",
+    "model": "VF 7 Plus",
+    "year": 2025,
+    "pricePerDay": 70,
+    "available": true,
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf7plus001.png&w=750&q=75"
+  },
+  {
+    "id": 13,
+    "make": "VinFast",
+    "model": "VF 6S",
+    "year": 2025,
+    "pricePerDay": 50,
+    "available": true,
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf6s001.png&w=750&q=75"
+  },
+  {
+    "id": 14,
+    "make": "VinFast",
+    "model": "VF 5 Plus",
+    "year": 2024,
+    "pricePerDay": 40,
+    "available": true,
+    "imageUrl": "https://vinfast-auto-vn.net/wp-content/uploads/2022/12/Hinh-bia-VF5.jpeg"
   }
 ]
