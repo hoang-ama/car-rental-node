@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Đơn Đặt Xe - Admin</title>
+    <link rel="stylesheet" href="admin-style.css">
+</head>
+<body>
+    <header>
+        <h1>Trang Quản Trị Đơn Đặt Xe</h1>
+        <nav>
+            <a href="admin-cars.html" style="color: white; margin-right: 15px;">Quản Lý Xe</a>
+            <a href="admin-bookings.html" style="color: #3498db; font-weight: bold;">Quản Lý Đặt Xe</a>
+        </nav>
+    </header>
+
+    <main>
+        <section id="add-booking-section">
+            <h2>Thêm Mới / Cập Nhật Đơn Đặt Xe</h2>
+            <form id="booking-form">
+                <input type="hidden" id="booking-id" name="bookingId"> <div>
+                    <label for="customer-name">Tên Khách Hàng:</label>
+                    <input type="text" id="customer-name" name="customerName" required>
+                </div>
+
+                <div>
+                    <label for="car-select">Chọn Xe:</label>
+                    <select id="car-select" name="carId" required>
+                        <option value="">-- Vui lòng chọn xe --</option>
+                        </select>
+                </div>
+                
+                <div>
+                    <label for="start-date">Ngày Bắt Đầu:</label>
+                    <input type="date" id="start-date" name="startDate" required>
+                </div>
+                
+                <div>
+                    <label for="end-date">Ngày Kết Thúc:</label>
+                    <input type="date" id="end-date" name="endDate" required>
+                </div>
+                
+                <button type="submit" id="submit-booking-button">Thêm Đơn Đặt Xe</button>
+                <button type="button" id="cancel-edit-booking-button" style="display:none;">Hủy Cập Nhật</button>
+            </form>
+            <div id="booking-form-message" class="form-message-placeholder"></div>
+        </section>
+
+        <section id="bookings-list-section">
+            <h2>Danh Sách Đơn Đặt Xe Hiện Tại</h2>
+            <div id="booking-action-message" class="action-message-placeholder"></div> <table>
+                <thead>
+                    <tr>
+                        <th>ID Đặt Xe</th>
+                        <th>Tên Khách Hàng</th>
+                        <th>Xe (ID - Hãng - Mẫu)</th>
+                        <th>Ngày Bắt Đầu</th>
+                        <th>Ngày Kết Thúc</th>
+                        <th>Ngày Đặt</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody id="bookings-table-body">
+                    </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Car Rental Admin</p>
+    </footer>
+
+    <script src="admin-bookings-script.js"></script>
+</body>
+</html>

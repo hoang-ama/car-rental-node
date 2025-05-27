@@ -204,6 +204,101 @@ app.delete('/admin/cars/:id', async (req, res) => {
 });
 
 
+// DELETE /admin/bookings/:id - Xóa một đơn đặt xe
+app.delete('/admin/bookings/:id', async (req, res) => {
+    // TODO: Thêm xác thực admin ở đây sau này
+    const bookingId = parseInt(req.params.id);
+    const bookingIndex = bookings.findIndex(b => b.id === bookingId);
+
+    if (bookingIndex === -1) {
+        return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    const deletedBooking = bookings.splice(bookingIndex, 1);
+    await saveData(); // Lưu lại thay đổi vào bookings.json
+    
+    // Lấy thông tin xe liên quan đến booking đã xóa để có thể log hoặc trả về
+    // (Phần này tùy chọn, có thể không cần thiết nếu chỉ trả về message)
+    const carDetails = cars.find(car => car.id === deletedBooking[0].carId);
+
+    console.log(`Admin deleted booking ID: ${bookingId} for car: ${carDetails ? carDetails.make + ' ' + carDetails.model : 'N/A'}`);
+    res.json({ message: 'Booking deleted successfully by admin', booking: deletedBooking[0] });
+});
+
+// POST /admin/bookings - Admin tạo một đơn đặt xe mới
+app.post('/admin/bookings', async (req, res) => {
+    // TODO: Thêm xác thực admin
+    const { customerName, carId, startDate, endDate, carMake, carModel } = req.body; // Thêm carMake, carModel từ client
+
+    if (!customerName || !carId || !startDate || !endDate) {
+        return res.status(400).json({ message: 'Customer name, car ID, start date, and end date are required.' });
+    }
+
+    const carExists = cars.find(c => c.id === parseInt(carId));
+    if (!carExists) {
+        return res.status(404).json({ message: 'Selected car not found.' });
+    }
+    // Có thể thêm kiểm tra car.available ở đây nếu admin không được phép đặt xe unavailable
+    // if (!carExists.available) {
+    //     return res.status(400).json({ message: 'Selected car is not available for booking.' });
+    // }
+
+    const newBooking = {
+        id: nextBookingId++, // nextBookingId được quản lý bởi loadData()
+        customerName,
+        carId: parseInt(carId),
+        carMake: carMake || carExists.make, // Ưu tiên thông tin gửi lên, nếu không có thì lấy từ cars.json
+        carModel: carModel || carExists.model,
+        startDate,
+        endDate,
+        bookingDate: new Date().toISOString(),
+        // status: status || 'pending' // Nếu có trường status
+    };
+
+    bookings.push(newBooking);
+    await saveData(); // Lưu lại bookings.json
+    res.status(201).json({ message: 'Booking created successfully by admin', booking: newBooking });
+});
+
+// PUT /admin/bookings/:id - Admin cập nhật một đơn đặt xe
+app.put('/admin/bookings/:id', async (req, res) => {
+    // TODO: Thêm xác thực admin
+    const bookingId = parseInt(req.params.id);
+    const bookingIndex = bookings.findIndex(b => b.id === bookingId);
+
+    if (bookingIndex === -1) {
+        return res.status(404).json({ message: 'Booking not found' });
+    }
+
+    const { customerName, carId, startDate, endDate, carMake, carModel } = req.body; // Thêm carMake, carModel
+
+    // Lấy booking hiện tại để cập nhật
+    const updatedBooking = { ...bookings[bookingIndex] };
+
+    if (customerName !== undefined) updatedBooking.customerName = customerName;
+    if (startDate !== undefined) updatedBooking.startDate = startDate;
+    if (endDate !== undefined) updatedBooking.endDate = endDate;
+    // if (status !== undefined) updatedBooking.status = status;
+
+    if (carId !== undefined) {
+        const carExists = cars.find(c => c.id === parseInt(carId));
+        if (!carExists) {
+            return res.status(404).json({ message: 'Selected car for update not found.' });
+        }
+        updatedBooking.carId = parseInt(carId);
+        updatedBooking.carMake = carMake || carExists.make; // Cập nhật lại carMake, carModel nếu carId thay đổi
+        updatedBooking.carModel = carModel || carExists.model;
+    } else { // Nếu không có carId mới, nhưng có carMake/Model mới (ví dụ chỉ sửa tên xe)
+        if (carMake !== undefined) updatedBooking.carMake = carMake;
+        if (carModel !== undefined) updatedBooking.carModel = carModel;
+    }
+    
+    bookings[bookingIndex] = updatedBooking;
+    await saveData(); // Lưu lại bookings.json
+    res.json({ message: 'Booking updated successfully by admin', booking: updatedBooking });
+});
+
+
 // --- Start the server ---
 async function startServer() {
     await loadData(); // Tải dữ liệu trước khi server bắt đầu nhận request
