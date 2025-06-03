@@ -38,5 +38,45 @@
     "startDate": "2025-06-05",
     "endDate": "2025-06-05",
     "bookingDate": "2025-05-27T12:03:43.750Z"
+  },
+  {
+    "id": 5,
+    "carId": 5,
+    "carMake": "VinFast",
+    "carModel": "VF 8 Eco",
+    "customerName": "Nam",
+    "startDate": "2025-05-30",
+    "endDate": "2025-05-30",
+    "bookingDate": "2025-05-30T07:32:08.969Z"
+  },
+  {
+    "id": 6,
+    "carId": 6,
+    "carMake": "VinFast",
+    "carModel": "VF 9 Plus",
+    "customerName": "Minh Hong Hoang",
+    "startDate": "2025-06-05T07:00:00.000Z",
+    "endDate": "2025-06-08T19:00:00.000Z",
+    "bookingDate": "2025-06-03T10:40:48.917Z"
+  },
+  {
+    "id": 7,
+    "carId": 10,
+    "carMake": "VinFast",
+    "carModel": "VF 9 Eco",
+    "customerName": "Henry Lee",
+    "startDate": "2025-06-04T07:00:00.000Z",
+    "endDate": "2025-06-04T19:00:00.000Z",
+    "bookingDate": "2025-06-03T14:50:08.627Z"
+  },
+  {
+    "id": 8,
+    "carId": 1,
+    "carMake": "Toyota",
+    "carModel": "Camry",
+    "customerName": "Henry Do",
+    "startDate": "2025-06-04T00:00:00.000Z",
+    "endDate": "2025-06-04T12:00:00.000Z",
+    "bookingDate": "2025-06-03T16:19:32.200Z"
   }
 ]

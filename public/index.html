@@ -3,57 +3,349 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Rental System</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Vshare, Residental Car-sharing at Vinhomes</title>
+    <link rel="icon" type="image/png" href="assets/logo/favicon.png">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <header>
-        <h1>Rent-A-Car</h1>
+    <div id="popup-overlay" class="hidden">
+        <div id="popup">
+            <span id="close-popup">&times;</span>
+            <h4>Special Offer!</h4>
+            <p>Sign up today and get 10% off your first rental.</p>
+        </div>
+    </div>
+
+    <header class="header" id="main-page-header">
+        <div class="header-content">
+            <div class="header-left">
+                <a href="#home-view" class="logo"> <img src="assets/logo/logo.png" alt="Vshare Logo">
+                </a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            <nav class="header-right">
+                <ul class="menu" id="menu">
+                    <li><a href="#benefits-section" class="nav-link">Why Vshare</a></li>
+                    <li><a href="#steps-section" class="nav-link">How to Rent</a></li>
+                    <li><a href="#featured-cars-section" class="nav-link">Vehicles</a></li>
+                    <li><button class="menu-button" id="login-button">Login</button></li>
+                    </ul>
+            </nav>
+        </div>
     </header>
 
-    <main>
-        <section id="cars-section">
-            <h2>Available Cars</h2>
-            <div id="cars-list" class="grid-container">
+    <section id="home-view">
+        <main>
+            <section class="hero" style="background-image: url('assets/images/carslide.png');">
+                <div class="booking-widget-overlay">
+                    <h2>Rent a vehicle?</h2>
+                    <p>More than hundreds of vehicles waiting for you.</p>
+                    <form id="home-booking-form">
+                        <div>
+                            <label for="location">Location:</label>
+                            <select id="location" name="location">
+                                <option value="Hanoi">Hanoi</option>
+                                <option value="Danang">Da Nang</option>
+                                <option value="Ho Chi Minh City">Ho Chi Minh City</option>
+                            </select>
+                        </div>
+                        <div class="date-time-group">
+                            <div>
+                                <label for="pickup-date">Pick-up Date:</label>
+                                <input type="date" id="pickup-date" name="pickupDate" required>
+                            </div>
+                            <div>
+                                <label for="pickup-time">Pick-up Time:</label>
+                                <input type="time" id="pickup-time" name="pickupTime" value="07:00" required>
+                            </div>
+                        </div>
+                        <div class="date-time-group">
+                            <div>
+                                <label for="return-date">Return Date:</label>
+                                <input type="date" id="return-date" name="returnDate" required>
+                            </div>
+                            <div>
+                                <label for="return-time">Return Time:</label>
+                                <input type="time" id="return-time" name="returnTime" value="19:00" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="search-cars-btn main-cta-button">Find a Vehicle</button>
+                    </form>
                 </div>
-        </section>
+            </section>
 
-        <section id="booking-section">
-            <h2>Make a Booking</h2>
-            <form id="booking-form">
-                <div>
-                    <label for="car-select">Select Car:</label>
-                    <select id="car-select" name="carId" required>
-                        </select>
+            <section id="benefits-section" class="benefits info-section">
+                <h2 class="section-title">Why Vshare</h2>
+                <div class="benefits-grid">
+                    <div class="benefit-item">
+                        <img src="assets/images/convenient.svg" alt="Convenient">
+                        <h4>Convenient</h4>
+                        <p>Book online, pick up your car right at your residence.</p>
+                    </div>
+                    <div class="benefit-item">
+                        <img src="assets/images/insurance.svg" alt="Insurance">
+                        <h4>Insurance</h4>
+                        <p>Peace of mind with our inclusive car rental insurance coverage.</p>
+                    </div>
+                    <div class="benefit-item">
+                        <img src="assets/images/saving.svg" alt="Saving">
+                        <h4>Saving</h4>
+                        <p>Save up to 30% for residents compared to regular rental prices.</p>
+                    </div>
+                    <div class="benefit-item">
+                        <img src="assets/images/cs.svg" alt="Support">
+                        <h4>24/7 Support</h4>
+                        <p>Dedicated support team during the vehicle rental process.</p>
+                    </div>
                 </div>
-                <div>
-                    <label for="customer-name">Your Name:</label>
-                    <input type="text" id="customer-name" name="customerName" required>
-                </div>
-                <div>
-                    <label for="start-date">Start Date:</label>
-                    <input type="date" id="start-date" name="startDate" required>
-                </div>
-                <div>
-                    <label for="end-date">End Date:</label>
-                    <input type="date" id="end-date" name="endDate" required>
-                </div>
-                <button type="submit">Book Now</button>
-            </form>
-            <div id="booking-message"></div>
-        </section>
+            </section>
 
-        <section id="bookings-list-section">
-            <h2>Current Bookings</h2>
-            <ul id="bookings-list">
-                </ul>
-        </section>
-    </main>
+            <section id="steps-section" class="steps info-section">
+                <h2 class="section-title">How to Rent a car</h2>
+                <div class="steps-grid">
+                    <div class="step-item">
+                        <img src="assets/images/bookcar.png" alt="Book a Car" class="step-icon">
+                        <h4>1. Book a car</h4>
+                        <p>Choose a suitable car, select your rental dates and complete booking online.</p>
+                    </div>
+                    <div class="step-item">
+                        <img src="assets/images/receivecar.png" alt="Receive the Car" class="step-icon">
+                        <h4>2. Pick-up car</h4>
+                        <p>Easily pick up your car at the designated Vshare location in Vinhomes.</p>
+                    </div>
+                    <div class="step-item">
+                        <img src="assets/images/enjoycar.png" alt="Enjoy Your Ride" class="step-icon">
+                        <h4>3. Enjoy ride</h4>
+                        <p>Experience the freedom and convenience of driving your chosen Vshare vehicle.</p>
+                    </div>
+                </div>
+            </section>
 
-    <footer>
-        <p>&copy; 2025 Simple Car Rental</p>
-    </footer>
+            <section id="featured-cars-section" class="info-section">
+                <h3 class="section-title">Featured Vehicles</h3>
+                <div class="featured-cars-slider-controls">
+                    <button id="prev-featured-car" class="slider-btn">&lt;</button>
+                    <div id="featured-cars-list" class="grid-container">
+                        {/* Xe nổi bật sẽ được JavaScript tải vào đây */}
+                    </div>
+                    <button id="next-featured-car" class="slider-btn">&gt;</button>
+                </div>
+            </section>
+        </main>
+        
+        <footer class="footer">
+            <div class="footer-container">
+                <div class="footer-column">
+                    <h3>CONTACT</h3>
+                    <p><b><i>Vshare, car rental at Vinhomes</i></b></p>
+                    <p>Branch 1: Park 2, Sh.09, Times City</p>
+                    <p>Branch 2: S2.19, Vinhomes Ocean Park</p>
+                    <p class="contact-line"><i class="fas fa-envelope"></i>&nbsp;<a href="mailto:contact@vshare.asia">contact@vshare.asia</a></p>
+                    <p class="contact-line"><i class="fas fa-phone"></i>&nbsp;<a href="tel:0903229906">0903.229.906 (8:00 AM - 9:00 PM)</a></p>
+                    <div class="social-icons">
+                        <a href="#" target="_blank"><img src="assets/images/facebookicon.png" alt="Facebook"></a>
+                        <a href="#" target="_blank"><img src="assets/images/youtube-20200619043955.png" alt="Youtube"></a>
+                        <a href="#" target="_blank"><img src="assets/images/linkedin.png" alt="Linkedin"></a>
+                        <a href="#" target="_blank"><img src="assets/images/twitter.png" alt="Twitter"></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h3>INTRODUCTION</h3>
+                    <a href="#">About Us</a>
+                    <div class="email-subscription">
+                        <form name="email-subscription-form" class="subscribe-form">
+                        <p>Subscribe to receive promotions</p> 
+                        <div class="subscribe-wrapper">
+                            <input type="email" id="subscriber-email" name="email" placeholder="Enter your email..." class="subscribe-input" required>
+                            <button type="submit" class="subscribe-button">Sign-up</button>
+                        </div>
+                        </form>
+                    </div>       
+                    <a href="#" target="_blank" style="margin-top: 15px; display:inline-block;">
+                        <img src="assets/images/tmdtlogo.png" alt="E-commerce Registered" style="height: 50px;">
+                    </a>
+                </div>
+                <div class="footer-column">
+                    <h3>POLICIES</h3>
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Service Regulations</a>
+                    <a href="#">Incidents & Complaints</a>
+                    <a href="#">Become a Partner</a>
+                </div>
+                <div class="footer-column">
+                    <h3>SUPPORT</h3>
+                    <a href="#">Car Rental Guide</a>
+                    <a href="#">FAQs</a>
+                    <a href="#">ETC Top-up Guide</a>
+                    <a href="#">Blog</a> 
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>Copyright &copy; 2025 by Vshare. All rights reserved.</p>
+            </div>
+        </footer>
+    </section> 
 
-    <script src="script.js"></script>
+    <section id="car-listing-view" class="page-view hidden">
+        <header class="page-header">
+             <div class="top-bar">
+                <a href="#home-view" class="logo-link">
+                     <img src="assets/logo/logo.png" alt="Vshare Logo" class="logo-img-page">
+                </a>
+                <nav>
+                    <a href="#" id="nav-home-from-listing" class="nav-link">Home</a>
+                </nav>
+            </div>
+            <h1>Available Cars</h1>
+        </header>
+        <main class="container">
+            <div id="search-criteria-summary"></div>
+            <div id="cars-list-container" class="grid-container"></div>
+            <button id="back-to-home-from-listing" class="back-button main-cta-button">New Search</button>
+        </main>
+        <footer class="main-footer page-footer"><p>&copy; 2025 Vshare</p></footer>
+    </section>
+
+    <section id="car-detail-view" class="page-view hidden">
+        <header class="page-header">
+            <div class="top-bar">
+                 <a href="#home-view" class="logo-link">
+                     <img src="assets/logo/logo.png" alt="Vshare Logo" class="logo-img-page">
+                </a>
+                <nav>
+                    <a href="#" id="nav-home-from-detail" class="nav-link">Home</a>
+                    <a href="#" id="nav-listing-from-detail" class="nav-link">Car List</a>
+                </nav>
+            </div>
+            <h1>Vehicle Details & Pricing</h1>
+        </header>
+        <main class="container">
+            <div id="car-detail-content-wrapper"> 
+                <div id="car-detail-image-specs">
+                    <img id="detail-car-image" src="https://via.placeholder.com/600x400?text=Car+Image" alt="Selected Car">
+                    <h2 id="detail-car-name">Car Name (Year)</h2>
+                    <div id="detail-car-specs"></div>
+                </div>
+                <div id="car-detail-booking-info">
+                    <h3>Rental Details</h3>
+                    <div id="detail-rental-time">
+                        <p><strong>Pick-up:</strong> <span id="detail-pickup-datetime"></span></p>
+                        <p><strong>Return:</strong> <span id="detail-return-datetime"></span></p>
+                    </div>
+                    <div id="detail-additional-services">
+                        <h4>Additional Services</h4>
+                        <label><input type="checkbox" id="vehicle-insurance" data-price="10"> Vehicle Insurance ($10/day)</label><br>
+                        <label><input type="checkbox" id="include-driver" data-price="50"> Include a Driver ($50/day)</label>
+                    </div>
+                    <div id="detail-price-summary">
+                        <h4>Price Summary</h4>
+                        <p>Unit Price: $<span id="detail-unit-price">0</span>/day</p>
+                        <p>Rental Duration: <span id="detail-rental-duration">0</span> days</p>
+                        <p>Base Cost: $<span id="detail-base-cost">0</span></p>
+                        <p>Additional Services: $<span id="detail-services-cost">0</span></p>
+                        <p><strong>Total: $<span id="detail-total-price">0</span></strong></p>
+                    </div>
+                    <button id="proceed-to-customer-info-btn" class="action-button main-cta-button">Book This Vehicle</button>
+                </div>
+            </div>
+             <button id="back-to-listing-from-detail-page" class="back-button">Back to Car List</button>
+        </main>
+        <footer class="main-footer page-footer"><p>&copy; 2025 Vshare</p></footer>
+    </section>
+
+    <section id="customer-info-view" class="page-view hidden">
+        <header class="page-header">
+             <div class="top-bar">
+                 <a href="#home-view" class="logo-link">
+                     <img src="assets/logo/logo.png" alt="Vshare Logo" class="logo-img-page">
+                </a>
+                <nav>
+                     <a href="#home-view" id="nav-home-from-customer" class="nav-link">Home</a>
+                </nav>
+            </div>
+            <h1>Customer Information & Payment</h1>
+        </header>
+        <main class="container">
+            <div id="customer-info-form-area">
+                <h3>Your Information</h3>
+                <form id="customer-booking-form">
+                    <div>
+                        <label for="customer-fullname">Full Name (*):</label>
+                        <input type="text" id="customer-fullname" name="customerName" required>
+                    </div>
+                    <div>
+                        <label for="customer-phone">Phone Number (*):</label>
+                        <input type="tel" id="customer-phone" name="customerPhone" required>
+                    </div>
+                    <div>
+                        <label for="customer-email">Email (*):</label>
+                        <input type="email" id="customer-email" name="customerEmail" required>
+                    </div>
+                    <div>
+                        <label for="customer-notes">Message:</label>
+                        <textarea id="customer-notes" name="customerNotes" rows="3"></textarea>
+                    </div>
+                    <h3>Payment Method</h3>
+                    <div id="payment-options">
+                        <label><input type="radio" name="paymentMethod" value="Pay Now" checked> Pay Now (Full Amount)</label><br>
+                        <label><input type="radio" name="paymentMethod" value="Pay Later"> Pay Later (30% Deposit)</label><br>
+                        <p class="payment-details">Payment instructions will be provided upon booking completion.</p>
+                    </div>
+                    <div id="final-price-summary">
+                        <p><strong>Total Amount: $<span id="final-total-price">0</span></strong></p>
+                        <p><strong>Deposit (if Pay Later): $<span id="final-deposit-price">0</span></strong></p>
+                    </div>
+                    <button type="submit" id="complete-booking-btn" class="action-button main-cta-button">Complete Booking</button>
+                </form>
+            </div>
+            <button id="back-to-car-detail-from-customer" class="back-button">Back to Vehicle Details</button>
+        </main>
+        <footer class="main-footer page-footer"><p>&copy; 2025 Vshare</p></footer>
+    </section>
+
+    <section id="booking-confirmation-view" class="page-view hidden">
+        <header class="page-header">
+            <div class="top-bar">
+                 <a href="#home-view" class="logo-link">
+                     <img src="assets/logo/logo.png" alt="Vshare Logo" class="logo-img-page">
+                </a>
+                 <nav>
+                    <a href="#home-view" id="nav-home-from-confirmation" class="nav-link">Home</a>
+                </nav>
+            </div>
+            <h1>Booking Successful!</h1>
+        </header>
+        <main class="container">
+            <div id="booking-confirmation-content">
+                <h2>Thank you for choosing Vshare!</h2>
+                <p>Your booking has been received.</p>
+                <p><strong>Booking Code: <span id="conf-booking-code"></span></strong></p>
+                <div id="conf-customer-details"></div>
+                <div id="conf-vehicle-details"></div>
+                <div id="conf-rental-period"></div>
+                <div id="conf-total-price"></div>
+                <div id="conf-payment-method"></div>
+                <p>A confirmation email will be sent to you shortly.</p>
+                <p>For any inquiries, please contact our hotline: <strong>0903.229.906</strong></p>
+            </div>
+            <button id="back-to-home-from-confirmation-main" class="action-button main-cta-button">Back to Homepage</button>
+        </main>
+        <footer class="main-footer page-footer"><p>&copy; 2025 Vshare</p></footer>
+    </section>
+
+    <div class="floating-buttons">
+        <a href="tel:0903229906" class="floating-button call-button" title="Call now">
+            <img src="assets/images/phone-icon.svg" alt="Call now">
+        </a>
+        <a href="https://zalo.me/0903229906" class="floating-button zalo-button" title="Chat with us via Zalo">
+            <img src="assets/images/zalo-icon.svg" alt="Chat with us via Zalo">
+        </a>
+    </div>
+    
+    <script src="assets/js/script.js"></script>
 </body>
 </html>
