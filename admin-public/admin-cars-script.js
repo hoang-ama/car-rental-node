@@ -2,233 +2,291 @@
 document.addEventListener('DOMContentLoaded', () => {
     const carsTableBody = document.getElementById('cars-table-body');
     const carForm = document.getElementById('car-form');
-    const carIdInput = document.getElementById('car-id');
+    
+    // Input ẩn để lưu ID của record xe đang được sửa (nếu backend dùng ID dạng số tự tăng để update)
+    // Nếu backend dùng uniqueId (ví dụ biển số) làm key chính để update, thì input này có thể không cần thiết
+    // hoặc dùng để phân biệt trạng thái "ADD" và "EDIT"
+    const carRecordIdInput = document.getElementById('car-id-form'); // ID này là của record, không phải ID xe admin nhập
+
+    // Form fields
+    const carUniqueIdInput = document.getElementById('car-unique-id'); // ID xe do admin nhập (ví dụ biển số)
     const makeInput = document.getElementById('make');
     const modelInput = document.getElementById('model');
     const yearInput = document.getElementById('year');
     const pricePerDayInput = document.getElementById('pricePerDay');
     const imageUrlInput = document.getElementById('imageUrl');
     const availableSelect = document.getElementById('available');
+    const locationSelectCarForm = document.getElementById('location'); // Đã đổi tên biến để tránh nhầm lẫn
+
+    // Specification fields
+    const bodyTypeSelect = document.getElementById('bodyType');
+    const transmissionSelect = document.getElementById('transmission');
+    const fuelTypeSelect = document.getElementById('fuelType');
+    const seatsInput = document.getElementById('seats');
+
+    // Features checkboxes
+    const featuresCheckboxes = document.querySelectorAll('input[name="features"]');
+
     const submitButton = document.getElementById('submit-car-button');
     const cancelEditButton = document.getElementById('cancel-edit-button');
     const formMessageDiv = document.getElementById('form-message');
 
     const ADMIN_API_URL = '/admin/cars'; // API endpoint cho quản lý xe bởi admin
-    const PUBLIC_API_URL = '/api/cars';   // API endpoint công khai để lấy danh sách/chi tiết xe
+    const PUBLIC_CARS_API_URL = '/api/cars'; // API để lấy danh sách xe hiển thị
 
     // --- Hàm hiển thị thông báo ---
     function showMessage(message, type = 'success') {
+        if (!formMessageDiv) return;
         formMessageDiv.textContent = message;
         formMessageDiv.className = type; // 'success' hoặc 'error'
-        // Tự động xóa thông báo sau một khoảng thời gian
+        formMessageDiv.style.padding = '10px';
+        formMessageDiv.style.marginBottom = '15px';
+        // (Thêm các style khác nếu cần)
         setTimeout(() => {
             formMessageDiv.textContent = '';
             formMessageDiv.className = '';
-        }, 4000); // 4 giây
+            formMessageDiv.style.padding = '0';
+        }, 4000);
     }
 
     // --- Hàm tải và hiển thị danh sách xe ---
     async function fetchAndDisplayCars() {
+        if (!carsTableBody) return;
         try {
-            const response = await fetch(PUBLIC_API_URL); // Sử dụng API công khai để lấy danh sách
-            if (!response.ok) {
-                throw new Error(`Lỗi HTTP! Trạng thái: ${response.status}`);
-            }
+            const response = await fetch(PUBLIC_CARS_API_URL); 
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const cars = await response.json();
-            carsTableBody.innerHTML = ''; // Xóa các dòng cũ trong bảng
-
-            if (cars.length === 0) {
-                carsTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Không có xe nào trong hệ thống.</td></tr>';
-                return;
-            }
+            carsTableBody.innerHTML = ''; 
 
             cars.forEach(car => {
                 const row = carsTableBody.insertRow();
+                // Truyền cả object car vào data-car để dễ dàng lấy thông tin khi edit
+                // ID trong data-id của nút xóa sẽ là ID duy nhất của xe (ví dụ: biển số)
                 row.innerHTML = `
-                    <td>${car.id}</td>
-                    <td>${car.make}</td>
-                    <td>${car.model}</td>
-                    <td>${car.year}</td>
-                    <td>$${parseFloat(car.pricePerDay).toFixed(2)}</td>
-                    <td><img src="${car.imageUrl || 'https://via.placeholder.com/100/CCCCCC/FFFFFF?Text=No+Image'}" alt="${car.make} ${car.model}" style="width:100px; height:auto; border-radius:4px;"></td>
-                    <td style="color: ${car.available ? 'green' : 'red'}; font-weight: bold;">
-                        ${car.available ? 'Có sẵn' : 'Hết hàng'}
+                    <td>${car.id || 'N/A'}</td>
+                    <td>${car.make || 'N/A'}</td>
+                    <td>${car.model || 'N/A'}</td>
+                    <td>${car.year || 'N/A'}</td>
+                    <td>$${car.pricePerDay !== undefined ? car.pricePerDay : 'N/A'}</td>
+                    <td>${car.location || 'N/A'}</td>
+                    <td>${car.specifications?.bodyType || 'N/A'}</td>
+                    <td class="${car.available ? 'status-available' : 'status-unavailable'}">
+                        ${car.available ? 'Available' : 'Unavailable'}
                     </td>
                     <td>
-                        <button class="edit-btn" data-id="${car.id}" title="Sửa xe">Sửa</button>
-                        <button class="delete-btn" data-id="${car.id}" title="Xóa xe">Xóa</button>
+                        <button class="edit-btn" data-car='${JSON.stringify(car)}'>Edit</button>
+                        <button class="delete-btn" data-id="${car.id}">Delete</button>
                     </td>
                 `;
             });
-        } catch (error) {
-            console.error('Lỗi khi tải danh sách xe:', error);
-            carsTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;">Lỗi tải danh sách xe. Vui lòng thử lại.</td></tr>';
-            showMessage('Lỗi tải danh sách xe: ' + error.message, 'error');
+        } catch (error) { 
+            console.error("Error fetching cars for admin table:", error);
+            carsTableBody.innerHTML = '<tr><td colspan="9">Error loading cars. Please try again.</td></tr>';
+            showMessage('Error loading cars: ' + error.message, 'error');
         }
     }
 
-    // --- Xử lý submit form (Thêm mới hoặc Cập nhật xe) ---
-    carForm.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Ngăn form submit theo cách truyền thống
+    // --- Xử lý submit form (Thêm mới hoặc Cập nhật) ---
+    if (carForm) {
+        carForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if(formMessageDiv) {
+                formMessageDiv.textContent = '';
+                formMessageDiv.className = '';
+            }
 
-        // Thu thập dữ liệu từ form
-        const carData = {
-            make: makeInput.value.trim(),
-            model: modelInput.value.trim(),
-            year: parseInt(yearInput.value),
-            pricePerDay: parseFloat(pricePerDayInput.value),
-            imageUrl: imageUrlInput.value.trim(),
-            available: availableSelect.value === 'true' // Chuyển string "true"/"false" thành boolean
-        };
-
-        // Kiểm tra dữ liệu cơ bản (bạn có thể thêm kiểm tra chi tiết hơn)
-        if (!carData.make || !carData.model || isNaN(carData.year) || isNaN(carData.pricePerDay)) {
-            showMessage('Vui lòng điền đầy đủ các trường bắt buộc (Hãng, Mẫu, Năm, Giá/ngày).', 'error');
-            return;
-        }
-        if (carData.year < 1900 || carData.year > new Date().getFullYear() + 2) {
-            showMessage('Năm sản xuất không hợp lệ.', 'error');
-            return;
-        }
-        if (carData.pricePerDay <= 0) {
-            showMessage('Giá thuê mỗi ngày phải lớn hơn 0.', 'error');
-            return;
-        }
-
-
-        const carId = carIdInput.value; // Lấy ID từ input ẩn để biết là thêm mới hay cập nhật
-        let response;
-        let method;
-        let url;
-
-        if (carId) { // Nếu có carId -> Cập nhật xe (PUT)
-            method = 'PUT';
-            url = `${ADMIN_API_URL}/${carId}`;
-        } else { // Không có carId -> Thêm xe mới (POST)
-            method = 'POST';
-            url = ADMIN_API_URL;
-        }
-
-        try {
-            // Vô hiệu hóa nút submit để tránh click nhiều lần
-            submitButton.disabled = true;
-            submitButton.textContent = carId ? 'Đang cập nhật...' : 'Đang thêm...';
-
-            response = await fetch(url, {
-                method: method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(carData),
+            const selectedFeatures = [];
+            featuresCheckboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    selectedFeatures.push(checkbox.value);
+                }
             });
 
-            const result = await response.json(); // Parse JSON từ phản hồi của server
+            const carData = {
+                id: carUniqueIdInput.value.trim(), // ID duy nhất của xe do admin nhập
+                make: makeInput.value.trim(),
+                model: modelInput.value.trim(),
+                year: parseInt(yearInput.value),
+                pricePerDay: parseFloat(pricePerDayInput.value),
+                imageUrl: imageUrlInput.value.trim(),
+                available: availableSelect.value === 'true',
+                location: locationSelectCarForm.value,
+                specifications: {
+                    bodyType: bodyTypeSelect.value,
+                    transmission: transmissionSelect.value,
+                    fuelType: fuelTypeSelect.value,
+                    seats: parseInt(seatsInput.value)
+                },
+                features: selectedFeatures
+            };
 
-            if (response.ok) { // Kiểm tra xem request có thành công không (status code 200-299)
-                showMessage(result.message || (carId ? 'Cập nhật xe thành công!' : 'Thêm xe thành công!'), 'success');
-                resetForm(); // Đặt lại form về trạng thái ban đầu
-                fetchAndDisplayCars(); // Tải lại danh sách xe để hiển thị thay đổi
-            } else {
-                // Nếu có lỗi từ server (ví dụ: validation error, server error)
-                showMessage(result.message || 'Có lỗi xảy ra từ phía server.', 'error');
+            // Kiểm tra các trường bắt buộc
+            if (!carData.id || !carData.make || !carData.model || isNaN(carData.year) || isNaN(carData.pricePerDay) || !carData.location) {
+                showMessage('Please fill in all required fields (ID, Make, Model, Year, Price, Location).', 'error');
+                return;
             }
-        } catch (error) {
-            // Nếu có lỗi mạng hoặc lỗi trong quá trình fetch
-            console.error('Lỗi khi submit form:', error);
-            showMessage('Lỗi kết nối hoặc server không phản hồi: ' + error.message, 'error');
-        } finally {
-            // Kích hoạt lại nút submit dù thành công hay thất bại
-            submitButton.disabled = false;
-            submitButton.textContent = carIdInput.value ? 'Cập Nhật Xe' : 'Thêm Xe';
-        }
-    });
+            // Kiểm tra điều kiện 
+            if (carData.pricePerDay < 0 || carData.seats < 1 || carData.year < 2000 || carData.year > new Date().getFullYear() + 1) {
+                showMessage('Invalid input: Price must be non-negative, Seats must be positive, Year must be reasonable.', 'error');
+                return;
+              }
 
-    // --- Xử lý sự kiện click trên bảng xe (cho nút Sửa và Xóa) ---
-    carsTableBody.addEventListener('click', async (event) => {
-        const target = event.target; // Element được click
-        const carId = target.dataset.id; // Lấy giá trị của thuộc tính data-id
+            const editingRecordId = carRecordIdInput.value; // ID này của record, có thể khác carData.id
+            let method = editingRecordId ? 'PUT' : 'POST';
+            // URL sẽ dùng ID duy nhất của xe (carData.id) nếu backend PUT/DELETE dựa trên đó
+            // Hoặc dùng editingRecordId nếu backend dùng ID tự tăng của record.
+            // Giả sử backend dùng ID duy nhất của xe (biển số) làm key chính thì sẽ phải là đổi là {encodeURIComponent(carUniqueIdInput.value)}
+            let url = editingRecordId ? `${ADMIN_API_URL}/${encodeURIComponent(editingRecordId)}` : ADMIN_API_URL;
+             // Nếu backend dùng ID của record (1,2,3...) để update, thì carData.id sẽ là biển số.
+             // Còn editingRecordId sẽ là ID hệ thống.
+             // Phụ thuộc vào thiết kế API của bạn.
+             // Ví dụ này giả định editingRecordId (nếu có) là ID để PUT/DELETE trên server.
+             // Và carData.id là unique ID (biển số) luôn được gửi trong body.
 
-        if (!carId) return; // Bỏ qua nếu không phải click vào nút có data-id
+            console.log("Submitting car data:", carData, "Method:", method, "URL:", url, "Editing Record ID:", editingRecordId); // DEBUG
 
-        // Xử lý khi nhấn nút "Sửa"
-        if (target.classList.contains('edit-btn')) {
+
             try {
-                // Lấy thông tin chi tiết của xe cần sửa từ API công khai
-                const res = await fetch(`${PUBLIC_API_URL}/${carId}`);
-                if (!res.ok) {
-                    if (res.status === 404) throw new Error('Không tìm thấy xe để sửa (ID: ' + carId + ').');
-                    throw new Error(`Lỗi HTTP khi lấy chi tiết xe: ${res.status}`);
+                if(submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = editingRecordId ? 'Updating...' : 'Adding...';
                 }
-                const carToEdit = await res.json();
 
-                // Điền thông tin xe vào form
-                carIdInput.value = carToEdit.id;
-                makeInput.value = carToEdit.make;
-                modelInput.value = carToEdit.model;
-                yearInput.value = carToEdit.year;
-                pricePerDayInput.value = carToEdit.pricePerDay;
-                imageUrlInput.value = carToEdit.imageUrl || '';
-                availableSelect.value = String(carToEdit.available); // Chuyển boolean thành string "true" hoặc "false"
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(carData), // Gửi toàn bộ carData, bao gồm cả carData.id (unique id)
+                });
 
-                submitButton.textContent = 'Cập Nhật Xe'; // Thay đổi text nút submit
-                cancelEditButton.style.display = 'inline-block'; // Hiển thị nút "Hủy Cập Nhật"
-                
-                // Cuộn lên đầu trang hoặc tới form để người dùng dễ thấy
-                carForm.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                makeInput.focus(); // Focus vào trường đầu tiên
+                const result = await response.json();
 
-            } catch (error) {
-                console.error('Lỗi khi chuẩn bị sửa xe:', error);
-                showMessage(error.message, 'error');
-            }
-        }
-
-        // Xử lý khi nhấn nút "Xóa"
-        if (target.classList.contains('delete-btn')) {
-            // Hỏi xác nhận trước khi xóa
-            if (confirm(`Bạn có chắc chắn muốn xóa xe có ID: ${carId} không? Hành động này không thể hoàn tác.`)) {
-                try {
-                    target.disabled = true; // Vô hiệu hóa nút xóa tạm thời
-                    target.textContent = 'Đang xóa...';
-
-                    const response = await fetch(`${ADMIN_API_URL}/${carId}`, {
-                        method: 'DELETE',
-                    });
-                    const result = await response.json();
-
-                    if (response.ok) {
-                        showMessage(result.message || 'Xóa xe thành công!', 'success');
-                        fetchAndDisplayCars(); // Tải lại danh sách xe
-                    } else {
-                        showMessage(result.message || 'Lỗi khi xóa xe từ server.', 'error');
-                        target.disabled = false;
-                        target.textContent = 'Xóa';
-                    }
-                } catch (error) {
-                    console.error('Lỗi khi xóa xe:', error);
-                    showMessage('Lỗi kết nối khi xóa xe: ' + error.message, 'error');
-                    target.disabled = false;
-                    target.textContent = 'Xóa';
+                if (response.ok) {
+                    showMessage(result.message || (editingRecordId ? 'Car updated successfully!' : 'Car added successfully!'), 'success');
+                    resetForm();
+                    fetchAndDisplayCars(); 
+                } else {
+                    showMessage(result.message || 'Operation failed. Please try again.', 'error');
+                }
+            } catch (error) { 
+                console.error('Error submitting car form:', error);
+                showMessage('Client-side error: ' + error.message, 'error');
+            } finally {
+                if(submitButton) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = carRecordIdInput.value ? 'Update Car' : 'Add Car';
                 }
             }
-        }
-    });
-
-    // --- Xử lý nút "Hủy Cập Nhật" ---
-    cancelEditButton.addEventListener('click', () => {
-        resetForm();
-    });
-
-    // --- Hàm đặt lại (reset) form về trạng thái ban đầu ---
-    function resetForm() {
-        carForm.reset(); // Xóa hết giá trị trong các trường của form
-        carIdInput.value = ''; // Quan trọng: xóa ID xe đang sửa (nếu có)
-        submitButton.textContent = 'Thêm Xe'; // Đặt lại text nút submit
-        cancelEditButton.style.display = 'none'; // Ẩn nút "Hủy Cập Nhật"
-        availableSelect.value = 'true'; // Mặc định tình trạng là "Có sẵn"
-        makeInput.focus(); // Focus vào trường đầu tiên
+        });
     }
 
-    // --- Tải dữ liệu ban đầu khi trang được load ---
+    // --- Xử lý nút Sửa và Xóa ---
+    if (carsTableBody) {
+        carsTableBody.addEventListener('click', async (event) => {
+            const target = event.target;
+            
+            if (target.classList.contains('edit-btn')) {
+                const carDataString = target.dataset.car; 
+                if (!carDataString) {
+                    console.error("Car data not found on edit button's data-car attribute.");
+                    showMessage("Error: Could not retrieve car data for editing.", "error");
+                    return;
+                }
+                try {
+                    const carToEdit = JSON.parse(carDataString);
+                    console.log("Editing car:", carToEdit); 
+
+                    // carRecordIdInput dùng để xác định đây là PUT request và ID của record trên server
+                    // Nếu backend dùng ID duy nhất (ví dụ biển số) làm key, thì giá trị này chính là carToEdit.id
+                    carRecordIdInput.value = carToEdit.id; // Giả sử carToEdit.id là ID duy nhất được dùng để update
+
+                    if(carUniqueIdInput) carUniqueIdInput.value = carToEdit.id || ''; 
+                    if(makeInput) makeInput.value = carToEdit.make || '';
+                    if(modelInput) modelInput.value = carToEdit.model || '';
+                    if(yearInput) yearInput.value = carToEdit.year || '';
+                    if(pricePerDayInput) pricePerDayInput.value = carToEdit.pricePerDay !== undefined ? carToEdit.pricePerDay : '';
+                    if(imageUrlInput) imageUrlInput.value = carToEdit.imageUrl || '';
+                    if(availableSelect) availableSelect.value = String(carToEdit.available);
+                    if(locationSelectCarForm) locationSelectCarForm.value = carToEdit.location || 'Hanoi';
+
+                    if (carToEdit.specifications) {
+                        if(bodyTypeSelect) bodyTypeSelect.value = carToEdit.specifications.bodyType || 'SUV';
+                        if(transmissionSelect) transmissionSelect.value = carToEdit.specifications.transmission || 'AT';
+                        if(fuelTypeSelect) fuelTypeSelect.value = carToEdit.specifications.fuelType || 'Petrol';
+                        if(seatsInput) seatsInput.value = carToEdit.specifications.seats || 5;
+                    } else { 
+                        if(bodyTypeSelect) bodyTypeSelect.value = 'SUV';
+                        if(transmissionSelect) transmissionSelect.value = 'AT';
+                        if(fuelTypeSelect) fuelTypeSelect.value = 'Petrol';
+                        if(seatsInput) seatsInput.value = 5;
+                    }
+
+                    featuresCheckboxes.forEach(checkbox => {
+                        checkbox.checked = carToEdit.features ? carToEdit.features.includes(checkbox.value) : false;
+                    });
+
+                    if(submitButton) submitButton.textContent = 'Update Car';
+                    if(cancelEditButton) cancelEditButton.style.display = 'inline-block';
+                    const addCarSection = document.getElementById('add-car-section');
+                    if (addCarSection) addCarSection.scrollIntoView({ behavior: 'smooth' });
+
+                } catch (e) {
+                    console.error("Error parsing car data for edit:", e);
+                    showMessage("Error: Could not load car data for editing.", "error");
+                }
+            }
+
+            if (target.classList.contains('delete-btn')) {
+                const carIdToDelete = target.dataset.id; // ID này là ID duy nhất của xe
+                if (!carIdToDelete) {
+                     showMessage("Error: Car ID not found for deletion.", "error");
+                     return;
+                }
+                if (confirm(`Are you sure you want to delete car with ID: ${carIdToDelete}?`)) {
+                    try {
+                        target.disabled = true;
+                        target.textContent = "Deleting...";
+                        const response = await fetch(`${ADMIN_API_URL}/${encodeURIComponent(carIdToDelete)}`, {
+                            method: 'DELETE',
+                        });
+                        const result = await response.json();
+                        if (response.ok) {
+                            showMessage(result.message || 'Car deleted successfully!', 'success');
+                            fetchAndDisplayCars(); 
+                        } else {
+                            showMessage(result.message || 'Error deleting car.', 'error');
+                        }
+                    } catch (error) { 
+                        console.error("Error deleting car:", error);
+                        showMessage('Client-side error: ' + error.message, 'error');
+                    } finally {
+                        target.disabled = false;
+                        target.textContent = "Delete";
+                    }
+                }
+            }
+        });
+    }
+    
+    function resetForm() {
+        if(carForm) carForm.reset(); // Reset tất cả input trong form
+        if(carRecordIdInput) carRecordIdInput.value = ''; 
+        // carUniqueIdInput sẽ được reset bởi carForm.reset() nếu nó là input thường
+        if(submitButton) submitButton.textContent = 'Add Car';
+        if(cancelEditButton) cancelEditButton.style.display = 'none';
+        // Set lại giá trị mặc định cho các select nếu cần
+        if(availableSelect) availableSelect.value = 'true';
+        if(locationSelectCarForm) locationSelectCarForm.value = 'Hanoi';
+        if(bodyTypeSelect) bodyTypeSelect.value = 'SUV';
+        if(transmissionSelect) transmissionSelect.value = 'AT';
+        if(fuelTypeSelect) fuelTypeSelect.value = 'Petrol';
+        if(seatsInput) seatsInput.value = 5; // Giá trị mặc định cho seats
+        featuresCheckboxes.forEach(checkbox => checkbox.checked = false); // Bỏ chọn tất cả features
+        if(carUniqueIdInput) carUniqueIdInput.focus(); // Focus lại vào trường ID
+    }
+
+    if(cancelEditButton) {
+        cancelEditButton.addEventListener('click', resetForm);
+    }
+
     fetchAndDisplayCars();
 });

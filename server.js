@@ -1,62 +1,75 @@
 // server.js
 const express = require('express');
+const fs = require('fs').promises;
 const path = require('path');
-const fs = require('fs').promises; // Sử dụng fs.promises để thao tác file bất đồng bộ
+const cors = require('cors');
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Middleware
-app.use(express.json()); 
-// Middleware to serve static files (HTML, CSS, JS) from the 'public' directory for CLIENT
+app.use(cors());
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
-
-// Middleware to serve static files from the 'admin-public' directory for ADMIN
-// Các file trong admin-public sẽ được truy cập qua /admin/ten-file.html
 app.use('/admin', express.static(path.join(__dirname, 'admin-public')));
 
-
-
-// Đường dẫn tới file JSON
+// File paths
+// const carsFile = path.join(__dirname, 'cars.json');
 const CARS_FILE_PATH = path.join(__dirname, 'cars.json');
+
 const BOOKINGS_FILE_PATH = path.join(__dirname, 'bookings.json');
 
-// --- Biến lưu trữ dữ liệu (sẽ được tải từ file) ---
 let cars = [];
 let bookings = [];
-let nextCarId = 1; // Sẽ được tính toán lại dựa trên dữ liệu đã có
-let nextBookingId = 1; // Sẽ được tính toán lại dựa trên dữ liệu đã có
+let nextBookingId = 1;   // ID tự tăng cho bản ghi booking
 
-// --- Helper functions để đọc/ghi file JSON ---
+// Helper function to read JSON file
+async function readData(filePath) {
+    try {
+      const data = await fs.readFile(filePath, 'utf8');
+      return JSON.parse(data);
+    } catch (error) {
+      console.error(`Error reading file ${filePath}:`, error);
+      return [];
+    }
+  }
+
+  // Helper function to write JSON file
+async function writeData(filePath, data) {
+    try {
+      await fs.writeFile(filePath, JSON.stringify(data, null, 2));
+    } catch (error) {
+      console.error(`Error writing file ${filePath}:`, error);
+    }
+  }
+
+// --- Helper Functions ---
 async function loadData() {
     try {
-        // Đọc cars.json
         const carsData = await fs.readFile(CARS_FILE_PATH, 'utf-8');
         cars = JSON.parse(carsData);
-        if (cars.length > 0) {
-            // Tính nextCarId dựa trên id lớn nhất hiện có
-            nextCarId = Math.max(...cars.map(c => c.id)) + 1;
-        } else {
-            nextCarId = 1;
-        }
+        console.log('Cars data loaded. Number of cars:', cars.length);
 
-        // Đọc bookings.json
         const bookingsData = await fs.readFile(BOOKINGS_FILE_PATH, 'utf-8');
         bookings = JSON.parse(bookingsData);
         if (bookings.length > 0) {
-            nextBookingId = Math.max(...bookings.map(b => b.id)) + 1;
+            const maxBookingId = bookings.reduce((max, b) => b.id > max ? b.id : max, 0);
+            nextBookingId = maxBookingId + 1;
         } else {
             nextBookingId = 1;
         }
-        console.log('Data loaded successfully from JSON files.');
+        console.log('Bookings data loaded. Next Booking ID:', nextBookingId);
     } catch (error) {
-        // Nếu file không tồn tại hoặc có lỗi, khởi tạo với mảng rỗng
-        console.error('Error loading data, initializing with empty arrays:', error.message);
-        cars = [];
+        console.warn('Error loading data or files not found, initializing with example data:', error.message);
+        // Khởi tạo dữ liệu mẫu nếu file không tồn tại hoặc rỗng
+        cars = [
+            { "id": "VF8-29A12345", "make": "VinFast", "model": "VF 8 Eco", "year": 2024, "pricePerDay": 80, "available": true, "imageUrl": "assets/images/cars/vinfast_vf8.png", "specifications": { "bodyType": "SUV", "transmission": "AT", "fuelType": "Electric", "seats": 5 }, "features": ["AC", "GPS", "Bluetooth", "Reverse Camera"], "location": "Hanoi", "type": "SUV", "seats": 5 }, // Thêm type, seats ở ngoài cho dễ filter
+            { "id": "CAMRY-30E98765", "make": "Toyota", "model": "Camry", "year": 2022, "pricePerDay": 50, "available": true, "imageUrl": "assets/images/cars/toyota_camry.png", "specifications": { "bodyType": "Sedan", "transmission": "AT", "fuelType": "Petrol", "seats": 5 }, "features": ["AC", "Airbag", "Bluetooth"], "location": "Ho Chi Minh City", "type": "Sedan", "seats": 5 },
+            { "id": "CIVIC-51K54321", "make": "Honda", "model": "Civic", "year": 2023, "pricePerDay": 45, "available": true, "imageUrl": "assets/images/placeholder-car.png", "specifications": { "bodyType": "Sedan", "transmission": "AT", "fuelType": "Petrol", "seats": 5 }, "features": ["AC", "USB Port"], "location": "Danang", "type": "Sedan", "seats": 5 }
+        ];
         bookings = [];
-        nextCarId = 1;
         nextBookingId = 1;
-        // Tạo file nếu chưa có để lần sau không lỗi
-        await saveData(); // Lưu mảng rỗng vào file
+        await saveData();
     }
 }
 
@@ -64,23 +77,34 @@ async function saveData() {
     try {
         await fs.writeFile(CARS_FILE_PATH, JSON.stringify(cars, null, 2), 'utf-8');
         await fs.writeFile(BOOKINGS_FILE_PATH, JSON.stringify(bookings, null, 2), 'utf-8');
-        console.log('Data saved successfully to JSON files.');
+        // console.log('Data saved successfully.');
     } catch (error) {
         console.error('Error saving data:', error);
     }
 }
 
-// --- API Endpoints cho Client (không thay đổi nhiều) ---
+// --- Client API Endpoints ---
 
-// GET all cars
-app.get('/api/cars', (req, res) => {
-    res.json(cars);
+// API endpoint to fetch cars
+app.get('/api/cars', async (req, res) => {
+  try {
+    const cars = await readData(CARS_FILE_PATH);
+    const location = req.query.location;
+    let filteredCars = cars.filter(car => car.available); // Only return available cars
+    if (location && location !== "AnyLocation") {
+      filteredCars = filteredCars.filter(car => car.location === location);
+    }
+    res.json(filteredCars);
+  } catch (error) {
+    console.error('Error in /api/cars:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
 });
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-// GET a specific car by ID
-app.get('/api/cars/:id', (req, res) => {
-    const carId = parseInt(req.params.id);
-    const car = cars.find(c => c.id === carId);
+app.get('/api/cars/:carId', (req, res) => { 
+    const carIdParam = req.params.carId;
+    const car = cars.find(c => c.id === carIdParam);
     if (car) {
         res.json(car);
     } else {
@@ -88,224 +112,265 @@ app.get('/api/cars/:id', (req, res) => {
     }
 });
 
-// POST (create) a new booking
-app.post('/api/bookings', async (req, res) => { // Thêm async ở đây
-    const { carId, customerName, startDate, endDate } = req.body;
+app.post('/api/bookings', async (req, res) => {
+    const {
+        carId, 
+        customerName, customerPhone, customerEmail, notes,
+        pickupLocation, startDate, endDate,
+        paymentMethod, totalPrice, baseCost, servicesCost, depositAmount
+    } = req.body;
 
-    if (!carId || !customerName || !startDate || !endDate) {
-        return res.status(400).json({ message: 'All fields are required: carId, customerName, startDate, endDate' });
+    if (!carId || !customerName || !startDate || !endDate || totalPrice === undefined) {
+        return res.status(400).json({ message: 'Car ID, Customer Name, Start Date, End Date, and Total Price are required for booking.' });
     }
 
-    const car = cars.find(c => c.id === parseInt(carId));
+    const car = cars.find(c => c.id === carId);
     if (!car) {
-        return res.status(404).json({ message: 'Car not found' });
+        return res.status(404).json({ message: `Car with ID ${carId} not found for booking.` });
     }
-    // Tạm thời bỏ qua logic check car.available vì admin sẽ quản lý
-    // if (!car.available) {
-    //     return res.status(400).json({ message: 'Car is currently not available' });
-    // }
-
+    
     const newBooking = {
-        id: nextBookingId++,
-        carId: car.id,
-        carMake: car.make,
-        carModel: car.model,
+        id: nextBookingId++, 
+        carId: car.id, 
+        carMake: car.make, 
+        carModel: car.model, 
         customerName,
-        startDate,
-        endDate,
+        customerPhone,
+        customerEmail,
+        notes,
+        pickupLocation: pickupLocation || car.location, 
+        startDate, 
+        endDate,   
+        paymentMethod,
+        totalPrice: parseFloat(totalPrice),
+        baseCost: baseCost ? parseFloat(baseCost) : null,
+        servicesCost: servicesCost ? parseFloat(servicesCost) : null,
+        depositAmount: depositAmount ? parseFloat(depositAmount) : null,
+        status: 'Pending', 
         bookingDate: new Date().toISOString()
     };
-
     bookings.push(newBooking);
-    await saveData(); // Lưu lại bookings.json
-    console.log('New Booking:', newBooking);
+    await saveData();
+    console.log('New Booking by client:', newBooking);
     res.status(201).json({ message: 'Booking successful!', booking: newBooking });
 });
 
-// GET all bookings
 app.get('/api/bookings', (req, res) => {
     res.json(bookings);
 });
 
 
-// --- API Endpoints cho Admin Portal ---
+// --- Admin API Endpoints ---
+app.get('/admin/cars', (req, res) => {
+    res.json(cars);
+});
 
-// POST /admin/cars - Thêm xe mới
 app.post('/admin/cars', async (req, res) => {
-    // TODO: Thêm xác thực admin ở đây sau này
-    const { make, model, year, pricePerDay, available = true, imageUrl = '' } = req.body;
+    const {
+        id, 
+        make, model, year, pricePerDay, available = true, imageUrl = '',
+        location, specifications, features
+    } = req.body;
 
-    if (!make || !model || !year || pricePerDay === undefined) {
-        return res.status(400).json({ message: 'Make, model, year, and pricePerDay are required.' });
+    if (!id || !make || !model || !year || pricePerDay === undefined || !location || !specifications || !features) {
+        return res.status(400).json({ message: 'Vehicle ID (unique), make, model, year, price, location, specifications, and features are required.' });
+    }
+    if (cars.find(c => c.id === id)) {
+        return res.status(400).json({ message: `Car with Vehicle ID ${id} already exists.` });
     }
 
     const newCar = {
-        id: nextCarId++,
-        make,
-        model,
+        id: id, 
+        make, model,
         year: parseInt(year),
         pricePerDay: parseFloat(pricePerDay),
         available: Boolean(available),
-        imageUrl
+        imageUrl, location,
+        specifications: {
+            bodyType: specifications.bodyType || 'N/A',
+            transmission: specifications.transmission || 'N/A',
+            fuelType: specifications.fuelType || 'N/A',
+            seats: specifications.seats ? parseInt(specifications.seats) : 4 
+        },
+        features: Array.isArray(features) ? features : []
     };
     cars.push(newCar);
-    await saveData(); // Lưu lại cars.json
-    res.status(201).json({ message: 'Car added successfully', car: newCar });
+    await saveData();
+    console.log('Admin added new car:', newCar);
+    res.status(201).json({ message: 'Car added successfully by admin', car: newCar });
 });
 
-// PUT /admin/cars/:id - Cập nhật thông tin xe
-app.put('/admin/cars/:id', async (req, res) => {
-    // TODO: Thêm xác thực admin
-    const carId = parseInt(req.params.id);
-    const carIndex = cars.findIndex(c => c.id === carId);
+app.put('/admin/cars/:carIdToUpdate', async (req, res) => {
+    const carIdParam = req.params.carIdToUpdate; // Đây là ID duy nhất (VD: biển số)
+    const carIndex = cars.findIndex(c => c.id === carIdParam);
 
     if (carIndex === -1) {
-        return res.status(404).json({ message: 'Car not found' });
+        return res.status(404).json({ message: `Car with ID ${carIdParam} not found` });
     }
 
-    const { make, model, year, pricePerDay, available, imageUrl } = req.body;
-    const updatedCar = { ...cars[carIndex] }; // Sao chép xe hiện tại
+    const {
+        make, model, year, pricePerDay, available, imageUrl,
+        location, specifications, features
+    } = req.body;
 
-    // Cập nhật các trường nếu được cung cấp
+    const updatedCar = { ...cars[carIndex] }; 
+
     if (make !== undefined) updatedCar.make = make;
     if (model !== undefined) updatedCar.model = model;
     if (year !== undefined) updatedCar.year = parseInt(year);
     if (pricePerDay !== undefined) updatedCar.pricePerDay = parseFloat(pricePerDay);
     if (available !== undefined) updatedCar.available = Boolean(available);
     if (imageUrl !== undefined) updatedCar.imageUrl = imageUrl;
+    if (location !== undefined) updatedCar.location = location;
+// Chỉ cập nhật specifications nếu nó được gửi lên và là một object
+if (specifications && typeof specifications === 'object') {
+    // Đảm bảo rằng updatedCar.specifications tồn tại trước khi gán thuộc tính
+    if (!updatedCar.specifications) {
+        updatedCar.specifications = {};
+    }
+    if (specifications.bodyType !== undefined) updatedCar.specifications.bodyType = specifications.bodyType;
+    if (specifications.transmission !== undefined) updatedCar.specifications.transmission = specifications.transmission;
+    if (specifications.fuelType !== undefined) updatedCar.specifications.fuelType = specifications.fuelType;
+    if (specifications.seats !== undefined) updatedCar.specifications.seats = parseInt(specifications.seats);
+}
 
+if (features && Array.isArray(features)) { // Cập nhật mảng features
+    updatedCar.features = features;
+}
+    
     cars[carIndex] = updatedCar;
-    await saveData(); // Lưu lại cars.json
-    res.json({ message: 'Car updated successfully', car: updatedCar });
+    await saveData();
+    console.log('Admin updated car ID:', carIdParam, updatedCar);
+    res.json({ message: 'Car updated successfully by admin', car: updatedCar });
 });
 
-// DELETE /admin/cars/:id - Xóa xe
-app.delete('/admin/cars/:id', async (req, res) => {
-    // TODO: Thêm xác thực admin
-    const carId = parseInt(req.params.id);
-    const carIndex = cars.findIndex(c => c.id === carId);
+app.delete('/admin/cars/:carIdToDelete', async (req, res) => {
+    const carIdParam = req.params.carIdToDelete; // ID duy nhất của xe
+    const carIndex = cars.findIndex(c => c.id === carIdParam);
 
     if (carIndex === -1) {
-        return res.status(404).json({ message: 'Car not found' });
+        return res.status(404).json({ message: `Car with ID ${carIdParam} not found` });
     }
-
-    // Kiểm tra xem xe có booking nào không trước khi xóa (tùy chọn)
-    const hasBookings = bookings.some(booking => booking.carId === carId);
+    const hasBookings = bookings.some(booking => booking.carId === carIdParam);
     if (hasBookings) {
-        // Có thể không cho xóa hoặc đánh dấu là "archived" thay vì xóa hẳn
-        // For simplicity now, we'll allow deletion.
-        // Hoặc bạn có thể trả về lỗi:
-        // return res.status(400).json({ message: 'Car has existing bookings and cannot be deleted. Consider marking it as unavailable.' });
+        // return res.status(400).json({ message: `Car ID ${carIdParam} has existing bookings. Consider marking it as unavailable.` });
+        console.warn(`Attempting to delete car ID ${carIdParam} which has bookings. Allowed for now.`);
     }
-
     const deletedCar = cars.splice(carIndex, 1);
-    await saveData(); // Lưu lại cars.json
-    res.json({ message: 'Car deleted successfully', car: deletedCar[0] });
+    await saveData();
+    console.log('Admin deleted car ID:', carIdParam);
+    res.json({ message: 'Car deleted successfully by admin', car: deletedCar[0] });
 });
 
-
-// DELETE /admin/bookings/:id - Xóa một đơn đặt xe
-app.delete('/admin/bookings/:id', async (req, res) => {
-    // TODO: Thêm xác thực admin ở đây sau này
-    const bookingId = parseInt(req.params.id);
-    const bookingIndex = bookings.findIndex(b => b.id === bookingId);
-
-    if (bookingIndex === -1) {
-        return res.status(404).json({ message: 'Booking not found' });
-    }
-
-    const deletedBooking = bookings.splice(bookingIndex, 1);
-    await saveData(); // Lưu lại thay đổi vào bookings.json
-    
-    // Lấy thông tin xe liên quan đến booking đã xóa để có thể log hoặc trả về
-    // (Phần này tùy chọn, có thể không cần thiết nếu chỉ trả về message)
-    const carDetails = cars.find(car => car.id === deletedBooking[0].carId);
-
-    console.log(`Admin deleted booking ID: ${bookingId} for car: ${carDetails ? carDetails.make + ' ' + carDetails.model : 'N/A'}`);
-    res.json({ message: 'Booking deleted successfully by admin', booking: deletedBooking[0] });
+app.get('/admin/bookings', (req, res) => {
+    res.json(bookings);
 });
 
-// POST /admin/bookings - Admin tạo một đơn đặt xe mới
 app.post('/admin/bookings', async (req, res) => {
-    // TODO: Thêm xác thực admin
-    const { customerName, carId, startDate, endDate, carMake, carModel } = req.body; // Thêm carMake, carModel từ client
+    const {
+        customerName, customerPhone, customerEmail, notes,
+        carId, // vehicleId của xe
+        pickupLocation, startDate, endDate,
+        paymentMethod, totalPrice, baseCost, servicesCost, depositAmount, status
+    } = req.body;
 
-    if (!customerName || !carId || !startDate || !endDate) {
-        return res.status(400).json({ message: 'Customer name, car ID, start date, and end date are required.' });
+    if (!customerName || !carId || !startDate || !endDate || totalPrice === undefined || !status) {
+        return res.status(400).json({ message: 'Customer Name, Car ID, Start/End Dates, Total Price, and Status are required.' });
     }
 
-    const carExists = cars.find(c => c.id === parseInt(carId));
-    if (!carExists) {
-        return res.status(404).json({ message: 'Selected car not found.' });
+    const car = cars.find(c => c.id === carId);
+    if (!car) {
+        return res.status(404).json({ message: `Car with ID ${carId} not found for booking.` });
     }
-    // Có thể thêm kiểm tra car.available ở đây nếu admin không được phép đặt xe unavailable
-    // if (!carExists.available) {
-    //     return res.status(400).json({ message: 'Selected car is not available for booking.' });
-    // }
 
     const newBooking = {
-        id: nextBookingId++, // nextBookingId được quản lý bởi loadData()
-        customerName,
-        carId: parseInt(carId),
-        carMake: carMake || carExists.make, // Ưu tiên thông tin gửi lên, nếu không có thì lấy từ cars.json
-        carModel: carModel || carExists.model,
-        startDate,
-        endDate,
-        bookingDate: new Date().toISOString(),
-        // status: status || 'pending' // Nếu có trường status
+        id: nextBookingId++,
+        carId: car.id,
+        carMake: car.make,
+        carModel: car.model,
+        customerName, customerPhone, customerEmail, notes,
+        pickupLocation: pickupLocation || car.location,
+        startDate, endDate,
+        paymentMethod,
+        totalPrice: parseFloat(totalPrice),
+        baseCost: baseCost !== undefined && baseCost !== null ? parseFloat(baseCost) : null,
+        servicesCost: servicesCost !== undefined && servicesCost !== null ? parseFloat(servicesCost) : null,
+        depositAmount: depositAmount !== undefined && depositAmount !== null ? parseFloat(depositAmount) : null,
+        status,
+        bookingDate: new Date().toISOString()
     };
-
     bookings.push(newBooking);
-    await saveData(); // Lưu lại bookings.json
+    await saveData();
+    console.log('Admin created new booking:', newBooking);
     res.status(201).json({ message: 'Booking created successfully by admin', booking: newBooking });
 });
 
-// PUT /admin/bookings/:id - Admin cập nhật một đơn đặt xe
-app.put('/admin/bookings/:id', async (req, res) => {
-    // TODO: Thêm xác thực admin
-    const bookingId = parseInt(req.params.id);
-    const bookingIndex = bookings.findIndex(b => b.id === bookingId);
+app.put('/admin/bookings/:bookingId', async (req, res) => {
+    const bookingIdParam = parseInt(req.params.bookingId); // ID tự tăng của booking
+    const bookingIndex = bookings.findIndex(b => b.id === bookingIdParam);
 
     if (bookingIndex === -1) {
-        return res.status(404).json({ message: 'Booking not found' });
+        return res.status(404).json({ message: `Booking with ID ${bookingIdParam} not found` });
     }
 
-    const { customerName, carId, startDate, endDate, carMake, carModel } = req.body; // Thêm carMake, carModel
+    const {
+        customerName, customerPhone, customerEmail, notes,
+        carId, // vehicleId của xe
+        pickupLocation, startDate, endDate,
+        paymentMethod, totalPrice, baseCost, servicesCost, depositAmount, status
+    } = req.body;
 
-    // Lấy booking hiện tại để cập nhật
     const updatedBooking = { ...bookings[bookingIndex] };
 
     if (customerName !== undefined) updatedBooking.customerName = customerName;
+    if (customerPhone !== undefined) updatedBooking.customerPhone = customerPhone;
+    if (customerEmail !== undefined) updatedBooking.customerEmail = customerEmail;
+    if (notes !== undefined) updatedBooking.notes = notes;
+    if (pickupLocation !== undefined) updatedBooking.pickupLocation = pickupLocation;
     if (startDate !== undefined) updatedBooking.startDate = startDate;
     if (endDate !== undefined) updatedBooking.endDate = endDate;
-    // if (status !== undefined) updatedBooking.status = status;
+    if (paymentMethod !== undefined) updatedBooking.paymentMethod = paymentMethod;
+    if (totalPrice !== undefined) updatedBooking.totalPrice = parseFloat(totalPrice);
+    updatedBooking.baseCost = baseCost !== undefined && baseCost !== null ? parseFloat(baseCost) : updatedBooking.baseCost;
+    updatedBooking.servicesCost = servicesCost !== undefined && servicesCost !== null ? parseFloat(servicesCost) : updatedBooking.servicesCost;
+    updatedBooking.depositAmount = depositAmount !== undefined && depositAmount !== null ? parseFloat(depositAmount) : updatedBooking.depositAmount;
+    if (status !== undefined) updatedBooking.status = status;
 
-    if (carId !== undefined) {
-        const carExists = cars.find(c => c.id === parseInt(carId));
-        if (!carExists) {
-            return res.status(404).json({ message: 'Selected car for update not found.' });
+    if (carId !== undefined && carId !== updatedBooking.carId) {
+        const car = cars.find(c => c.id === carId);
+        if (!car) {
+            return res.status(404).json({ message: `Car with Vehicle ID ${carId} not found for booking update.` });
         }
-        updatedBooking.carId = parseInt(carId);
-        updatedBooking.carMake = carMake || carExists.make; // Cập nhật lại carMake, carModel nếu carId thay đổi
-        updatedBooking.carModel = carModel || carExists.model;
-    } else { // Nếu không có carId mới, nhưng có carMake/Model mới (ví dụ chỉ sửa tên xe)
-        if (carMake !== undefined) updatedBooking.carMake = carMake;
-        if (carModel !== undefined) updatedBooking.carModel = carModel;
+        updatedBooking.carId = car.id;
+        updatedBooking.carMake = car.make;
+        updatedBooking.carModel = car.model;
     }
-    
+
     bookings[bookingIndex] = updatedBooking;
-    await saveData(); // Lưu lại bookings.json
+    await saveData();
+    console.log('Admin updated booking ID:', bookingIdParam, updatedBooking);
     res.json({ message: 'Booking updated successfully by admin', booking: updatedBooking });
 });
 
+app.delete('/admin/bookings/:bookingId', async (req, res) => {
+    const bookingIdParam = parseInt(req.params.bookingId); // ID tự tăng của booking
+    const bookingIndex = bookings.findIndex(b => b.id === bookingIdParam);
+
+    if (bookingIndex === -1) {
+        return res.status(404).json({ message: `Booking with ID ${bookingIdParam} not found` });
+    }
+    const deletedBooking = bookings.splice(bookingIndex, 1);
+    await saveData();
+    console.log('Admin deleted booking ID:', bookingIdParam);
+    res.json({ message: 'Booking deleted successfully by admin', booking: deletedBooking[0] });
+});
 
 // --- Start the server ---
 async function startServer() {
-    await loadData(); // Tải dữ liệu trước khi server bắt đầu nhận request
+    await loadData();
     app.listen(PORT, () => {
         console.log(`Server is running on http://localhost:${PORT}`);
-        console.log(`Deployed app accessible at: https://car-rental-node.onrender.com (Frontend might need to point to this if deployed backend changes URL)`);
     });
 }
 
-startServer(); // Gọi hàm để khởi động server
+startServer();

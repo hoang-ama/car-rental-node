@@ -1,5 +1,3 @@
-// public/assets/js/script.js
-
 const googleSheetScriptURL = 'https://script.google.com/macros/s/AKfycbw3v7HA2uQ5anB9WByDtgZe2fa7cRm3WGG5ZFmblTwd8MyHg4nv5u7POLVZ4ZrdGcMLdg/exec'; 
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -57,6 +55,116 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menu-toggle');
     const menu = document.getElementById('menu');
 
+    // Slider variables
+    let itemsPerSlide = 3; // Fixed to 3 items per slide
+    let currentSlideStartIndex = 0;
+    let allFeaturedCars = [];
+
+    function updateItemsPerSlide() {
+        itemsPerSlide = 3; // Force 3 items per slide
+        console.log('[updateItemsPerSlide] Items per slide set to:', itemsPerSlide);
+    }
+
+    function updateSliderPosition() {
+        if (!featuredCarsListDiv) return;
+        const itemWidth = featuredCarsListDiv.querySelector('.car-item')?.offsetWidth || 300;
+        const translateX = -(currentSlideStartIndex * itemWidth * itemsPerSlide);
+        featuredCarsListDiv.style.transform = `translateX(${translateX}px)`;
+        console.log('[updateSliderPosition] Slider position updated:', translateX);
+
+        if (prevFeaturedBtn && nextFeaturedBtn) {
+            prevFeaturedBtn.disabled = currentSlideStartIndex === 0;
+            nextFeaturedBtn.disabled = (currentSlideStartIndex + 1) * itemsPerSlide >= allFeaturedCars.length;
+        }
+    }
+
+    function displayInitialFeaturedCarItems(carsArray) {
+        if (!featuredCarsListDiv) {
+            console.error('[displayInitialFeaturedCarItems] featuredCarsListDiv is null');
+            return;
+        }
+        if (!carsArray || carsArray.length === 0) {
+            featuredCarsListDiv.innerHTML = '<p>No featured vehicles available.</p>';
+            if (prevFeaturedBtn) prevFeaturedBtn.style.display = 'none';
+            if (nextFeaturedBtn) nextFeaturedBtn.style.display = 'none';
+            return;
+        }
+
+        allFeaturedCars = carsArray; // Update global array
+        displayCarItems(allFeaturedCars, featuredCarsListDiv, true); // Display ALL cars, not just a slice
+        updateSliderPosition();
+
+        if (prevFeaturedBtn && nextFeaturedBtn) {
+            prevFeaturedBtn.style.display = 'block';
+            nextFeaturedBtn.style.display = allFeaturedCars.length > itemsPerSlide ? 'block' : 'none';
+        }
+
+        console.log('[displayInitialFeaturedCarItems] Displayed initial featured cars:', carsArray.length);
+    }
+
+    async function fetchAndDisplayFeaturedCars() {
+        console.log("[fetchAndDisplayFeaturedCars] Started.");
+        if (!featuredCarsListDiv) {
+            console.error("[fetchAndDisplayFeaturedCars] featuredCarsListDiv is null.");
+            return;
+        }
+        featuredCarsListDiv.innerHTML = '<p>Loading featured vehicles...</p>';
+        try {
+            const response = await fetch('/api/cars');
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+            const cars = await response.json();
+            if (!Array.isArray(cars)) throw new Error('Invalid API response: Expected array');
+
+            const selectedLocation = locationSelect ? locationSelect.value : "AnyLocation";
+            allFeaturedCars = cars.filter(car =>
+                car.available &&
+                (selectedLocation === "AnyLocation" || car.location === selectedLocation) &&
+                car.isFeatured === true // Filter for featured cars only
+            );
+            console.log(`[fetchAndDisplayFeaturedCars] Location: ${selectedLocation}, Filtered featured cars: ${allFeaturedCars.length}`);
+
+            if (allFeaturedCars.length === 0) {
+                featuredCarsListDiv.innerHTML = '<p>No featured vehicles available for this location.</p>';
+                if (prevFeaturedBtn) prevFeaturedBtn.style.display = 'none';
+                if (nextFeaturedBtn) nextFeaturedBtn.style.display = 'none';
+            } else {
+                displayInitialFeaturedCarItems(allFeaturedCars);
+            }
+        } catch (error) {
+            console.error('[fetchAndDisplayFeaturedCars] Error:', error);
+            featuredCarsListDiv.innerHTML = `<p>Error loading featured vehicles: ${error.message}</p>`;
+        }
+    }
+
+    // Update navigation event listeners
+    if (prevFeaturedBtn) {
+        prevFeaturedBtn.addEventListener('click', () => {
+            if (currentSlideStartIndex > 0) {
+                currentSlideStartIndex -= 1;
+                updateSliderPosition();
+                console.log('[prevFeaturedBtn] Slide moved back to index:', currentSlideStartIndex);
+            }
+        });
+    }
+
+    if (nextFeaturedBtn) {
+        nextFeaturedBtn.addEventListener('click', () => {
+            if ((currentSlideStartIndex + 1) * itemsPerSlide < allFeaturedCars.length) {
+                currentSlideStartIndex += 1;
+                updateSliderPosition();
+                console.log('[nextFeaturedBtn] Slide moved forward to index:', currentSlideStartIndex);
+            }
+        });
+    }
+    
+    if (locationSelect) {
+        locationSelect.addEventListener('change', () => {
+            console.log("[locationSelect] Location changed to:", locationSelect.value);
+            currentBookingDetails.location = locationSelect.value || "AnyLocation";
+            fetchAndDisplayFeaturedCars();
+        });
+    }
+
     if (menuToggle && menu) {
         menuToggle.addEventListener('click', () => {
             menu.classList.toggle('active'); 
@@ -69,9 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
         carData: null, totalPrice: 0, baseCost: 0, servicesCost: 0, rentalDurationDays: 0,
         customerInfo: null, paymentMethod: 'Pay Now', depositAmount: 0
     };
-    let allFeaturedCars = []; 
-    let currentFeaturedCarIndex = 0; 
-    const featuredCarsPerPage = 3; 
 
     function showView(viewId) {
         console.log(`[showView] Attempting to show view: '${viewId}'`);
@@ -97,8 +202,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (mainPageHeader) {
-            // Header chính của trang chủ (landing page) sẽ ẩn khi chuyển sang các view con (quy trình đặt xe)
-            // và hiện lại khi quay về homeView.
             mainPageHeader.style.display = (viewId === 'home-view') ? 'block' : 'none'; 
         } else {
             console.warn("[showView] mainPageHeader element (id='main-page-header') not found.");
@@ -138,168 +241,132 @@ document.addEventListener('DOMContentLoaded', () => {
             pickupDateInput.value = formatDateForInput(tomorrow);
             const defaultReturnDate = new Date(tomorrow); 
             returnDateInput.value = formatDateForInput(defaultReturnDate);
-            // Giữ lại value mặc định từ HTML cho time
-            // pickupTimeInput.value = "07:00";
-            // returnTimeInput.value = "19:00"; 
             console.log('[setDefaultPickupReturnTimes] Default dates set. Pickup:', pickupDateInput.value, "Return:", returnDateInput.value);
         } else {
             console.error('[setDefaultPickupReturnTimes] Date input elements not all found.');
         }
     }
 
-    function renderFeaturedCars() {
-        if (!featuredCarsListDiv) { console.error("[renderFeaturedCars] featuredCarsListDiv is null"); return; }
-        featuredCarsListDiv.innerHTML = '';
-        
-        const carsToDisplayInSlider = allFeaturedCars.slice(currentFeaturedCarIndex, currentFeaturedCarIndex + featuredCarsPerPage);
-        console.log(`[renderFeaturedCars] Index: ${currentFeaturedCarIndex}, Cars to display:`, carsToDisplayInSlider.length);
-
-
-        if (carsToDisplayInSlider.length === 0) {
-             featuredCarsListDiv.innerHTML = "<p>No featured vehicles currently available.</p>";
-             if(prevFeaturedBtn) prevFeaturedBtn.style.display = allFeaturedCars.length > featuredCarsPerPage ? 'flex' : 'none'; // Hiển thị nếu có nhiều hơn 1 trang
-             if(nextFeaturedBtn) nextFeaturedBtn.style.display = allFeaturedCars.length > featuredCarsPerPage ? 'flex' : 'none';
-             if (allFeaturedCars.length === 0) { // Hoàn toàn không có xe nào
-                if(prevFeaturedBtn) prevFeaturedBtn.style.display = 'none';
-                if(nextFeaturedBtn) nextFeaturedBtn.style.display = 'none';
-             }
-             return;
+    function displayCarItems(carsArray, targetContainerElement, isFeatured = false) {
+        if (!targetContainerElement) {
+            console.error(`[displayCarItems] Target container element is null. isFeatured: ${isFeatured}`);
+            return;
         }
-        
-        displayCarItems(carsToDisplayInSlider, true); 
-        updateFeaturedCarsButtonStates();
-    }
-
-    function displayCarItems(carsArray, isFeatured = false) { 
-        const container = isFeatured ? featuredCarsListDiv : carsListContainer;
-        if (!container) { 
-            console.error(`[displayCarItems] Container not found. isFeatured: ${isFeatured}`); 
-            return; 
-        }
-        container.innerHTML = ''; 
-        
-        if (carsArray.length === 0) {
-            container.innerHTML = isFeatured ? "<p>No featured vehicles at the moment.</p>" : "<p>No cars match your current criteria or are available.</p>";
+        targetContainerElement.innerHTML = '';
+      
+        if (!carsArray || carsArray.length === 0) {
+            targetContainerElement.innerHTML = isFeatured
+                ? "<p>No featured vehicles currently available.</p>"
+                : "<p>No cars found matching your criteria.</p>";
             if (isFeatured) {
-                if(prevFeaturedBtn) prevFeaturedBtn.style.display = 'none';
-                if(nextFeaturedBtn) nextFeaturedBtn.style.display = 'none';
+                if (prevFeaturedBtn) prevFeaturedBtn.style.display = 'none';
+                if (nextFeaturedBtn) nextFeaturedBtn.style.display = 'none';
             }
             return;
         }
-
+      
         carsArray.forEach(car => {
             const carDiv = document.createElement('div');
-            carDiv.classList.add('car-item'); 
-            // Cấu trúc HTML cho mỗi item xe trong danh sách (dựa theo image (1).jpg)
+            carDiv.classList.add('car-item');
+      
+            let specsHtml = '<div class="car-specs-listing">';
+            if (car.specifications) {
+                if (car.specifications.bodyType) specsHtml += `<span><i class="fas fa-car-side"></i> ${car.specifications.bodyType}</span>`;
+                if (car.specifications.transmission) specsHtml += `<span><i class="fas fa-cogs"></i> ${car.specifications.transmission}</span>`;
+                if (car.specifications.fuelType) {
+                    let fuelIcon = car.specifications.fuelType.toLowerCase() === "electric" ? "fa-bolt" :
+                                   car.specifications.fuelType.toLowerCase() === "diesel" ? "fa-tint" : "fa-gas-pump";
+                    specsHtml += `<span><i class="fas ${fuelIcon}"></i> ${car.specifications.fuelType}</span>`;
+                }
+                if (car.specifications.seats) specsHtml += `<span><i class="fas fa-users"></i> ${car.specifications.seats} seats</span>`;
+            }
+            specsHtml += '</div>';
+      
+            let featuresHtml = '<div class="car-features-pills">';
+            if (car.features && car.features.length > 0) {
+                car.features.slice(0, 2).forEach(feature => {
+                    featuresHtml += `<span class="feature-pill">${feature}</span>`;
+                });
+                if (car.features.length > 2) featuresHtml += `<span class="feature-pill">...</span>`;
+            }
+            featuresHtml += '</div>';
+      
+            let locationHtmlCarItem = car.location
+                ? `<p class="car-location-item"><i class="fas fa-map-marker-alt"></i> ${car.location}</p>`
+                : '';
+      
             carDiv.innerHTML = `
                 <img src="${car.imageUrl || 'assets/images/placeholder-car.png'}" alt="${car.make} ${car.model}">
                 <div class="car-item-content">
                     <h4>${car.make} ${car.model} (${car.year})</h4>
+                    ${locationHtmlCarItem}
                     <p class="price"><strong>${car.pricePerDay.toLocaleString('en-US')} USD/day</strong></p>
-                    <div class="car-specs-listing"> 
-                        <span><i class="fas fa-car"></i> ${car.type || 'N/A'}</span>
-                        <span><i class="fas fa-user-friends"></i> ${car.seats || 'N/A'} seats</span>
-                        <span><i class="fas fa-gas-pump"></i> ${car.fuelType || 'Petrol'}</span> 
-                    </div>
-                    <p class="availability-text car-status-listing">Available</p> 
-                    <button class="view-detail-btn select-car-btn" data-car-id="${car.id}">Select This Car</button>
+                    ${specsHtml}
+                    ${!isFeatured ? featuresHtml : ''}
+                    <p class="availability-text car-status-listing">Available</p>
+                    <button class="view-detail-btn ${isFeatured ? '' : 'select-car-btn'}" data-car-id="${car.id}">
+                        ${isFeatured ? 'View Details' : 'Select This Car'}
+                    </button>
                 </div>
             `;
             carDiv.querySelector('.view-detail-btn').addEventListener('click', () => {
-                console.log(`[displayCarItems] Select Car/View Details clicked for car ID: ${car.id}, isFeatured: ${isFeatured}`);
-                // Nếu là xe nổi bật, cần lấy ngày giờ từ form chính
-                if (isFeatured) {
-                    const pickupDate = pickupDateInput.value;
-                    const pickupTime = pickupTimeInput.value;
-                    const returnDate = returnDateInput.value;
-                    const returnTime = returnTimeInput.value;
-                    if (!pickupDate || !pickupTime || !returnDate || !returnTime) {
-                        alert("Please ensure dates and times are set in the search form (or use defaults).");
-                        setDefaultPickupReturnTimes(); return;
+                console.log(`[displayCarItems] Button clicked for car ID: ${car.id}, isFeatured: ${isFeatured}`);
+                if (isFeatured || !currentBookingDetails.pickupDateTime) {
+                    if (!pickupDateInput.value || !pickupTimeInput.value || !returnDateInput.value || !returnTimeInput.value) {
+                        alert("Please ensure dates and times are set in the search form.");
+                        setDefaultPickupReturnTimes();
+                        return;
                     }
-                    currentBookingDetails.pickupDateTime = new Date(`${pickupDate}T${pickupTime}:00Z`).toISOString();
-                    currentBookingDetails.returnDateTime = new Date(`${returnDate}T${returnTime}:00Z`).toISOString();
-                    currentBookingDetails.location = locationSelect.value;
+                    currentBookingDetails.pickupDateTime = new Date(`${pickupDateInput.value}T${pickupTimeInput.value}:00Z`).toISOString();
+                    currentBookingDetails.returnDateTime = new Date(`${returnDateInput.value}T${returnTimeInput.value}:00Z`).toISOString();
+                    currentBookingDetails.location = locationSelect.value || "AnyLocation";
                 }
-                // Nếu là xe trong danh sách (isFeatured = false), ngày giờ đã có trong currentBookingDetails
-                handleCarSelection(car.id); 
+                handleCarSelection(car.id);
             });
-            container.appendChild(carDiv);
+            targetContainerElement.appendChild(carDiv);
         });
     }
 
-    function updateFeaturedCarsButtonStates() {
-        if(prevFeaturedBtn) prevFeaturedBtn.style.display = currentFeaturedCarIndex > 0 ? 'flex' : 'none';
-        if(nextFeaturedBtn) nextFeaturedBtn.style.display = (currentFeaturedCarIndex + featuredCarsPerPage) < allFeaturedCars.length ? 'flex' : 'none';
-    }
-
-    async function fetchAndDisplayFeaturedCars() {
-        if (!featuredCarsListDiv) { console.log("[fetchAndDisplayFeaturedCars] featuredCarsListDiv not found"); return; }
-        featuredCarsListDiv.innerHTML = '<p>Loading featured vehicles...</p>';
-        try {
-            const response = await fetch('/api/cars');
-            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-            const cars = await response.json();
-            allFeaturedCars = cars.filter(car => car.available);
-            currentFeaturedCarIndex = 0; 
-            renderFeaturedCars(); 
-        } catch (error) {
-            console.error('[fetchAndDisplayFeaturedCars] Error:', error);
-            if (featuredCarsListDiv) {
-                 featuredCarsListDiv.innerHTML = `<p>Error loading featured vehicles. (${error.message})</p>`;
-            }
-        }
-    }
-
-    if (prevFeaturedBtn) {
-        prevFeaturedBtn.addEventListener('click', () => {
-            console.log("[prevFeaturedBtn] Clicked. Current index:", currentFeaturedCarIndex); // DEBUG
-            currentFeaturedCarIndex = Math.max(0, currentFeaturedCarIndex - 1); 
-            renderFeaturedCars();
-        });
-    }
-    if (nextFeaturedBtn) {
-        nextFeaturedBtn.addEventListener('click', () => {
-            console.log("[nextFeaturedBtn] Clicked. Current index:", currentFeaturedCarIndex, "Total featured:", allFeaturedCars.length); // DEBUG
-            if (currentFeaturedCarIndex < allFeaturedCars.length - featuredCarsPerPage) {
-                currentFeaturedCarIndex++; 
-            }
-            renderFeaturedCars();
-        });
-    }
-    
     async function handleHomeBookingFormSubmit(event) {
-        if(event) event.preventDefault(); 
-        console.log("[handleHomeBookingFormSubmit] Form submitted or Find Vehicle clicked."); 
+        if (event) event.preventDefault();
+        console.log("[handleHomeBookingFormSubmit] Form submitted.");
         const pickupDateVal = pickupDateInput.value;
         const pickupTimeVal = pickupTimeInput.value;
         const returnDateVal = returnDateInput.value;
         const returnTimeVal = returnTimeInput.value;
         const locationVal = locationSelect.value;
-
+      
         if (!pickupDateVal || !pickupTimeVal || !returnDateVal || !returnTimeVal) {
-            alert("Please select pick-up and return dates/times."); return;
+            alert("Please select pick-up and return dates/times.");
+            return;
         }
+      
         const pickupDateTime = new Date(`${pickupDateVal}T${pickupTimeVal}`);
         const returnDateTime = new Date(`${returnDateVal}T${returnTimeVal}`);
         if (isNaN(pickupDateTime.getTime()) || isNaN(returnDateTime.getTime())) {
-            alert("Invalid date or time."); return;
+            alert("Invalid date or time.");
+            return;
         }
         if (returnDateTime <= pickupDateTime) {
-            alert("Return date/time must be after pick-up date/time."); return;
+            alert("Return date/time must be after pick-up date/time.");
+            return;
         }
+      
         currentBookingDetails.pickupDateTime = pickupDateTime.toISOString();
         currentBookingDetails.returnDateTime = returnDateTime.toISOString();
-        currentBookingDetails.location = locationVal;
-        
-        console.log("[handleHomeBookingFormSubmit] Calling displayCarListing with details:", currentBookingDetails); 
-        await displayCarListing(); 
+        currentBookingDetails.location = locationVal || "AnyLocation";
+      
+        console.log("[handleHomeBookingFormSubmit] Booking details:", currentBookingDetails);
+      
+        await fetchAndDisplayFeaturedCars();
+        await displayCarListing();
     }
+    
     if (homeBookingForm) homeBookingForm.addEventListener('submit', handleHomeBookingFormSubmit);
 
     async function displayCarListing() {
-        console.log("[displayCarListing] Attempting to show car-listing-view."); 
-        showView('car-listing-view'); 
+        console.log("[displayCarListing] Displaying cars for location:", currentBookingDetails.location);
+        showView('car-listing-view');
         if (searchCriteriaSummary) {
             searchCriteriaSummary.innerHTML = `
                 <p><strong>Location:</strong> ${currentBookingDetails.location || 'Any'}</p>
@@ -307,20 +374,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 <p><strong>Return:</strong> ${formatDateTimeForDisplay(currentBookingDetails.returnDateTime)}</p>
             `;
         }
-        if (!carsListContainer) {console.error("[displayCarListing] carsListContainer not found"); return;}
+        if (!carsListContainer) {
+            console.error("[displayCarListing] carsListContainer not found");
+            return;
+        }
         carsListContainer.innerHTML = '<p>Loading available cars...</p>';
         try {
             const response = await fetch('/api/cars');
-            if (!response.ok) throw new Error(`Error fetching cars: ${response.status}`);
+            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
             const allCars = await response.json();
-            const availableCars = allCars.filter(car => car.available); 
-            
-            // Sử dụng lại hàm displayCarItems với isFeatured = false
-            displayCarItems(availableCars, false); 
-
+            if (!Array.isArray(allCars)) throw new Error('Invalid API response: Expected array');
+      
+            const carsToList = allCars.filter(car =>
+                car.available &&
+                (currentBookingDetails.location === "AnyLocation" || car.location === currentBookingDetails.location)
+            );
+            console.log(`[displayCarListing] Filtered cars for location '${currentBookingDetails.location}': ${carsToList.length}`);
+      
+            if (carsToList.length === 0) {
+                carsListContainer.innerHTML = `<p>No cars found for location: ${currentBookingDetails.location || 'Any'}.</p>`;
+            } else {
+                displayCarItems(carsToList, carsListContainer, false);
+            }
         } catch (error) {
             console.error('[displayCarListing] Error:', error);
-            if (carsListContainer) carsListContainer.innerHTML = `<p>Error: ${error.message}. Please try again.</p>`;
+            carsListContainer.innerHTML = `<p>Error loading cars: ${error.message}. Please try again.</p>`;
         }
     }
     
@@ -365,6 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(detailServicesCost) detailServicesCost.textContent = currentBookingDetails.servicesCost.toLocaleString('en-US');
         if(detailTotalPrice) detailTotalPrice.textContent = currentBookingDetails.totalPrice.toLocaleString('en-US');
     }
+    
     async function displayCarDetails() { 
         if (!currentSelectedCarData) { alert("No car selected."); showView('car-listing-view'); return; }
         console.log("[displayCarDetails] Displaying car-detail-view for car ID:", currentSelectedCarData.id);
@@ -395,6 +474,7 @@ document.addEventListener('DOMContentLoaded', () => {
             displayCustomerInfoForm();
         });
     }
+    
     function displayCustomerInfoForm() { 
         console.log("[displayCustomerInfoForm] Displaying customer-info-view."); 
         showView('customer-info-view');
@@ -410,6 +490,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (defaultPaymentMethod) currentBookingDetails.paymentMethod = defaultPaymentMethod.value;
         updateDepositDisplay();
     }
+    
     function updateDepositDisplay() { 
         if (currentBookingDetails.paymentMethod === "Pay Later") {
             currentBookingDetails.depositAmount = currentBookingDetails.totalPrice * 0.30; 
@@ -455,6 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    
     function displayBookingConfirmation() { 
         showView('booking-confirmation-view');
         const booking = currentBookingDetails.bookingConfirmation; if(!booking) return;
@@ -470,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
             confRentalPeriod.innerHTML = `<h4>Rental Period</h4><p><strong>Pick-up:</strong> ${formatDateTimeForDisplay(booking.startDate)}</p><p><strong>Return:</strong> ${formatDateTimeForDisplay(booking.endDate)}</p>`;
         }
         if(confTotalPrice) confTotalPrice.innerHTML = `<h4>Total Amount: $${currentBookingDetails.totalPrice.toLocaleString('en-US')}</h4>`;
-         if(confPaymentMethod) {
+        if(confPaymentMethod) {
             confPaymentMethod.innerHTML = `<p><strong>Payment Method:</strong> ${currentBookingDetails.paymentMethod}</p>`;
             if (currentBookingDetails.paymentMethod === "Pay Later" && currentBookingDetails.depositAmount > 0) {
                 confPaymentMethod.innerHTML += `<p><strong>Deposit Due:</strong> $${currentBookingDetails.depositAmount.toLocaleString('en-US')}</p>`;
@@ -505,6 +587,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .catch(error => { console.error('Subscription Error!', error.message); alert('An error occurred. Please try again.'); })
             .finally(() => { if(button) { button.disabled = false; button.textContent = "Sign-up"; }});
     }
+    
     function validateEmail(email) { const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; return re.test(String(email).toLowerCase()); }
     
     const commonNavButtons = { 
@@ -536,8 +619,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 showView(targetViewId);
             });
-        } else {
-            // console.warn(`[Navigation] Element with ID '${id}' not found.`);
         }
     }
     
@@ -552,24 +633,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const popupOverlayEl = document.getElementById('popup-overlay');
     const closePopupButton = document.getElementById('close-popup');
     if (popupOverlayEl && closePopupButton) {
-        // setTimeout(() => { popupOverlayEl.classList.remove('hidden'); /* popupOverlayEl.classList.add('active'); */ }, 60000); // Bỏ active vì style.display đã dùng
         closePopupButton.addEventListener('click', () => {
-            // popupOverlayEl.classList.remove('active'); 
             popupOverlayEl.classList.add('hidden');
         });
         popupOverlayEl.addEventListener('click', function(event) {
             if (event.target === popupOverlayEl) {
-                // popupOverlayEl.classList.remove('active');
                 popupOverlayEl.classList.add('hidden');
             }
         });
     }
 
     function initApp() {
-        console.log("VShare App Initializing..."); 
+        console.log("VShare App Initializing...");
+        if (!homeView || !carListingView || !carDetailView || !customerInfoView || !bookingConfirmationView) {
+            console.error("One or more main view elements are missing from the DOM!");
+            return;
+        }
+        if (!featuredCarsListDiv || !carsListContainer) {
+            console.warn("Car list containers (featured or listing) are missing!");
+        }
+      
         setDefaultPickupReturnTimes();
+        currentBookingDetails.location = locationSelect ? locationSelect.value : "AnyLocation";
         fetchAndDisplayFeaturedCars();
-        showView('home-view'); 
+        showView('home-view');
     }
+    
     initApp(); 
 });

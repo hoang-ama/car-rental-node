@@ -3,68 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Xe - Admin</title>
+    <title>Car Management - Admin Portal</title>
     <link rel="stylesheet" href="admin-style.css">
 </head>
 <body>
     <header>
-        <h1>Trang Quản Trị Xe</h1>
+        <h1>Car Management</h1>
         <nav>
-            <a href="admin-cars.html" style="color: #3498db; font-weight: bold; margin-right: 15px;">Quản Lý Xe</a>
-            <a href="admin-bookings.html" style="color: white;">Quản Lý Đặt Xe</a>
+            <a href="admin-cars.html" style="color: #3498db; font-weight: bold; margin-right: 15px;">Car Management</a>
+            <a href="admin-bookings.html" style="color: white;">Booking Management</a>
             </nav>
     </header>
-
     <main>
         <section id="add-car-section">
-            <h2>Thêm Xe Mới / Cập Nhật Xe</h2>
+            <h2>Add New Car / Update Car</h2>
             <form id="car-form">
-                <input type="hidden" id="car-id" name="carId"> <div>
-                    <label for="make">Hãng xe (Make):</label>
+                <input type="hidden" id="car-id-form" name="carIdForm"> <div>
+                    <label for="car-unique-id">Car ID (e.g., VF8-30G19704):</label>
+                    <input type="text" id="car-unique-id" name="uniqueId" required>
+                </div>
+                <div>
+                    <label for="make">Make:</label>
                     <input type="text" id="make" name="make" required>
                 </div>
                 <div>
-                    <label for="model">Mẫu xe (Model):</label>
+                    <label for="model">Model:</label>
                     <input type="text" id="model" name="model" required>
                 </div>
                 <div>
-                    <label for="year">Năm sản xuất:</label>
-                    <input type="number" id="year" name="year" required>
+                    <label for="year">Year:</label>
+                    <input type="number" id="year" name="year" required min="2000" max="2030">
                 </div>
                 <div>
-                    <label for="pricePerDay">Giá thuê/ngày ($):</label>
-                    <input type="number" id="pricePerDay" name="pricePerDay" step="0.01" required>
+                    <label for="pricePerDay">Price/Day ($):</label>
+                    <input type="number" id="pricePerDay" name="pricePerDay" step="0.01" required min="0" step="0.01">
                 </div>
                 <div>
-                    <label for="imageUrl">Link hình ảnh:</label>
-                    <input type="url" id="imageUrl" name="imageUrl">
+                    <label for="imageUrl">Image URL:</label>
+                    <input type="text" id="imageUrl" name="imageUrl">
                 </div>
                 <div>
-                    <label for="available">Tình trạng (Available):</label>
+                    <label for="available">Status (Available):</label>
                     <select id="available" name="available">
-                        <option value="true">Có sẵn (Available)</option>
-                        <option value="false">Không có sẵn (Unavailable)</option>
+                        <option value="true">Available</option>
+                        <option value="false">Unavailable</option>
                     </select>
                 </div>
-                <button type="submit" id="submit-car-button">Thêm Xe</button>
-                <button type="button" id="cancel-edit-button" style="display:none;">Hủy Cập Nhật</button>
+                <div>
+                    <label for="location">Location:</label>
+                    <select id="location" name="location">
+                        <option value="Hanoi">Hanoi</option>
+                        <option value="Ho Chi Minh City">Ho Chi Minh City</option>
+                        <option value="Danang">Da Nang</option>
+                    </select>
+                </div>
+    
+                <fieldset>
+                    <legend>Specifications</legend>
+                    <div>
+                        <label for="bodyType">Body Type:</label>
+                        <select id="bodyType" name="bodyType">
+                            <option value="SUV">SUV</option>
+                            <option value="CUV">CUV</option>
+                            <option value="Sedan">Sedan</option>
+                            <option value="Hatchback">Hatchback</option>
+                            <option value="Mini-SUV">Mini-SUV</option>
+                            <option value="Mini">Mini</option>
+                            <option value="MPV">MPV</option>
+                            <option value="Pickup">Pickup</option>
+                            <option value="Luxury">Luxury</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="transmission">Transmission:</label>
+                        <select id="transmission" name="transmission">
+                            <option value="AT">AT (Automatic)</option>
+                            <option value="MT">MT (Manual)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="fuelType">Fuel Type:</label>
+                        <select id="fuelType" name="fuelType">
+                            <option value="Petrol">Petrol</option>
+                            <option value="Diesel">Diesel</option>
+                            <option value="Electric">Electric</option>
+                            <option value="Hybrid">Hybrid</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="seats">Seats:</label>
+                        <input type="number" id="seats" name="seats" min="2" max="16" value="5">
+                    </div>
+                </fieldset>
+    
+                <fieldset>
+                    <legend>Features (Select multiple)</legend>
+                    <div class="features-checkbox-group">
+                        <label><input type="checkbox" name="features" value="AC"> Air Conditioning (AC)</label>
+                        <label><input type="checkbox" name="features" value="Airbag"> Airbag</label>
+                        <label><input type="checkbox" name="features" value="ETC"> ETC</label>
+                        <label><input type="checkbox" name="features" value="Bluetooth"> Bluetooth</label>
+                        <label><input type="checkbox" name="features" value="Reverse Camera"> Reverse Camera</label>
+                        <label><input type="checkbox" name="features" value="GPS"> GPS</label>
+                        <label><input type="checkbox" name="features" value="USB Port"> USB Port</label>
+                        <label><input type="checkbox" name="features" value="Screen Display">Screen Display</label>
+                        <label><input type="checkbox" name="features" value="Spare Tire"> Spare Tire</label>
+                        <label><input type="checkbox" name="features" value="Parking Sensors"> Parking Sensors</label>
+                        <label><input type="checkbox" name="features" value="Navigation Map"> Navigation Map</label>
+                        <label><input type="checkbox" name="features" value="Child Seat"> Child Seat Support</label>
+                        </div>
+                </fieldset>
+    
+                <button type="submit" id="submit-car-button">Add Car</button>
+                <button type="button" id="cancel-edit-button" style="display:none;">Cancel Update</button>
             </form>
             <div id="form-message"></div>
         </section>
-
+    
         <section id="cars-list-section">
-            <h2>Danh Sách Xe Hiện Tại</h2>
+            <h2>Current Car List</h2>
             <table>
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Hãng</th>
-                        <th>Mẫu</th>
-                        <th>Năm</th>
-                        <th>Giá/ngày</th>
-                        <th>Hình ảnh</th>
-                        <th>Tình trạng</th>
-                        <th>Hành động</th>
+                        <th>Make</th>
+                        <th>Model</th>
+                        <th>Year</th>
+                        <th>Price/day</th>
+                        <th>Location</th>
+                        <th>Body Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="cars-table-body">
@@ -74,7 +143,7 @@
     </main>
 
     <footer>
-        <p>&copy; 2025 Car Rental Admin</p>
+        <p>&copy; 2025 Car Rental Admin Portal</p>
     </footer>
 
     <script src="admin-cars-script.js"></script>

@@ -1,128 +1,572 @@
 [
   {
-    "id": 1,
+    "id": "Camry-50F49750",
     "make": "Toyota",
     "model": "Camry",
     "year": 2022,
     "pricePerDay": 50,
     "available": true,
-    "imageUrl": "https://proauto.vn/wp-content/uploads/2024/09/gia-lan-banh-xe-toyota-camry-2025.png"
+    "imageUrl": "https://proauto.vn/wp-content/uploads/2024/09/gia-lan-banh-xe-toyota-camry-2025.png",
+    "location": "Ho Chi Minh City",
+    "specifications": {
+      "bodyType": "Sedan",
+      "transmission": "AT",
+      "fuelType": "Petrol",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
   },
   {
-    "id": 2,
+    "id": "Civic-43F49751",
     "make": "Honda",
     "model": "Civic",
     "year": 2023,
     "pricePerDay": 45,
     "available": true,
-    "imageUrl": "https://media.auto5.vn/files/quanganh/2024/08/03/2025-honda-civic-rs-jdm%20(6)-184359.jpg"
+    "imageUrl": "https://media.auto5.vn/files/quanganh/2024/08/03/2025-honda-civic-rs-jdm%20(6)-184359.jpg",
+    "location": "Danang",
+    "specifications": {
+      "bodyType": "Sedan",
+      "transmission": "AT",
+      "fuelType": "Petrol",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
   },
   {
-    "id": 3,
+    "id": "Ranger-30G49790",
     "make": "Ford",
     "model": "Ranger",
     "year": 2022,
     "pricePerDay": 40,
     "available": false,
-    "imageUrl": "https://vcdn1-vnexpress.vnecdn.net/2023/05/11/Ford-Ranger-1-5137-1683786232.jpg?w=460&h=0&q=100&dpr=2&fit=crop&s=PjdQsFGf5Ou2VgCfi34igg"
+    "imageUrl": "https://vcdn1-vnexpress.vnecdn.net/2023/05/11/Ford-Ranger-1-5137-1683786232.jpg?w=460&h=0&q=100&dpr=2&fit=crop&s=PjdQsFGf5Ou2VgCfi34igg",
+    "location": "Hanoi",
+    "specifications": {
+      "bodyType": "Pickup",
+      "transmission": "AT",
+      "fuelType": "Diesel",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": false
   },
   {
-    "id": 4,
+    "id": "Vios-30G49791",
     "make": "Toyota",
     "model": "Vios",
     "year": 2023,
     "pricePerDay": 45,
     "available": false,
-    "imageUrl": "https://cdnphoto.dantri.com.vn/ciGmUZaqUYeXvq6Ac8HOlyJbwiE=/thumb_w/1020/2024/03/07/0703toyota-vios-2023-79-copy-1709796616626.jpg"
+    "imageUrl": "https://cdnphoto.dantri.com.vn/ciGmUZaqUYeXvq6Ac8HOlyJbwiE=/thumb_w/1020/2024/03/07/0703toyota-vios-2023-79-copy-1709796616626.jpg",
+    "location": "Hanoi",
+    "specifications": {
+      "bodyType": "Sedan",
+      "transmission": "AT",
+      "fuelType": "Petrol",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": false
   },
   {
-    "id": 5,
+    "id": "VF8-30G49792",
     "make": "VinFast",
     "model": "VF 8 Eco",
     "year": 2024,
     "pricePerDay": 80,
     "available": true,
-    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf8eco01.jpg&w=750&q=75"
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf8eco01.jpg&w=750&q=75",
+    "location": "Hanoi",
+    "specifications": {
+      "bodyType": "Sedan",
+      "transmission": "AT",
+      "fuelType": "Electric",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
   },
   {
-    "id": 6,
+    "id": "VF9-30G49792",
     "make": "VinFast",
     "model": "VF 9 Plus",
     "year": 2024,
     "pricePerDay": 120,
     "available": true,
-    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf9-plus-10.jpg&w=750&q=75"
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf9-plus-10.jpg&w=750&q=75",
+    "location": "Hanoi",
+    "specifications": {
+      "bodyType": "SUV",
+      "transmission": "AT",
+      "fuelType": "Electric",
+      "seats": 7
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
   },
   {
-    "id": 7,
+    "id": "VF3-30S49795",
     "make": "VinFast",
     "model": "VF 3",
     "year": 2025,
     "pricePerDay": 30,
     "available": true,
-    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf305.jpg&w=1080&q=75"
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf305.jpg&w=1080&q=75",
+    "location": "Hanoi",
+    "specifications": {
+      "bodyType": "Mini",
+      "transmission": "AT",
+      "fuelType": "Electric",
+      "seats": 4
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
   },
   {
-    "id": 8,
+    "id": "VF6-43G49798",
     "make": "VinFast",
     "model": "VF 6 Plus",
     "year": 2024,
     "pricePerDay": 55,
     "available": true,
-    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf6plus001.png&w=750&q=75"
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf6plus001.png&w=750&q=75",
+    "location": "Danang",
+    "specifications": {
+      "bodyType": "SUV",
+      "transmission": "AT",
+      "fuelType": "Electric",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
   },
   {
-    "id": 9,
+    "id": "VF8-50G49799",
     "make": "VinFast",
     "model": "VF 8 Plus",
     "year": 2024,
     "pricePerDay": 90,
     "available": true,
-    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf8plus01.jpg&w=750&q=75"
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf8plus01.jpg&w=750&q=75",
+    "location": "Ho Chi Minh City",
+    "specifications": {
+      "bodyType": "SUV",
+      "transmission": "AT",
+      "fuelType": "Electric",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
   },
   {
-    "id": 10,
+    "id": "VF9-30G59999",
     "make": "VinFast",
     "model": "VF 9 Eco",
     "year": 2024,
     "pricePerDay": 100,
     "available": true,
-    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf9-eco-09.jpg&w=2048&q=75"
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf9-eco-09.jpg&w=2048&q=75",
+    "location": "Hanoi",
+    "specifications": {
+      "bodyType": "SUV",
+      "transmission": "AT",
+      "fuelType": "Electric",
+      "seats": 7
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
   },
   {
-    "id": 11,
+    "id": "VF7-30G59988",
     "make": "VinFast",
     "model": "VF 7S",
     "year": 2024,
     "pricePerDay": 60,
     "available": true,
-    "imageUrl": "https://vinfast-longbien.com.vn/OTO3602400604/files/san_pham/vf7_do.webp"
+    "imageUrl": "https://vinfast-longbien.com.vn/OTO3602400604/files/san_pham/vf7_do.webp",
+    "location": "Hanoi",
+    "specifications": {
+      "bodyType": "CUV",
+      "transmission": "AT",
+      "fuelType": "Electric",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
   },
   {
-    "id": 12,
+    "id": "VF7-50G59989",
     "make": "VinFast",
     "model": "VF 7 Plus",
     "year": 2025,
     "pricePerDay": 70,
     "available": true,
-    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf7plus001.png&w=750&q=75"
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf7plus001.png&w=750&q=75",
+    "location": "Ho Chi Minh City",
+    "specifications": {
+      "bodyType": "CUV",
+      "transmission": "AT",
+      "fuelType": "Electric",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
   },
   {
-    "id": 13,
+    "id": "VF6-30U59950",
     "make": "VinFast",
     "model": "VF 6S",
     "year": 2025,
     "pricePerDay": 50,
     "available": true,
-    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf6s001.png&w=750&q=75"
+    "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf6s001.png&w=750&q=75",
+    "location": "Hanoi",
+    "specifications": {
+      "bodyType": "CUV",
+      "transmission": "AT",
+      "fuelType": "Electric",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
   },
   {
-    "id": 14,
+    "id": "VF5-30U49799",
     "make": "VinFast",
     "model": "VF 5 Plus",
     "year": 2024,
     "pricePerDay": 40,
     "available": true,
-    "imageUrl": "https://vinfast-auto-vn.net/wp-content/uploads/2022/12/Hinh-bia-VF5.jpeg"
+    "imageUrl": "https://vinfast-auto-vn.net/wp-content/uploads/2022/12/Hinh-bia-VF5.jpeg",
+    "location": "Hanoi",
+    "specifications": {
+      "bodyType": "Mini-SUV",
+      "transmission": "AT",
+      "fuelType": "Electric",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
+  },
+  {
+    "id": "Kona-50F49755",
+    "make": "Hyundai",
+    "model": "Kona",
+    "year": 2019,
+    "pricePerDay": 55,
+    "available": true,
+    "imageUrl": "assets/images/cars/Kona.jpg",
+    "location": "Ho Chi Minh City",
+    "specifications": {
+      "bodyType": "SUV",
+      "transmission": "AT",
+      "fuelType": "Petrol",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map"
+    ],
+    "isFeatured": true
+  },
+  {
+    "id": "Fadil-30H62960",
+    "make": "VinFast",
+    "model": "Fadil",
+    "year": 2022,
+    "pricePerDay": 45,
+    "available": true,
+    "imageUrl": "https://phuclamauto.vn/?attachment_id=11203",
+    "location": "Danang",
+    "specifications": {
+      "bodyType": "Hatchback",
+      "transmission": "AT",
+      "fuelType": "Petrol",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Spare Tire"
+    ],
+    "isFeatured": true
+  },
+  {
+    "id": "LuxA-30H72851",
+    "make": "VinFast",
+    "model": "Lux A",
+    "year": 2022,
+    "pricePerDay": 100,
+    "available": true,
+    "imageUrl": "assets/images/cars/LuxA.jpg",
+    "location": "Hanoi",
+    "specifications": {
+      "bodyType": "Sedan",
+      "transmission": "AT",
+      "fuelType": "Petrol",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map",
+      "Child Seat"
+    ],
+    "isFeatured": true
+  },
+  {
+    "id": "Santafe-30S76956",
+    "make": "Hyundai",
+    "model": "Santafe",
+    "year": 2025,
+    "pricePerDay": 150,
+    "available": true,
+    "imageUrl": "assets/images/cars/Santafe.png",
+    "location": "Hanoi",
+    "specifications": {
+      "bodyType": "SUV",
+      "transmission": "AT",
+      "fuelType": "Diesel",
+      "seats": 7
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map",
+      "Child Seat"
+    ],
+    "isFeatured": true
+  },
+  {
+    "id": "BYD-50F23450",
+    "make": "BYD",
+    "model": "Sealion 6",
+    "year": 2025,
+    "pricePerDay": 80,
+    "available": true,
+    "imageUrl": "https://xehay.vn/uploads/images/2025/1/01/xehay-BYD-171024-2.jpg",
+    "location": "Ho Chi Minh City",
+    "specifications": {
+      "bodyType": "CUV",
+      "transmission": "AT",
+      "fuelType": "Hybrid",
+      "seats": 5
+    },
+    "features": [
+      "AC",
+      "Airbag",
+      "ETC",
+      "Bluetooth",
+      "Reverse Camera",
+      "GPS",
+      "USB Port",
+      "Screen Display",
+      "Spare Tire",
+      "Parking Sensors",
+      "Navigation Map",
+      "Child Seat"
+    ],
+    "isFeatured": true
   }
 ]

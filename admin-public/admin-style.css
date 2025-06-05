@@ -1,4 +1,12 @@
 /* admin-public/admin-style.css */
+
+:root {
+    --primary: #3498db;
+    --primary-hover: #2980b9;
+    --danger: #e74c3c;
+    --danger-hover: #c0392b;
+  }
+  
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -129,6 +137,26 @@ td button {
 .delete-btn { background-color: #e74c3c; }
 .delete-btn:hover { background-color: #c0392b; }
 
+.features-checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+    margin-top: 5px;
+    padding: 10px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+.features-checkbox-group label {
+    display: flex; /* Changed from block for better alignment */
+    align-items: center;
+    font-weight: normal; /* Normal weight for checkbox labels */
+    margin-bottom: 0; /* Remove default margin from form label */
+}
+.features-checkbox-group input[type="checkbox"] {
+    margin-right: 8px;
+    width: auto; /* Allow checkbox to size naturally */
+}
+
 footer {
     text-align: center;
     padding: 20px 0;
@@ -136,3 +164,18 @@ footer {
     background: #2c3e50;
     color: #fff;
 }
+
+@media (max-width: 768px) {
+    main {
+      padding: 10px;
+    }
+    table {
+      font-size: 0.9em;
+    }
+    th, td {
+      padding: 8px;
+    }
+    .features-checkbox-group {
+      grid-template-columns: 1fr;
+    }
+  }

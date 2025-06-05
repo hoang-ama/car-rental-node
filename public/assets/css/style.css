@@ -1,373 +1,1223 @@
 /* public/assets/css/style.css */
+:root {
+  --primary-color: #e67e22;
+  --primary-hover: #d35400;
+  --text-dark: #2c3e50;
+}
 
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-body, p, h1, h2, h3, h4, h5, h6, span, div, a, button, input, select, textarea { font-family: "Montserrat", sans-serif; }
-body { background-color: #fff; line-height: 1.65; color: #343a40; font-size: 16px; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
-.hidden { display: none !important; }
-a { text-decoration: none; color: #E67E22; }
-a:hover { color: #d35400; }
-img { max-width: 100%; height: auto; display: block; }
-.container { max-width: 1140px; margin-left: auto; margin-right: auto; padding-left: 15px; padding-right: 15px; }
-.section-title { font-size: 2em; margin-bottom: 40px; color: #2c3e50; position: relative; display: inline-block; font-weight: 600; text-align: center; width: 100%; }
-.section-title::after { content: ''; display: block; width: 60px; height: 3px; background-color: #E67E22; margin: 8px auto 0; border-radius: 2px; }
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+span,
+div,
+a,
+button,
+input,
+select,
+textarea {
+  font-family: "Montserrat", sans-serif;
+}
+body {
+  background-color: #fff;
+  line-height: 1.65;
+  color: #343a40;
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.hidden {
+  display: none !important;
+}
+a {
+  text-decoration: none;
+  color: #e67e22;
+}
+a:hover {
+  color: #d35400;
+}
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+.container {
+  max-width: 1140px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.section-title {
+  font-size: 2em;
+  margin-bottom: 40px;
+  color: #2c3e50;
+  position: relative;
+  display: inline-block;
+  font-weight: 600;
+  text-align: center;
+  width: 100%;
+}
+.section-title::after {
+  content: "";
+  display: block;
+  width: 60px;
+  height: 3px;
+  background-color: #e67e22;
+  margin: 8px auto 0;
+  border-radius: 2px;
+}
 
 /* --- Header --- */
-.header { background-color: #fff; position: sticky; top: 0; z-index: 1020; padding: 0 20px; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08); }
-.header-content { 
-    max-width: 1200px; 
-    margin: 0 auto; 
-    display: flex; /* Quan trọng để căn chỉnh */
-    justify-content: space-between; /* Đẩy logo sang trái, menu sang phải */
-    align-items: center; 
-    height: 70px; 
+.header {
+  background-color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1020;
+  padding: 0 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
-.header-left .logo img { height: 32px; }
-.menu-toggle { display: none; font-size: 22px; cursor: pointer; color: #333; }
-.header-right .menu { list-style-type: none; display: flex; align-items: center; padding-left: 0; }
-.header-right .menu li { margin-left: 22px; }
-.header-right .menu li a.nav-link, .header-right .menu li a { color: #343a40; font-weight: 500; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; transition: color 0.2s ease; }
-.header-right .menu li a.nav-link:hover, .header-right .menu li a.nav-link.active, .header-right .menu li a:hover { color: #E67E22; }
-.menu-button { background-color: #E67E22; color: white !important; padding: 7px 16px; border-radius: 4px; border: none; font-weight: 500; font-size: 0.85rem; transition: background-color 0.2s ease; text-transform: uppercase; letter-spacing: 0.5px; }
-.menu-button:hover { background-color: #d35400; color: white !important; }
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex; /* Quan trọng để căn chỉnh */
+  justify-content: space-between; /* Đẩy logo sang trái, menu sang phải */
+  align-items: center;
+  height: 70px;
+}
+.header-left .logo img {
+  height: 32px;
+}
+.menu-toggle {
+  display: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #333;
+}
+.header-right .menu {
+  list-style-type: none;
+  display: flex;
+  align-items: center;
+  padding-left: 0;
+}
+.header-right .menu li {
+  margin-left: 22px;
+}
+.header-right .menu li a.nav-link,
+.header-right .menu li a {
+  color: #343a40;
+  font-weight: 500;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: color 0.2s ease;
+}
+.header-right .menu li a.nav-link:hover,
+.header-right .menu li a.nav-link.active,
+.header-right .menu li a:hover {
+  color: #e67e22;
+}
+.menu-button {
+  background-color: #e67e22;
+  color: white !important;
+  padding: 7px 16px;
+  border-radius: 4px;
+  border: none;
+  font-weight: 500;
+  font-size: 0.85rem;
+  transition: background-color 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.menu-button:hover {
+  background-color: #d35400;
+  color: white !important;
+}
 
 /* --- Hero Section & Booking Widget --- */
 .hero {
-    background-color: #333; 
-    background-repeat: no-repeat;
-    background-position: center center;
-    background-size: cover;
-    height: calc(100vh - 70px); 
-    min-height: 500px; 
-    max-height: 650px; 
-    display: flex; 
-    align-items: center; 
-    /* justify-content: flex-end;  Bỏ justify-content ở đây để position absolute của widget hoạt động đúng hơn */
-    position: relative; 
-    padding: 20px; /* Padding chung cho hero */
+  background-color: #333;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  height: calc(100vh - 70px);
+  min-height: 500px;
+  max-height: 650px;
+  display: flex;
+  align-items: center;
+  /* justify-content: flex-end;  Bỏ justify-content ở đây để position absolute của widget hoạt động đúng hơn */
+  position: relative;
+  padding: 20px; /* Padding chung cho hero */
 }
-.booking-widget-overlay { 
-    background-color: rgba(255, 255, 255, 0.96); 
-    padding: 20px 25px; 
-    border-radius: 8px; 
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    width: 100%; 
-    max-width: 430px; /* Chiều rộng widget */
-    text-align: left;
-    position: absolute; /* Định vị tuyệt đối so với .hero */
-    top: 50%; 
-    right: 5%; /* Cách lề phải */
-    transform: translateY(-50%); /* Căn giữa theo chiều dọc */
-    z-index: 5; 
+.booking-widget-overlay {
+  background-color: rgba(255, 255, 255, 0.96);
+  padding: 20px 25px;
+  border-radius: 8px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 430px; /* Chiều rộng widget */
+  text-align: left;
+  position: absolute; /* Định vị tuyệt đối so với .hero */
+  top: 50%;
+  right: 5%; /* Cách lề phải */
+  transform: translateY(-50%); /* Căn giữa theo chiều dọc */
+  z-index: 5;
 }
-.booking-widget-overlay h2 { margin-top: 0; margin-bottom: 5px; font-size: 1.6em; text-align: center; color: #2c3e50; font-weight: 600; }
-.booking-widget-overlay p { margin-bottom: 15px; color: #495057; font-size: 0.9em; line-height: 1.4; }
-#home-booking-form div:not(.date-time-group) { margin-bottom: 10px; }
-#home-booking-form label { font-weight: 500; margin-bottom: 4px; font-size: 0.8rem; color: #333; display: block; }
-#home-booking-form input[type="date"], #home-booking-form input[type="time"], #home-booking-form select { 
-    padding: 9px 10px; font-size: 0.88em; border-radius: 4px; width: 100%;
-    border: 1px solid #ced4da; box-sizing: border-box; font-family: 'Montserrat', sans-serif;
+.booking-widget-overlay h2 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  font-size: 1.6em;
+  text-align: center;
+  color: #2c3e50;
+  font-weight: 600;
 }
-#home-booking-form input:focus, #home-booking-form select:focus { border-color: #E67E22; outline: none; box-shadow: 0 0 0 0.15rem rgba(230, 126, 34, 0.2); }
-.date-time-group { display: flex; gap: 8px; margin-bottom: 8px; } 
-.date-time-group > div { flex: 1; margin-bottom: 0; }
-.main-cta-button, .search-cars-btn { 
-    background-color: #E67E22; color: white; padding: 11px 18px; border: none;
-    border-radius: 5px; cursor: pointer; font-size: 1em; font-weight: 600; 
-    width: 100%; text-transform: uppercase; transition: background-color 0.2s ease, transform 0.1s ease;
-    letter-spacing: 0.5px; text-align: center; margin-top: 10px; 
+.booking-widget-overlay p {
+  margin-bottom: 15px;
+  color: #495057;
+  font-size: 0.9em;
+  line-height: 1.4;
 }
-.main-cta-button:hover, .search-cars-btn:hover { background-color: #d35400; }
-.main-cta-button:active, .search-cars-btn:active { transform: scale(0.98); }
+#home-booking-form div:not(.date-time-group) {
+  margin-bottom: 10px;
+}
+#home-booking-form label {
+  font-weight: 500;
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+  color: #333;
+  display: block;
+}
+#home-booking-form input[type="date"],
+#home-booking-form input[type="time"],
+#home-booking-form select {
+  padding: 9px 10px;
+  font-size: 0.88em;
+  border-radius: 4px;
+  width: 100%;
+  border: 1px solid #ced4da;
+  box-sizing: border-box;
+  font-family: "Montserrat", sans-serif;
+}
+#home-booking-form input:focus,
+#home-booking-form select:focus {
+  border-color: #e67e22;
+  outline: none;
+  box-shadow: 0 0 0 0.15rem rgba(230, 126, 34, 0.2);
+}
+.date-time-group {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.date-time-group > div {
+  flex: 1;
+  margin-bottom: 0;
+}
+.main-cta-button,
+.search-cars-btn {
+  background-color: #e67e22;
+  color: white;
+  padding: 11px 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  width: 100%;
+  text-transform: uppercase;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  letter-spacing: 0.5px;
+  text-align: center;
+  margin-top: 10px;
+}
+.main-cta-button:hover,
+.search-cars-btn:hover {
+  background-color: #d35400;
+}
+.main-cta-button:active,
+.search-cars-btn:active {
+  transform: scale(0.98);
+}
 
 /* --- Info Sections --- */
-.info-section { padding: 30px 20px; text-align: center; }
-.benefits-grid, .steps-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; margin-top: 20px; padding: 0px 100px; }
-.benefit-item, .step-item { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06); text-align: left; }
-.benefit-item img, .step-item img.step-icon { height: 100px; margin-bottom: 12px; }
-.benefit-item h4, .step-item h4 { font-size: 1.1em; color: #333; margin-bottom: 8px; font-weight: 600; }
-.benefit-item p, .step-item p { font-size: 0.88em; color: #555; line-height: 1.5; }
+.info-section {
+  padding: 30px 20px;
+  text-align: center;
+}
+.benefits-grid,
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+  padding: 0px 100px;
+}
+.benefit-item,
+.step-item {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  text-align: left;
+}
+.benefit-item img,
+.step-item img.step-icon {
+  height: 100px;
+  margin-bottom: 12px;
+}
+.benefit-item h4,
+.step-item h4 {
+  font-size: 1.1em;
+  color: #333;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+.benefit-item p,
+.step-item p {
+  font-size: 0.88em;
+  color: #555;
+  line-height: 1.5;
+}
 
 /* --- Featured Vehicles Section --- */
-#featured-cars-section { background-color: #f8f9fa; padding-bottom: 40px;}
-#featured-cars-section .section-title { margin-bottom: 30px; } /* Giảm margin cho tiêu đề này */
-.featured-cars-slider-controls { display: flex; align-items: center; justify-content: center; max-width: 1320px; /* Giảm max-width 1 chút */ margin: 0 auto; position: relative; padding: 0 10px; /* Giảm padding để nút gần hơn */ }
-.slider-btn {
-    background-color: rgba(44, 62, 80, 0.5); color: white; border: none; padding: 0;
-    border-radius: 50%; cursor: pointer; font-size: 1.6em; line-height: 1;
-    width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
-    transition: background-color 0.2s ease; z-index: 10;
-    margin: 0 5px; /* Thêm margin để nút không quá sát list */
+#featured-cars-section {
+  background-color: #f8f9fa;
+  padding-bottom: 40px;
 }
-.slider-btn:hover { background-color: rgba(44, 62, 80, 0.7); }
+#featured-cars-section .section-title {
+  margin-bottom: 30px;
+} /* Giảm margin cho tiêu đề này */
+.featured-cars-slider-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 1320px; /* Giảm max-width 1 chút */
+  margin: 0 auto;
+  position: relative;
+  padding: 0 10px; /* Giảm padding để nút gần hơn */
+}
+.slider-btn {
+  background-color: rgba(44, 62, 80, 0.5);
+  color: white;
+  border: none;
+  padding: 0;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 1.6em;
+  line-height: 1;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s ease;
+  z-index: 10;
+  margin: 0 5px; /* Thêm margin để nút không quá sát list */
+}
+.slider-btn:hover {
+  background-color: rgba(44, 62, 80, 0.7);
+}
+
+/* Thêm đoạn này !!!+++ */
+
+.slider-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.prev-btn {
+  position: absolute;
+  left: 0;
+}
+.next-btn {
+  position: absolute;
+  right: 0;
+}
 /* #prev-featured-car { left: -10px; }  Bỏ position absolute */
 /* #next-featured-car { right: -10px; } */
+/* Changes:
+Slider Layout: Changed #featured-cars-list.grid-container to display: flex with overflow-x: hidden to enable sliding via transform.
+Item Width: Set .car-item to flex: 0 0 calc(100% / 3) to ensure exactly 3 cars per slide.
+*/
 
-#featured-cars-list.grid-container { 
-    display: grid; grid-template-columns: repeat(3, 1fr); /* Hiển thị 3 cột trên màn hình lớn */
-    gap: 20px; flex-grow: 1; 
-    width: 100%; /* Cho phép list co giãn */
-    max-width: calc(100% - 100px); /* Trừ không gian cho nút nếu nút ở ngoài */
-    overflow: hidden; /* Quan trọng để hiệu ứng trượt đơn giản bằng JS */
+#featured-cars-list.grid-container {
+  display: flex; /* Trước là grid */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  transition: transform 0.3s ease;
+  width: 100%;
+  max-width: calc(100% - 80px); /* Adjust for button width */
+  margin: 0 auto;
 }
 
-.car-item { 
-    border: 1px solid #e9ecef; border-radius: 8px; background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.05); text-align: left; display: flex;
-    flex-direction: column; overflow: hidden; transition: box-shadow 0.3s ease;
+#featured-cars-list .car-item {
+  flex: 0 0 calc(100% / 3); /* Exactly 3 items per slide */
+  box-sizing: border-box;
+  padding: 10px;
+  min-width: 0; /* Prevent overflow issues */
 }
-.car-item:hover { box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-.car-item img { width: 100%; height: 170px; object-fit: cover; display: block; }
-.car-item-content { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
-.car-item-content h4 { margin: 0 0 5px 0; font-size: 1.05em; color: #333; font-weight: 600; } /* Giảm font size */
-.car-item-content p.price { font-weight: bold; color: #E67E22; font-size: 1em; margin-top: 5px; margin-bottom: 8px;}
-.car-item-content p.availability-text { font-size: 0.85em; color: #28a745; font-weight: 500; margin-bottom: 10px; }
-.car-item-content button.view-detail-btn { 
-    background-color: #007bff; color: white; padding: 9px 15px; border: none;
-    border-radius: 4px; cursor: pointer; margin-top: auto; width: 100%;
-    font-size: 0.9em; font-weight: 500; transition: background-color 0.2s ease; text-align: center;
+
+.car-item:hover {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
-.car-item-content button.view-detail-btn:hover { background-color: #0056b3; }
+.car-item img {
+  width: 100%;
+  height: 170px;
+  object-fit: cover;
+  display: block;
+}
+.car-item-content {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+.car-item-content h4 {
+  margin: 0 0 5px 0;
+  font-size: 1.05em;
+  color: #333;
+  font-weight: 600;
+} /* Giảm font size */
+.car-item-content p.price {
+  font-weight: bold;
+  color: #e67e22;
+  font-size: 1em;
+  margin-top: 5px;
+  margin-bottom: 8px;
+}
+.car-item-content p.availability-text {
+  font-size: 0.85em;
+  color: #28a745;
+  font-weight: 500;
+  margin-bottom: 10px;
+}
+.car-item-content button.view-detail-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 9px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: auto;
+  width: 100%;
+  font-size: 0.9em;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  text-align: center;
+}
+.car-item-content button.view-detail-btn:hover {
+  background-color: #0056b3;
+}
 
 /* --- Footer --- */
-.footer { background-color: #212529; color: #adb5bd; padding: 40px 20px; font-size: 0.9rem; }
-.footer-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 30px; max-width: 1200px; margin: 0 auto; }
-.footer-column h3 { font-size: 1rem; font-weight: 600; margin-bottom: 15px; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; }
-.footer-column p, .footer-column a { font-size: 0.88rem; color: #adb5bd; margin-bottom: 10px; display: block; }
-.footer-column a:hover { color: #fff; }
-.footer-column p.contact-line { display: flex; align-items: center; margin-bottom: 8px;} /* Đảm bảo icon và text cùng hàng */
-.footer-column p.contact-line i.fas { margin-right: 10px; color: #E67E22; width: 16px; text-align: center; flex-shrink: 0; }
-.footer-column p.contact-line a, .footer-column p.contact-line span { margin-left: 0; color: #adb5bd; }
-.social-icons { margin-top: 15px; display: flex; gap: 12px; align-items: center; /* Thêm align-items */ }
-.social-icons img { height: 22px; opacity: 0.7; transition: opacity 0.2s ease; }
-.social-icons img:hover { opacity: 1; }
-.email-subscription { margin-top: 20px; }
-.email-subscription form p { margin-bottom: 8px; font-weight: 500; color: #fff; }
-.subscribe-wrapper { display: flex; border-radius: 5px; overflow: hidden; border: 1px solid #495057; }
-.subscribe-input { flex: 1; padding: 10px; border: none; outline: none; font-size: 0.9em; height: 40px; background-color: #343a40; color: #fff; border-radius: 5px 0 0 5px; }
-.subscribe-input::placeholder { color: #6c757d; }
-.subscribe-button { padding: 0 15px; background-color: #E67E22; color: #fff; border: none; font-size: 0.9em; cursor: pointer; transition: background-color 0.3s; height: 40px; border-radius: 0 5px 5px 0; font-weight: 500; }
-.subscribe-button:hover { background-color: #d35400; }
-.footer-bottom { text-align: center; font-size: 0.8rem; color: #6c757d; padding-top: 25px; margin-top: 25px; /* border-top: 1px solid #343a40; */ /* Đã bỏ */ }
+.footer {
+  background-color: #212529;
+  color: #adb5bd;
+  padding: 40px 20px;
+  font-size: 0.9rem;
+}
+.footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 30px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+.footer-column h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.footer-column p,
+.footer-column a {
+  font-size: 0.88rem;
+  color: #adb5bd;
+  margin-bottom: 10px;
+  display: block;
+}
+.footer-column a:hover {
+  color: #fff;
+}
+.footer-column p.contact-line {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+} /* Đảm bảo icon và text cùng hàng */
+.footer-column p.contact-line i.fas {
+  margin-right: 10px;
+  color: #e67e22;
+  width: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.footer-column p.contact-line a,
+.footer-column p.contact-line span {
+  margin-left: 0;
+  color: #adb5bd;
+}
+.social-icons {
+  margin-top: 15px;
+  display: flex;
+  gap: 12px;
+  align-items: center; /* Thêm align-items */
+}
+.social-icons img {
+  height: 22px;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+.social-icons img:hover {
+  opacity: 1;
+}
+.email-subscription {
+  margin-top: 20px;
+}
+.email-subscription form p {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #fff;
+}
+.subscribe-wrapper {
+  display: flex;
+  border-radius: 5px;
+  overflow: hidden;
+  border: 1px solid #495057;
+}
+.subscribe-input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  outline: none;
+  font-size: 0.9em;
+  height: 40px;
+  background-color: #343a40;
+  color: #fff;
+  border-radius: 5px 0 0 5px;
+}
+.subscribe-input::placeholder {
+  color: #6c757d;
+}
+.subscribe-button {
+  padding: 0 15px;
+  background-color: #e67e22;
+  color: #fff;
+  border: none;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  height: 40px;
+  border-radius: 0 5px 5px 0;
+  font-weight: 500;
+}
+.subscribe-button:hover {
+  background-color: #d35400;
+}
+.footer-bottom {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #6c757d;
+  padding-top: 25px;
+  margin-top: 25px; /* border-top: 1px solid #343a40; */ /* Đã bỏ */
+}
 
 /* --- Floating Buttons, Popup, Page Views, Responsive (Giữ nguyên hoặc điều chỉnh từ lượt trước) --- */
-.floating-buttons { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 999; }
-.floating-button { display: flex; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: 50%; background-color: #fff; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); transition: transform 0.2s; }
-.floating-button img { width: 28px; height: 28px; }
-.floating-button:hover { transform: scale(1.1); }
-.call-button { background-color: #28a745; }
-.zalo-button { background-color: #0068ff; }
+.floating-buttons {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 999;
+}
+.floating-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s;
+}
+.floating-button img {
+  width: 28px;
+  height: 28px;
+}
+.floating-button:hover {
+  transform: scale(1.1);
+}
+.call-button {
+  background-color: #28a745;
+}
+.zalo-button {
+  background-color: #0068ff;
+}
 
-#popup-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.65); display: flex; justify-content: center; align-items: center; z-index: 1050; opacity: 0; visibility: hidden; transition: opacity 0.3s ease, visibility 0.3s ease; }
-#popup-overlay.active { opacity: 1; visibility: visible; }
-#popup { background-color: #fff; padding: 25px 30px; border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.15); text-align: center; position: relative; min-width: 320px; max-width: 450px; transform: scale(0.9); transition: transform 0.3s ease; }
-#popup-overlay.active #popup { transform: scale(1); }
-#close-popup { position: absolute; top: 8px; right: 12px; font-size: 1.8em; font-weight: bold; color: #aaa; cursor: pointer; line-height: 1; }
-#close-popup:hover { color: #333; }
+#popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+#popup-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+#popup {
+  background-color: #fff;
+  padding: 25px 30px;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  position: relative;
+  min-width: 320px;
+  max-width: 450px;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+#popup-overlay.active #popup {
+  transform: scale(1);
+}
+#close-popup {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+  line-height: 1;
+}
+#close-popup:hover {
+  color: #333;
+}
 
-.page-view header.page-header { background-color: #ffffff; padding: 0; text-align: center; position: sticky; top: 0; z-index: 1010; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-.page-header .top-bar { border-bottom: none; height: 60px; max-width: 1200px; margin:0 auto; padding: 0 20px; display:flex; justify-content: space-between; align-items:center;}
-.page-header .top-bar .logo-img-page { height: 30px; } 
-.page-header .top-bar .nav-link { 
-    color: #343a40; 
-    font-weight: 500; 
-    font-size: 0.85rem; /* Giống với .header-right .menu li a */
-    text-transform: uppercase; /* CHỮ HOA */
-    letter-spacing: 0.5px; /* Giống với .header-right .menu li a */
-    transition: color 0.2s ease;
-    font-family: "Montserrat", sans-serif; /* Đảm bảo font được áp dụng */
-    margin-left: 20px; /* Giữ lại hoặc điều chỉnh margin */
+.page-view header.page-header {
+  background-color: #ffffff;
+  padding: 0;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 1010;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.page-header .top-bar {
+  border-bottom: none;
+  height: 60px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.page-header .top-bar .logo-img-page {
+  height: 30px;
+}
+.page-header .top-bar .nav-link {
+  color: #343a40;
+  font-weight: 500;
+  font-size: 0.85rem; /* Giống với .header-right .menu li a */
+  text-transform: uppercase; /* CHỮ HOA */
+  letter-spacing: 0.5px; /* Giống với .header-right .menu li a */
+  transition: color 0.2s ease;
+  font-family: "Montserrat", sans-serif; /* Đảm bảo font được áp dụng */
+  margin-left: 20px; /* Giữ lại hoặc điều chỉnh margin */
 }
 .page-header .top-bar .nav-link:hover,
 .page-header .top-bar .nav-link.active {
-  color: #E67E22; 
+  color: #e67e22;
 }
 
-.page-header .top-bar .logo-img-page { 
-    height: 30px; /* Đồng bộ kích thước logo nếu muốn */
+.page-header .top-bar .logo-img-page {
+  height: 30px; /* Đồng bộ kích thước logo nếu muốn */
 }
 
-.page-header h1 { font-size: 1.7em; color: #2c3e50; margin: 0; padding: 20px; border-bottom: 1px solid #e9ecef; border-top: 1px solid #e9ecef;font-weight: 600; }
-.page-view main.container { max-width: 1000px; margin: 25px auto; padding: 25px; background-color: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
-
-.action-button, .back-button {
-    display: inline-block; margin-top: 20px; padding: 10px 20px;
-    color: white; text-decoration: none; border: none; border-radius: 5px;
-    cursor: pointer; font-size: 0.95em; font-weight: 500;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-    text-transform: uppercase; letter-spacing: 0.3px;
+.page-header h1 {
+  font-size: 1.7em;
+  color: #2c3e50;
+  margin: 0;
+  padding: 20px;
+  border-bottom: 1px solid #e9ecef;
+  border-top: 1px solid #e9ecef;
+  font-weight: 600;
 }
-.action-button, .main-cta-button { background-color: #E67E22; } 
-.action-button:hover, .main-cta-button:hover { background-color: #d35400; }
-.back-button { background-color: #6c757d; margin-right: 10px; }
-.back-button:hover { background-color: #5a6268; }
-.action-button:active, .back-button:active { transform: scale(0.98); }
+.page-view main.container {
+  max-width: 1000px;
+  margin: 25px auto;
+  padding: 25px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
 
-#search-criteria-summary { margin-bottom: 20px; padding: 15px; background-color: #eef1f5; border-radius: 6px; font-size: 0.95em; border: 1px solid #d6dde7; }
-#search-criteria-summary p { margin: 6px 0; }
-#search-criteria-summary p strong { color: #2c3e50; }
-#cars-list-container p { text-align: center; font-size: 1.05em; padding: 20px; color: #555;}
+.action-button,
+.back-button {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 10px 20px;
+  color: white;
+  text-decoration: none;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.95em;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.action-button,
+.main-cta-button {
+  background-color: #e67e22;
+}
+.action-button:hover,
+.main-cta-button:hover {
+  background-color: #d35400;
+}
+.back-button {
+  background-color: #6c757d;
+  margin-right: 10px;
+}
+.back-button:hover {
+  background-color: #5a6268;
+}
+.action-button:active,
+.back-button:active {
+  transform: scale(0.98);
+}
+
+#search-criteria-summary {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #eef1f5;
+  border-radius: 6px;
+  font-size: 0.95em;
+  border: 1px solid #d6dde7;
+}
+#search-criteria-summary p {
+  margin: 6px 0;
+}
+#search-criteria-summary p strong {
+  color: #2c3e50;
+}
+#cars-list-container p {
+  text-align: center;
+  font-size: 1.05em;
+  padding: 20px;
+  color: #555;
+}
 #cars-list-container .car-item {
-    box-shadow: 0 1px 4px rgba(0,0,0,0.07); /* Shadow nhẹ hơn một chút */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.07); /* Shadow nhẹ hơn một chút */
 }
 #cars-list-container .car-item img {
-    height: 160px; /* Điều chỉnh chiều cao ảnh cho phù hợp với layout compact */
+  height: 160px; /* Điều chỉnh chiều cao ảnh cho phù hợp với layout compact */
 }
 
 #cars-list-container .car-item-content {
-    padding: 12px; /* Padding nhỏ hơn cho nội dung */
+  padding: 12px; /* Padding nhỏ hơn cho nội dung */
 }
 
 #cars-list-container .car-item-content h4 {
-    font-size: 1em; /* Font size tên xe nhỏ hơn */
-    margin-bottom: 4px;
+  font-size: 1em; /* Font size tên xe nhỏ hơn */
+  margin-bottom: 4px;
 }
 
 #cars-list-container .car-item-content p.price {
-    font-size: 0.95em; /* Font size giá nhỏ hơn */
-    margin-bottom: 6px;
+  font-size: 0.95em; /* Font size giá nhỏ hơn */
+  margin-bottom: 6px;
 }
 
-.car-specs-listing { /* Class mới cho div chứa specs trong car listing */
+.car-specs-listing {
+  font-size: 0.8em; /* Giảm font size */
+  color: #555;
+  margin-bottom: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px; /* Khoảng cách nhỏ hơn */
+}
+
+car-specs-listing span {
+  display: inline-flex;
+  align-items: center;
+  background-color: #f0f0f0; /* Nền nhẹ cho spec */
+  padding: 2px 6px;
+  border-radius: 3px;
+  line-height: 1.4;
+}
+
+
+.car-specs-listing i.fas {
+  margin-right: 4px;
+  color: #777;
+  font-size: 0.9em; /* Icon nhỏ hơn */
+}
+
+.car-features-pills {
+  /* Cho features ở trang listing */
+  font-size: 0.75em;
+  color: #666;
+  margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.feature-pill {
+  background-color: #e9ecef;
+  padding: 3px 7px; /* Tăng padding một chút */
+  border-radius: 10px; /* Bo tròn hơn */
+  white-space: nowrap;
+  display: inline-flex; /* Để icon và text cùng hàng */
+  align-items: center;
+}
+.feature-pill i.fas {
+  margin-right: 4px;
+}
+
+/* Location trong Featured Cars */
+.car-location-item, /* Áp dụng cho cả listing nếu muốn */
+p.car-location-featured { /* Giữ lại style cũ nếu chỉ muốn cho featured */
     font-size: 0.8em;
-    color: #555;
+    color: #777;
     margin-bottom: 6px;
     display: flex;
-    flex-wrap: wrap; /* Cho phép xuống dòng nếu không đủ chỗ */
-    gap: 5px 10px; /* Khoảng cách giữa các spec items */
-}
-
-.car-specs-listing span {
-    display: inline-flex; /* Để icon và text nằm cùng hàng */
     align-items: center;
-    /* border-right: 1px solid #eee; */ /* Đường kẻ phân cách nếu muốn */
-    /* padding-right: 8px; */
-    /* margin-right: 8px; */
 }
-/* .car-specs-listing span:last-child {
-    border-right: none;
-    padding-right: 0;
-    margin-right: 0;
-} */
-.car-specs-listing i.fas {
-    margin-right: 4px;
-    color: #777;
+
+.car-location-item i.fas,
+p.car-location-featured i.fas {
+    margin-right: 5px;
+    color: #E67E22; /* Màu cam cho icon location */
 }
 
 
-#cars-list-container .car-item-content p.availability-text.car-status-listing { /* Style riêng cho status */
-    font-size: 0.8em;
-    font-weight: 500;
-    margin-bottom: 8px;
+#cars-list-container .car-item-content p.availability-text.car-status-listing {
+  /* Style riêng cho status */
+  font-size: 0.8em;
+  font-weight: 500;
+  margin-bottom: 8px;
 }
 
 #cars-list-container .car-item-content button.select-car-btn {
-    background-color: #28a745; /* Màu xanh lá cho nút "Chọn xe" */
-    font-size: 0.85em; /* Font nút nhỏ hơn */
-    padding: 8px 12px; /* Padding nút nhỏ hơn */
+  background-color: #28a745; /* Màu xanh lá cho nút "Chọn xe" */
+  font-size: 0.85em; /* Font nút nhỏ hơn */
+  padding: 8px 12px; /* Padding nút nhỏ hơn */
 }
 #cars-list-container .car-item-content button.select-car-btn:hover {
-    background-color: #218838;
+  background-color: #218838;
 }
-
 
 /* --- Đảm bảo .grid-container hiển thị lưới --- */
 /* Bạn có thể đã có style này, nhưng kiểm tra lại: */
-.grid-container { 
-    display: grid;
-    /* Số cột sẽ được trình duyệt tự tính toán dựa trên minmax, */
-    /* để luôn có khoảng 3-4 cột trên desktop tùy kích thước item và container */
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
-    /* image (1).jpg có vẻ như các item hẹp hơn, bạn có thể giảm minmax ở đây */
-    /* Ví dụ: minmax(220px, 1fr) nếu muốn nhiều item hơn trên một hàng */
-    gap: 20px;
-    max-width: 1200px;
-    margin: 0 auto;
+.grid-container {
+  display: grid;
+  /* Số cột sẽ được trình duyệt tự tính toán dựa trên minmax, */
+  /* để luôn có khoảng 3-4 cột trên desktop tùy kích thước item và container */
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  /* image (1).jpg có vẻ như các item hẹp hơn, bạn có thể giảm minmax ở đây */
+  /* Ví dụ: minmax(220px, 1fr) nếu muốn nhiều item hơn trên một hàng */
+  gap: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-#cars-list-container .car-item button.view-detail-btn { background-color: #28a745; }
-#cars-list-container .car-item button.view-detail-btn:hover { background-color: #218838; }
+#cars-list-container .car-item button.view-detail-btn {
+  background-color: #28a745;
+}
+#cars-list-container .car-item button.view-detail-btn:hover {
+  background-color: #218838;
+}
 
-#car-detail-content-wrapper { display: grid; grid-template-columns: 2fr 1.2fr; gap: 35px; }
-#detail-car-image { width: 100%; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
-#detail-car-name { font-size: 1.7em; color: #2c3e50; margin-bottom: 10px; font-weight: 600;}
-#detail-car-specs p { margin-bottom: 6px; font-size: 0.95em; }
-#car-detail-booking-info h3, #car-detail-booking-info h4 { color: #2c3e50; margin-top: 0; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 8px; font-size: 1.2em; font-weight: 600; }
-#detail-additional-services label {margin-bottom: 5px; font-size: 0.9em;} /* bỏ display: block; */
-#detail-price-summary p { margin: 6px 0; font-size: 1em; }
-#detail-price-summary p strong { font-size: 1.25em; color: #E67E22; }
+#car-detail-content-wrapper {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr;
+  gap: 35px;
+}
+#detail-car-image {
+  width: 100%;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #eee;
+}
+#detail-car-name {
+  font-size: 1.7em;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+/* Chi tiết xe trong Car Detail View */
+#detail-car-specs p {
+  font-size: 0.95em;
+  margin-bottom: 6px;
+}
+#detail-car-specs p strong {
+  display: inline-block;
+  min-width: 120px; /* Để các label thẳng hàng */
+}
 
-#customer-info-form-area form div:not(#payment-options):not(#final-price-summary) { margin-bottom: 5px; }
-#customer-info-form-area label {font-weight: 500; margin-bottom: 5px; font-size: 0.9em; }
-#customer-info-form-area input[type="text"], #customer-info-form-area input[type="tel"], #customer-info-form-area input[type="email"], #customer-info-form-area textarea { width: 100%; padding: 10px; border: 1px solid #ced4da; border-radius: 4px; box-sizing: border-box; font-family: 'Montserrat', sans-serif; font-size: 0.95em; }
-#customer-info-form-area textarea { resize: vertical; min-height: 70px; }
-#payment-options label { font-weight: normal; margin-right: 15px; font-size: 0.95em; }
-.payment-details { font-size: 0.8em; color: #777; margin-top: 5px; }
-#final-price-summary { margin-top: 15px; padding-top:15px; border-top: 1px solid #eee;}
-#final-price-summary p { font-size: 1.05em; margin: 8px 0; }
-#final-price-summary p strong { color: #E67E22; }
+ul.features-detail-list {
+  list-style: none;
+  padding-left: 0;
+  font-size: 0.9em;
+  margin-top: 8px; /* Tăng margin top */
+  columns: 2; /* Hiển thị features thành 2 cột nếu danh sách dài */
+  column-gap: 20px;
+}
+ul.features-detail-list li {
+    margin-bottom: 5px; /* Tăng margin bottom */
+    color: #454545;
+    display: flex;
+    align-items: center;
+}
+ul.features-detail-list li i.fas {
+    color: #28a745; 
+    margin-right: 8px; /* Tăng margin right */
+    width: 16px; /* Cho icon có không gian cố định */
+}
 
-#booking-confirmation-content h2 { color: #28a745; text-align: center; margin-bottom: 15px; font-size: 1.8em;}
-#booking-confirmation-content p { margin-bottom: 12px; line-height: 1.6; font-size: 1em;}
-#booking-confirmation-content strong { color: #333; }
-#conf-customer-details, #conf-vehicle-details, #conf-rental-period, #conf-total-price, #conf-payment-method { background-color: #f9f9f9; padding: 12px 15px; border-radius: 6px; margin-bottom: 12px; border: 1px solid #eee; font-size: 0.95em; }
-#conf-customer-details h4, #conf-vehicle-details h4, #conf-rental-period h4 { font-size: 1.1em; color: #2c3e50; margin-bottom: 8px; }
+#car-detail-booking-info h3,
+#car-detail-booking-info h4 {
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  font-size: 1.2em;
+  font-weight: 600;
+}
+#detail-additional-services label {
+  margin-bottom: 5px;
+  font-size: 0.9em;
+} /* bỏ display: block; */
+#detail-price-summary p {
+  margin: 6px 0;
+  font-size: 1em;
+}
+#detail-price-summary p strong {
+  font-size: 1.25em;
+  color: #e67e22;
+}
+
+#customer-info-form-area
+  form
+  div:not(#payment-options):not(#final-price-summary) {
+  margin-bottom: 5px;
+}
+#customer-info-form-area label {
+  font-weight: 500;
+  margin-bottom: 5px;
+  font-size: 0.9em;
+}
+#customer-info-form-area input[type="text"],
+#customer-info-form-area input[type="tel"],
+#customer-info-form-area input[type="email"],
+#customer-info-form-area textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: "Montserrat", sans-serif;
+  font-size: 0.95em;
+}
+#customer-info-form-area textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+#payment-options label {
+  font-weight: normal;
+  margin-right: 15px;
+  font-size: 0.95em;
+}
+.payment-details {
+  font-size: 0.8em;
+  color: #777;
+  margin-top: 5px;
+}
+#final-price-summary {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+#final-price-summary p {
+  font-size: 1.05em;
+  margin: 8px 0;
+}
+#final-price-summary p strong {
+  color: #e67e22;
+}
+
+#booking-confirmation-content h2 {
+  color: #28a745;
+  text-align: center;
+  margin-bottom: 15px;
+  font-size: 1.8em;
+}
+#booking-confirmation-content p {
+  margin-bottom: 12px;
+  line-height: 1.6;
+  font-size: 1em;
+}
+#booking-confirmation-content strong {
+  color: #333;
+}
+#conf-customer-details,
+#conf-vehicle-details,
+#conf-rental-period,
+#conf-total-price,
+#conf-payment-method {
+  background-color: #f9f9f9;
+  padding: 12px 15px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+  border: 1px solid #eee;
+  font-size: 0.95em;
+}
+#conf-customer-details h4,
+#conf-vehicle-details h4,
+#conf-rental-period h4 {
+  font-size: 1.1em;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
 
 /* Responsive */
 @media (max-width: 992px) {
-  .header-content { padding: 0 15px;}
-  .header-right .menu { display: none; position: absolute; top: 70px; /* Chiều cao header */ left: 0; width: 100%; background-color: #fff; box-shadow: 0 3px 5px rgba(0,0,0,0.1); padding: 0; flex-direction: column; }
-  .header-right .menu.active { display: flex; }
-  .header-right .menu li { margin: 0; width: 100%; text-align: left; }
-  .header-right .menu li a { display: block; padding: 12px 20px; border-bottom: 1px solid #f0f0f0; }
-  .header-right .menu li:last-child a { border-bottom: none; }
-  .menu-toggle { display: flex; align-items:center; } /* Để nút burger căn giữa */
-  
-  .hero { justify-content: center; padding: 20px; } /* Canh giữa widget trên tablet */
-  .booking-widget-overlay { position: relative; top: auto; right: auto; transform: none; margin: 20px auto; max-width: 90%; width: 480px;  }
 
-  .benefits-grid, .steps-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
-  .footer-container { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-  #car-detail-content-wrapper { grid-template-columns: 1fr; }
-  #featured-cars-list.grid-container { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: none; width: auto;}
-  .featured-cars-slider-controls { padding: 0; /* Bỏ padding để nút gần hơn khi list co lại */ }
+/* 1.Header  */
+.header-content {
+  padding: 0 15px;
+}
+.header-right .menu {
+  display: none;
+  position: absolute;
+  top: 70px; /* Chiều cao header */
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+  padding: 0;
+  flex-direction: column;
+}
+.header-right .menu.active {
+  display: flex;
+}
+.header-right .menu li {
+  margin: 0;
+  width: 100%;
+  text-align: left;
+}
+.header-right .menu li a {
+  display: block;
+  padding: 12px 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+.header-right .menu li:last-child a {
+  border-bottom: none;
+}
+.menu-toggle {
+  display: flex;
+  margin-left: auto;
+} /* Để nút burger ở trái */
+
+/* 2.Hero Section & Booking Widget */
+
+  .hero {
+    justify-content: center;
+    padding: 20px;
+  } /* Canh giữa widget trên tablet */
+  .booking-widget-overlay {
+    position: relative;
+    top: auto;
+    right: auto;
+    transform: none;
+    margin: 20px auto;
+    max-width: 90%;
+    width: 480px;
+  }
+
+   /* 3.Benefits Section */
+
+   .benefits {
+    padding: 30px 30px;
+    text-align: left;
+  }
+
+  .benefits-grid {
+    display: flex; /* các benefit-item được xếp theo hàng ngang. */
+    overflow-x: auto; /* để cho phép nội dung tràn theo chiều ngang và hiển thị thanh cuộn khi cần. */
+    flex-wrap: nowrap; /* Đảm bảo các benefit-item không bị xuống dòng. */
+    scroll-snap-type: x mandatory; /* Buộc cuộn dừng ở các điểm neo */
+    -webkit-overflow-scrolling: touch; /* Cuộn mượt hơn trên iOS */
+    gap: 16px;
+    padding-bottom: 10px; /* Thêm khoảng đệm nhỏ để thanh cuộn không che nội dung */
+  }
+  .benefit-item {
+    flex: 0 0 auto; /* Ngăn item co lại hoặc giãn ra, giữ kích thước gốc */
+    width: 85%; /* Đặt chiều rộng cố định cho mỗi item, bạn có thể điều chỉnh cho phù hợp */
+    height: auto;
+    scroll-snap-align: start; /* Neo item vào điểm bắt đầu khi cuộn */
+  }
+  /* 4.Steps Section */
+  .steps {
+    padding: 30px 30px;
+    text-align: left;
+  }
+
+  .steps-grid {
+    display: flex; /* các benefit-item được xếp theo hàng ngang. */
+    overflow-x: auto; /* để cho phép nội dung tràn theo chiều ngang và hiển thị thanh cuộn khi cần. */
+    flex-wrap: nowrap; /* Đảm bảo các benefit-item không bị xuống dòng. */
+    scroll-snap-type: x mandatory; /* Buộc cuộn dừng ở các điểm neo */
+    -webkit-overflow-scrolling: touch; /* Cuộn mượt hơn trên iOS */
+    gap: 16px;
+    padding-bottom: 10px; /* Thêm khoảng đệm nhỏ để thanh cuộn không che nội dung */
+  }
+  .step-item {
+    flex: 0 0 auto; /* Ngăn item co lại hoặc giãn ra, giữ kích thước gốc */
+    width: 85%; /* Đặt chiều rộng cố định cho mỗi item, bạn có thể điều chỉnh cho phù hợp */
+    height: auto;
+    scroll-snap-align: start; /* Neo item vào điểm bắt đầu khi cuộn */
+  }
+  /* 5.Featured Cars Section */
+
+  #car-detail-content-wrapper {
+    grid-template-columns: 1fr;
+  }
+  #featured-cars-list.grid-container {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    max-width: none;
+    width: auto;
+  }
+  .featured-cars-slider-controls {
+    padding: 0; /* Bỏ padding để nút gần hơn khi list co lại */
+  }
   #cars-list-container.grid-container,
   #featured-cars-list.grid-container {
-      grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (max-width: 768px) {
-  .section-title, .info-section h2, .info-section h3,
-  #featured-cars-section h3, .page-header h1 { font-size: 1.6em; }
-  .featured-cars-slider-controls { flex-direction: row; align-items: stretch; } /* Giữ nút 2 bên */
-  #featured-cars-list.grid-container { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom:15px; } /* Cho phép cuộn ngang item thay vì grid */
-  #featured-cars-list.grid-container .car-item { flex: 0 0 80%; min-width: 250px; scroll-snap-align: center; } /* Item rộng hơn */
-  .slider-btn { position: static; transform: none; margin: auto 5px; } /* Nút nằm trong luồng */
+.footer-container {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
 
-  .footer-container { grid-template-columns: 1fr; text-align: left; }
-  .social-icons, .subscribe-wrapper { justify-content: flex-start; margin-left:0; }
+@media (max-width: 768px) {
+  .section-title,
+  .info-section h2,
+  .info-section h3,
+  #featured-cars-section h3,
+  .page-header h1 {
+    font-size: 1.6em;
+  }
+
+  
+  .featured-cars-slider-controls {
+    flex-direction: row;
+    align-items: stretch;
+  } /* Giữ nút 2 bên */
+  #featured-cars-list.grid-container {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 15px;
+  } /* Cho phép cuộn ngang item thay vì grid */
+  #featured-cars-list.grid-container .car-item {
+    flex: 0 0 80%; 
+    min-width: 250px;
+    scroll-snap-align: center;
+  } /* Item rộng hơn */
+  .slider-btn {
+    position: static;
+    transform: none;
+    margin: auto 5px;
+  } /* Nút nằm trong luồng */
+
+  .footer-container {
+    grid-template-columns: 1fr;
+    text-align: left;
+  }
+  .social-icons,
+  .subscribe-wrapper {
+    justify-content: flex-start;
+    margin-left: 0;
+  }
   #cars-list-container.grid-container,
   #featured-cars-list.grid-container {
-      grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 480px) {
-  .header-content { padding: 0 15px;}
-  .header-left .logo img { height: 28px; }
-  .hero { min-height: auto; padding-top: 20px; padding-bottom: 20px; height: auto; align-items: flex-start; } 
-  .booking-widget-overlay { padding: 15px; margin-top: 0; } /* Widget sát top hero hơn */
-  .booking-widget-overlay h2 { font-size: 1.3em; }
-  .date-time-group { flex-direction: column; gap: 0; }
-  .date-time-group > div { margin-bottom: 12px; }
-  .date-time-group > div:last-child { margin-bottom: 0; }
+  .header-content {
+    padding: 0 15px;
+  }
+  .header-left .logo img {
+    height: 28px;
+  }
+  .hero {
+    min-height: auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    height: auto;
+    align-items: flex-start;
+  }
+  .booking-widget-overlay {
+    padding: 15px;
+    margin-top: 0;
+  } /* Widget sát top hero hơn */
+  .booking-widget-overlay h2 {
+    font-size: 1.3em;
+  }
+  .date-time-group {
+    flex-direction: column;
+    gap: 0;
+  }
+  .date-time-group > div {
+    margin-bottom: 12px;
+  }
+  .date-time-group > div:last-child {
+    margin-bottom: 0;
+  }
 
-  .info-section { padding: 25px 15px; }
-  .section-title, .info-section h2, .info-section h3,
-  #featured-cars-section h3, .page-header h1 { font-size: 1.4em; }
-  .car-item img { height: 160px; }
+  .info-section {
+    padding: 25px 15px;
+  }
+  .section-title,
+  .info-section h2,
+  .info-section h3,
+  #featured-cars-section h3,
+  .page-header h1 {
+    font-size: 1.4em;
+  }
+  .car-item img {
+    height: 160px;
+  }
   #cars-list-container.grid-container,
   #featured-cars-list.grid-container {
-      grid-template-columns: 1fr;
+    grid-template-columns: 1fr;
   }
 }
