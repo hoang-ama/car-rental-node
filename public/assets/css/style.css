@@ -308,7 +308,7 @@ img {
   padding: 0 10px; /* Giảm padding để nút gần hơn */
 }
 .slider-btn {
-  background-color: rgba(44, 62, 80, 0.5);
+  background-color: rgba(44, 62, 80, 0.3);
   color: white;
   border: none;
   padding: 0;
@@ -365,6 +365,7 @@ Item Width: Set .car-item to flex: 0 0 calc(100% / 3) to ensure exactly 3 cars p
   padding: 10px;
   min-width: 0; /* Prevent overflow issues */
 }
+
 
 .car-item:hover {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -1107,11 +1108,16 @@ ul.features-detail-list li i.fas {
   #car-detail-content-wrapper {
     grid-template-columns: 1fr;
   }
+
   #featured-cars-list.grid-container {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    max-width: none;
-    width: auto;
+    display: flex;
+    overflow-x: hidden;
+    transition: transform 0.3s ease;
+    width: 100%;
+    max-width: calc(100% - 80px);
+    margin: 0 auto;
   }
+
   .featured-cars-slider-controls {
     padding: 0; /* Bỏ padding để nút gần hơn khi list co lại */
   }
@@ -1120,6 +1126,8 @@ ul.features-detail-list li i.fas {
     grid-template-columns: repeat(3, 1fr);
   }
 }
+
+
 
 .footer-container {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1138,23 +1146,29 @@ ul.features-detail-list li i.fas {
   .featured-cars-slider-controls {
     flex-direction: row;
     align-items: stretch;
-  } /* Giữ nút 2 bên */
+    }
+
+  /* Cho phép scroll ngang và trượt từng xe */
   #featured-cars-list.grid-container {
     display: flex;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
     padding-bottom: 15px;
-  } /* Cho phép cuộn ngang item thay vì grid */
+  }
+
+
   #featured-cars-list.grid-container .car-item {
-    flex: 0 0 80%; 
-    min-width: 250px;
-    scroll-snap-align: center;
-  } /* Item rộng hơn */
+    flex: 0 0 auto;               /* Hiển thị tất cả các xe */
+    width: 85%;                   /* Chiếm khoảng 85% màn hình */
+    min-width: 260px;             /* Đảm bảo đủ chiều rộng */
+    scroll-snap-align: start;     /* Snap mượt */
+    margin-right: 12px;           /* Tạo khoảng cách giữa các item */
+  }
+  
   .slider-btn {
-    position: static;
-    transform: none;
-    margin: auto 5px;
-  } /* Nút nằm trong luồng */
+    display: none !important;
+  }
 
   .footer-container {
     grid-template-columns: 1fr;
@@ -1221,3 +1235,4 @@ ul.features-detail-list li i.fas {
     grid-template-columns: 1fr;
   }
 }
+

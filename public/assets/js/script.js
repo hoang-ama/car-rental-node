@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const pickupTimeInput = document.getElementById('pickup-time');
     const returnDateInput = document.getElementById('return-date');
     const returnTimeInput = document.getElementById('return-time');
+
     const featuredCarsListDiv = document.getElementById('featured-cars-list');
     const prevFeaturedBtn = document.getElementById('prev-featured-car');
     const nextFeaturedBtn = document.getElementById('next-featured-car');
@@ -65,105 +66,102 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('[updateItemsPerSlide] Items per slide set to:', itemsPerSlide);
     }
 
-    function updateSliderPosition() {
-        if (!featuredCarsListDiv) return;
-        const itemWidth = featuredCarsListDiv.querySelector('.car-item')?.offsetWidth || 300;
-        const translateX = -(currentSlideStartIndex * itemWidth * itemsPerSlide);
-        featuredCarsListDiv.style.transform = `translateX(${translateX}px)`;
-        console.log('[updateSliderPosition] Slider position updated:', translateX);
 
-        if (prevFeaturedBtn && nextFeaturedBtn) {
-            prevFeaturedBtn.disabled = currentSlideStartIndex === 0;
-            nextFeaturedBtn.disabled = (currentSlideStartIndex + 1) * itemsPerSlide >= allFeaturedCars.length;
-        }
+// Optional improvement: limit max currentSlideStartIndex
+function limitSlideIndex() {
+    const maxStartIndex = Math.max(0, allFeaturedCars.length - itemsPerSlide);
+    if (currentSlideStartIndex > maxStartIndex) {
+        currentSlideStartIndex = maxStartIndex;
+    }
+}
+
+// 🔴 [UPDATE START: displayInitialFeaturedCarItems function] 🔴
+function displayInitialFeaturedCarItems(carsArray) {
+    if (!featuredCarsListDiv) return;
+    if (!carsArray || carsArray.length === 0) {
+        featuredCarsListDiv.innerHTML = '<p>No featured vehicles available.</p>';
+        if (prevFeaturedBtn) prevFeaturedBtn.style.display = 'none';
+        if (nextFeaturedBtn) nextFeaturedBtn.style.display = 'none';
+        return;
     }
 
-    function displayInitialFeaturedCarItems(carsArray) {
-        if (!featuredCarsListDiv) {
-            console.error('[displayInitialFeaturedCarItems] featuredCarsListDiv is null');
-            return;
+    allFeaturedCars = carsArray;
+    currentSlideStartIndex = 0;
+    renderFeaturedCarSlide();
+
+    if (prevFeaturedBtn) prevFeaturedBtn.style.display = 'block';
+    if (nextFeaturedBtn) nextFeaturedBtn.style.display = allFeaturedCars.length > itemsPerSlide ? 'block' : 'none';
+}
+// 🔴 [UPDATE END: displayInitialFeaturedCarItems function] 🔴
+
+// 🔴 [Add thêm START: renderFeaturedCarSlide ] 🔴
+function renderFeaturedCarSlide() {
+    if (!featuredCarsListDiv) return;
+    const endIndex = currentSlideStartIndex + itemsPerSlide;
+    const visibleCars = allFeaturedCars.slice(currentSlideStartIndex, endIndex);
+    featuredCarsListDiv.innerHTML = '';
+    displayCarItems(visibleCars, featuredCarsListDiv, true);
+
+    if (prevFeaturedBtn) prevFeaturedBtn.disabled = currentSlideStartIndex === 0;
+    if (nextFeaturedBtn) nextFeaturedBtn.disabled = (currentSlideStartIndex + itemsPerSlide) >= allFeaturedCars.length;
+}
+// 🔴 [UPDATE END: renderFeaturedCarSlide function] 🔴
+
+async function fetchAndDisplayFeaturedCars() {
+    if (!featuredCarsListDiv) return;
+    featuredCarsListDiv.innerHTML = '<p>Loading featured vehicles...</p>';
+    try {
+        const response = await fetch('/api/cars');
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        const cars = await response.json();
+        if (!Array.isArray(cars)) throw new Error('Invalid car data');
+
+        const selectedLocation = locationSelect ? locationSelect.value : "AnyLocation";
+        const featuredCars = cars.filter(car => car.available && car.isFeatured === true); // ✅ ignore location
+        const isMobile = window.innerWidth <= 768;
+        if (isMobile) {
+            // ✅ Trên mobile: hiển thị tất cả và không phân trang
+            allFeaturedCars = featuredCars;
+            featuredCarsListDiv.innerHTML = '';
+            displayCarItems(featuredCars, featuredCarsListDiv, true);
+          } else {
+            // ✅ Trên desktop: giữ logic slide
+            displayInitialFeaturedCarItems(featuredCars);
+          }
+        } catch (err) {
+          console.error("[fetchAndDisplayFeaturedCars] Error:", err);
+          featuredCarsListDiv.innerHTML = '<p>Error loading featured cars.</p>';
         }
-        if (!carsArray || carsArray.length === 0) {
-            featuredCarsListDiv.innerHTML = '<p>No featured vehicles available.</p>';
-            if (prevFeaturedBtn) prevFeaturedBtn.style.display = 'none';
-            if (nextFeaturedBtn) nextFeaturedBtn.style.display = 'none';
-            return;
+      }
+
+// 🔴 [UPDATE START: Navigation Event Listeners] 🔴
+if (prevFeaturedBtn) {
+    prevFeaturedBtn.addEventListener('click', () => {
+        if (currentSlideStartIndex > 0) {
+            currentSlideStartIndex -= 1; // ✅ move back by 1
+            if (currentSlideStartIndex < 0) currentSlideStartIndex = 0;
+            renderFeaturedCarSlide();
         }
+    });
+}
 
-        allFeaturedCars = carsArray; // Update global array
-        displayCarItems(allFeaturedCars, featuredCarsListDiv, true); // Display ALL cars, not just a slice
-        updateSliderPosition();
-
-        if (prevFeaturedBtn && nextFeaturedBtn) {
-            prevFeaturedBtn.style.display = 'block';
-            nextFeaturedBtn.style.display = allFeaturedCars.length > itemsPerSlide ? 'block' : 'none';
+if (nextFeaturedBtn) {
+    nextFeaturedBtn.addEventListener('click', () => {
+        const maxStartIndex = allFeaturedCars.length - itemsPerSlide;
+        if (currentSlideStartIndex < maxStartIndex) {
+            currentSlideStartIndex += 1; // ✅ move forward by 1
+            if (currentSlideStartIndex > maxStartIndex) currentSlideStartIndex = maxStartIndex;
+            renderFeaturedCarSlide();
         }
-
-        console.log('[displayInitialFeaturedCarItems] Displayed initial featured cars:', carsArray.length);
-    }
-
-    async function fetchAndDisplayFeaturedCars() {
-        console.log("[fetchAndDisplayFeaturedCars] Started.");
-        if (!featuredCarsListDiv) {
-            console.error("[fetchAndDisplayFeaturedCars] featuredCarsListDiv is null.");
-            return;
-        }
-        featuredCarsListDiv.innerHTML = '<p>Loading featured vehicles...</p>';
-        try {
-            const response = await fetch('/api/cars');
-            if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
-            const cars = await response.json();
-            if (!Array.isArray(cars)) throw new Error('Invalid API response: Expected array');
-
-            const selectedLocation = locationSelect ? locationSelect.value : "AnyLocation";
-            allFeaturedCars = cars.filter(car =>
-                car.available &&
-                (selectedLocation === "AnyLocation" || car.location === selectedLocation) &&
-                car.isFeatured === true // Filter for featured cars only
-            );
-            console.log(`[fetchAndDisplayFeaturedCars] Location: ${selectedLocation}, Filtered featured cars: ${allFeaturedCars.length}`);
-
-            if (allFeaturedCars.length === 0) {
-                featuredCarsListDiv.innerHTML = '<p>No featured vehicles available for this location.</p>';
-                if (prevFeaturedBtn) prevFeaturedBtn.style.display = 'none';
-                if (nextFeaturedBtn) nextFeaturedBtn.style.display = 'none';
-            } else {
-                displayInitialFeaturedCarItems(allFeaturedCars);
-            }
-        } catch (error) {
-            console.error('[fetchAndDisplayFeaturedCars] Error:', error);
-            featuredCarsListDiv.innerHTML = `<p>Error loading featured vehicles: ${error.message}</p>`;
-        }
-    }
-
-    // Update navigation event listeners
-    if (prevFeaturedBtn) {
-        prevFeaturedBtn.addEventListener('click', () => {
-            if (currentSlideStartIndex > 0) {
-                currentSlideStartIndex -= 1;
-                updateSliderPosition();
-                console.log('[prevFeaturedBtn] Slide moved back to index:', currentSlideStartIndex);
-            }
-        });
-    }
-
-    if (nextFeaturedBtn) {
-        nextFeaturedBtn.addEventListener('click', () => {
-            if ((currentSlideStartIndex + 1) * itemsPerSlide < allFeaturedCars.length) {
-                currentSlideStartIndex += 1;
-                updateSliderPosition();
-                console.log('[nextFeaturedBtn] Slide moved forward to index:', currentSlideStartIndex);
-            }
-        });
-    }
+    });
+}
+// 🔴 [UPDATE END: Navigation Event Listeners] 🔴
     
-    if (locationSelect) {
-        locationSelect.addEventListener('change', () => {
-            console.log("[locationSelect] Location changed to:", locationSelect.value);
-            currentBookingDetails.location = locationSelect.value || "AnyLocation";
-            fetchAndDisplayFeaturedCars();
-        });
-    }
+if (locationSelect) {
+    locationSelect.addEventListener('change', () => {
+        fetchAndDisplayFeaturedCars();
+    });
+}
 
     if (menuToggle && menu) {
         menuToggle.addEventListener('click', () => {
