@@ -266,7 +266,10 @@ if (locationSelect) {
         carsArray.forEach(car => {
             const carDiv = document.createElement('div');
             carDiv.classList.add('car-item');
-      
+            // Determine availability status and class
+            const availabilityStatus = car.available ? 'Available' : 'Unavailable';
+            const availabilityClass = car.available ? '' : 'unavailable';
+
             let specsHtml = '<div class="car-specs-listing">';
             if (car.specifications) {
                 if (car.specifications.bodyType) specsHtml += `<span><i class="fas fa-car-side"></i> ${car.specifications.bodyType}</span>`;
@@ -279,33 +282,25 @@ if (locationSelect) {
                 if (car.specifications.seats) specsHtml += `<span><i class="fas fa-users"></i> ${car.specifications.seats} seats</span>`;
             }
             specsHtml += '</div>';
-      
-            let featuresHtml = '<div class="car-features-pills">';
-            if (car.features && car.features.length > 0) {
-                car.features.slice(0, 2).forEach(feature => {
-                    featuresHtml += `<span class="feature-pill">${feature}</span>`;
-                });
-                if (car.features.length > 2) featuresHtml += `<span class="feature-pill">...</span>`;
-            }
-            featuresHtml += '</div>';
+        
+            let featuresHtml = ''; // Đảm bảo featuresHtml luôn là chuỗi rỗng trong hàm này.
+            // Nó sẽ được xây dựng và hiển thị trong displayCarDetails.
       
             let locationHtmlCarItem = car.location
-                ? `<p class="car-location-item"><i class="fas fa-map-marker-alt"></i> ${car.location}</p>`
+                ? `<p class="car-location-featured"><i class="fas fa-map-marker-alt"></i> ${car.location}</p>`
                 : '';
       
             carDiv.innerHTML = `
                 <img src="${car.imageUrl || 'assets/images/placeholder-car.png'}" alt="${car.make} ${car.model}">
+                <span class="availability-status ${availabilityClass}">${availabilityStatus}</span>
                 <div class="car-item-content">
                     <h4>${car.make} ${car.model} (${car.year})</h4>
-                    ${locationHtmlCarItem}
-                    <p class="price"><strong>${car.pricePerDay.toLocaleString('en-US')} USD/day</strong></p>
-                    ${specsHtml}
-                    ${!isFeatured ? featuresHtml : ''}
-                    <p class="availability-text car-status-listing">Available</p>
+                    ${specsHtml} <div class="car-item-location-price-group">
+                        ${locationHtmlCarItem} <p class="price"><strong>${car.pricePerDay.toLocaleString('en-US')} USD/day</strong></p> </div>
                     <button class="view-detail-btn ${isFeatured ? '' : 'select-car-btn'}" data-car-id="${car.id}">
-                        ${isFeatured ? 'View Details' : 'Select This Car'}
-                    </button>
-                </div>
+                    ${isFeatured ? 'View Details' : 'Select This Car'}
+                </button>
+            </div>
             `;
             carDiv.querySelector('.view-detail-btn').addEventListener('click', () => {
                 console.log(`[displayCarItems] Button clicked for car ID: ${car.id}, isFeatured: ${isFeatured}`);

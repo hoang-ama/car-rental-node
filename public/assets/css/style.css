@@ -329,8 +329,6 @@ img {
   background-color: rgba(44, 62, 80, 0.7);
 }
 
-/* Thêm đoạn này !!!+++ */
-
 .slider-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -343,12 +341,7 @@ img {
   position: absolute;
   right: 0;
 }
-/* #prev-featured-car { left: -10px; }  Bỏ position absolute */
-/* #next-featured-car { right: -10px; } */
-/* Changes:
-Slider Layout: Changed #featured-cars-list.grid-container to display: flex with overflow-x: hidden to enable sliding via transform.
-Item Width: Set .car-item to flex: 0 0 calc(100% / 3) to ensure exactly 3 cars per slide.
-*/
+
 
 #featured-cars-list.grid-container {
   display: flex; /* Trước là grid */
@@ -359,6 +352,8 @@ Item Width: Set .car-item to flex: 0 0 calc(100% / 3) to ensure exactly 3 cars p
   margin: 0 auto;
 }
 
+/* Nôi dụng trong car items */
+
 #featured-cars-list .car-item {
   flex: 0 0 calc(100% / 3); /* Exactly 3 items per slide */
   box-sizing: border-box;
@@ -366,10 +361,43 @@ Item Width: Set .car-item to flex: 0 0 calc(100% / 3) to ensure exactly 3 cars p
   min-width: 0; /* Prevent overflow issues */
 }
 
+/* ver.2.4 */
+.car-item {
+  position: relative; /* Quan trọng để định vị availability-status tuyệt đối */
+  overflow: hidden; /* Đảm bảo nội dung không tràn ra ngoài khi có position absolute */
+}
+
+.availability-status {
+  position: absolute;
+  top: 10px; /* Cách trên 10px */
+  right: 10px; /* Cách phải 10px */
+  background-color: #28a745; /* Màu xanh cho Available */
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75em;
+  font-weight: 600;
+  z-index: 2; /* Đảm bảo nằm trên ảnh */
+  /* text-transform: uppercase; Chữ hoa nếu cần */
+}
+
+.availability-status.unavailable {
+  background-color: #dc3545; /* Màu đỏ cho Unavailable */
+}
+
+.car-item-location-price-group {
+  display: flex;
+  justify-content: space-between; /* Đẩy Location sang trái, Price sang phải */
+  align-items: center;
+  margin-bottom: 8px; /* Khoảng cách với nút View Details */
+}
+/* end: ver.2.4 */
+
 
 .car-item:hover {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
+
 .car-item img {
   width: 100%;
   height: 170px;
@@ -383,7 +411,7 @@ Item Width: Set .car-item to flex: 0 0 calc(100% / 3) to ensure exactly 3 cars p
   flex-grow: 1;
 }
 .car-item-content h4 {
-  margin: 0 0 5px 0;
+  margin: 0 0 8px 0;
   font-size: 1.05em;
   color: #333;
   font-weight: 600;
@@ -392,15 +420,9 @@ Item Width: Set .car-item to flex: 0 0 calc(100% / 3) to ensure exactly 3 cars p
   font-weight: bold;
   color: #e67e22;
   font-size: 1em;
-  margin-top: 5px;
-  margin-bottom: 8px;
+  margin: 0; 
 }
-.car-item-content p.availability-text {
-  font-size: 0.85em;
-  color: #28a745;
-  font-weight: 500;
-  margin-bottom: 10px;
-}
+
 .car-item-content button.view-detail-btn {
   background-color: #007bff;
   color: white;
@@ -755,7 +777,7 @@ Item Width: Set .car-item to flex: 0 0 calc(100% / 3) to ensure exactly 3 cars p
 .car-specs-listing {
   font-size: 0.8em; /* Giảm font size */
   color: #555;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
   display: flex;
   flex-wrap: wrap;
   gap: 4px 8px; /* Khoảng cách nhỏ hơn */
@@ -799,16 +821,14 @@ car-specs-listing span {
 }
 
 /* Location trong Featured Cars */
-.car-location-item, /* Áp dụng cho cả listing nếu muốn */
 p.car-location-featured { /* Giữ lại style cũ nếu chỉ muốn cho featured */
     font-size: 0.8em;
     color: #777;
-    margin-bottom: 6px;
+    margin: 0; 
     display: flex;
     align-items: center;
 }
 
-.car-location-item i.fas,
 p.car-location-featured i.fas {
     margin-right: 5px;
     color: #E67E22; /* Màu cam cho icon location */
