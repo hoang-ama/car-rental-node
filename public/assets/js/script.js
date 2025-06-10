@@ -56,6 +56,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuToggle = document.getElementById('menu-toggle');
     const menu = document.getElementById('menu');
 
+    const detailAvailabilityStatus = document.getElementById('detail-availability-status'); // NEW
+    const detailCarSpecsIcons = document.getElementById('detail-car-specs-icons'); // NEW
+    const detailFeaturesList = document.getElementById('detail-features-list'); // NEW
+    const detailCarLocation = document.getElementById('detail-car-location'); // NEW
+    const detailUnitPriceDisplay = document.getElementById('detail-unit-price-display'); // NEW
+
     // Slider variables
     let itemsPerSlide = 3; // Fixed to 3 items per slide
     let currentSlideStartIndex = 0;
@@ -116,7 +122,7 @@ async function fetchAndDisplayFeaturedCars() {
         const cars = await response.json();
         if (!Array.isArray(cars)) throw new Error('Invalid car data');
 
-        const selectedLocation = locationSelect ? locationSelect.value : "AnyLocation";
+        const selectedLocation = locationSelect ? locationSelect.value : "Any Location";
         const featuredCars = cars.filter(car => car.available && car.isFeatured === true); // ✅ ignore location
         const isMobile = window.innerWidth <= 768;
         if (isMobile) {
@@ -312,7 +318,7 @@ if (locationSelect) {
                     }
                     currentBookingDetails.pickupDateTime = new Date(`${pickupDateInput.value}T${pickupTimeInput.value}:00Z`).toISOString();
                     currentBookingDetails.returnDateTime = new Date(`${returnDateInput.value}T${returnTimeInput.value}:00Z`).toISOString();
-                    currentBookingDetails.location = locationSelect.value || "AnyLocation";
+                    currentBookingDetails.location = locationSelect.value || "Any Location";
                 }
                 handleCarSelection(car.id);
             });
@@ -347,7 +353,7 @@ if (locationSelect) {
       
         currentBookingDetails.pickupDateTime = pickupDateTime.toISOString();
         currentBookingDetails.returnDateTime = returnDateTime.toISOString();
-        currentBookingDetails.location = locationVal || "AnyLocation";
+        currentBookingDetails.location = locationVal || "Any Location";
       
         console.log("[handleHomeBookingFormSubmit] Booking details:", currentBookingDetails);
       
@@ -380,7 +386,7 @@ if (locationSelect) {
       
             const carsToList = allCars.filter(car =>
                 car.available &&
-                (currentBookingDetails.location === "AnyLocation" || car.location === currentBookingDetails.location)
+                (currentBookingDetails.location === "Any Location" || car.location === currentBookingDetails.location)
             );
             console.log(`[displayCarListing] Filtered cars for location '${currentBookingDetails.location}': ${carsToList.length}`);
       
@@ -437,23 +443,71 @@ if (locationSelect) {
         if(detailTotalPrice) detailTotalPrice.textContent = currentBookingDetails.totalPrice.toLocaleString('en-US');
     }
     
+     // Cập nhật hàm displayCarDetails để hiển thị thông tin chi tiết xe
+     
     async function displayCarDetails() { 
         if (!currentSelectedCarData) { alert("No car selected."); showView('car-listing-view'); return; }
         console.log("[displayCarDetails] Displaying car-detail-view for car ID:", currentSelectedCarData.id);
         showView('car-detail-view');
+
+        // Cập nhật ảnh và trạng thái khả dụng
         if(detailCarImage) detailCarImage.src = currentSelectedCarData.imageUrl || 'assets/images/placeholder-car.png';
-        if(detailCarName) detailCarName.textContent = `${currentSelectedCarData.make} ${currentSelectedCarData.model} (${currentSelectedCarData.year})`;
-        if(detailCarSpecs) {
-            detailCarSpecs.innerHTML = `
-                <p><strong>Type:</strong> ${currentSelectedCarData.type || 'N/A'}</p>
-                <p><strong>Seats:</strong> ${currentSelectedCarData.seats || 'N/A'}</p>
-                <p><strong>Status:</strong> ${currentSelectedCarData.available ? 'Available' : 'Unavailable'}</p>
-            `;
+        if(detailAvailabilityStatus) {
+            detailAvailabilityStatus.textContent = currentSelectedCarData.available ? 'Available' : 'Unavailable';
+            detailAvailabilityStatus.classList.toggle('unavailable', !currentSelectedCarData.available);
         }
+
+        if(detailCarName) detailCarName.textContent = `${currentSelectedCarData.make} ${currentSelectedCarData.model} (${currentSelectedCarData.year})`;
+        
+        // Hiển thị thông số kỹ thuật dạng icon
+        if(detailCarSpecsIcons) {
+            let specsHtml = '';
+            if (currentSelectedCarData.specifications) {
+                if (currentSelectedCarData.specifications.bodyType) specsHtml += `<span><i class="fas fa-car-side"></i> ${currentSelectedCarData.specifications.bodyType}</span>`;
+                if (currentSelectedCarData.specifications.transmission) specsHtml += `<span><i class="fas fa-cogs"></i> ${currentSelectedCarData.specifications.transmission}</span>`;
+                if (currentSelectedCarData.specifications.fuelType) {
+                    let fuelIcon = currentSelectedCarData.specifications.fuelType.toLowerCase() === "electric" ? "fa-bolt" :
+                                   currentSelectedCarData.specifications.fuelType.toLowerCase() === "diesel" ? "fa-tint" : "fa-gas-pump";
+                    specsHtml += `<span><i class="fas ${fuelIcon}"></i> ${currentSelectedCarData.specifications.fuelType}</span>`;
+                }
+                if (currentSelectedCarData.specifications.seats) specsHtml += `<span><i class="fas fa-users"></i> ${currentSelectedCarData.specifications.seats} seats</span>`;
+            }
+            detailCarSpecsIcons.innerHTML = specsHtml;
+        }
+
+        // Hiển thị vị trí và giá/ngày
+        if (detailCarLocation) {
+            detailCarLocation.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${currentSelectedCarData.location || 'N/A'}`;
+        }
+        if (detailUnitPriceDisplay) {
+            detailUnitPriceDisplay.textContent = `${currentSelectedCarData.pricePerDay.toLocaleString('en-US')} USD/day`;
+        }
+
+        // Hiển thị Features
+        if (detailFeaturesList) {
+            detailFeaturesList.innerHTML = ''; // Clear previous features
+            if (currentSelectedCarData.features && currentSelectedCarData.features.length > 0) {
+                currentSelectedCarData.features.forEach(feature => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `<i class="fas fa-check-circle"></i> ${feature}`;
+                    detailFeaturesList.appendChild(li);
+                });
+            } else {
+                // Tùy chọn: hiển thị thông báo nếu không có tính năng nào
+                // const li = document.createElement('li');
+                // li.textContent = "No special features listed.";
+                // detailFeaturesList.appendChild(li);
+            }
+        }
+        
+        // Cập nhật thời gian thuê xe và giá cả
         if(detailPickupDateTime) detailPickupDateTime.textContent = formatDateTimeForDisplay(currentBookingDetails.pickupDateTime);
         if(detailReturnDateTime) detailReturnDateTime.textContent = formatDateTimeForDisplay(currentBookingDetails.returnDateTime);
+        
+        // Reset checkboxes và tính toán giá
         if(vehicleInsuranceCheckbox) vehicleInsuranceCheckbox.checked = false;
         if(includeDriverCheckbox) includeDriverCheckbox.checked = false;
+        
         calculatePrice(); 
     }
 
@@ -647,7 +701,7 @@ if (locationSelect) {
         }
       
         setDefaultPickupReturnTimes();
-        currentBookingDetails.location = locationSelect ? locationSelect.value : "AnyLocation";
+        currentBookingDetails.location = locationSelect ? locationSelect.value : "Any Location";
         fetchAndDisplayFeaturedCars();
         showView('home-view');
     }

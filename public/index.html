@@ -63,9 +63,9 @@
                 <label for="location">Location:</label>
                 <select id="location" name="location" required>
                   <option value="Hanoi">Hanoi</option>
-                  <option value="Danang">Da Nang</option> <!-- value sẽ là Danang sẽ dùng trong các hàm, Da Nang chi là tên hiển thị ở đây  -->
+                  <option value="Da Nang">Da Nang</option> <!-- value sẽ là Da Nang sẽ dùng trong các hàm, Da Nang chi là tên hiển thị ở đây  -->
                   <option value="Ho Chi Minh City">Ho Chi Minh City</option>
-                  <option value="AnyLocation">Any Location</option>
+                  <option value="Any Location">Any Location</option>
                 </select>
               </div>
               <div class="date-time-group">
@@ -342,69 +342,104 @@
         <h1>Vehicle Details & Pricing</h1>
       </header>
       <main class="container">
-        <div id="car-detail-content-wrapper">
-          <div id="car-detail-image-specs">
-            <img
-              id="detail-car-image"
-              src="/public/assets/images/cars/placeholder-car.png"
-              alt="Selected Car"
-            />
+        <div id="detail-page-content"> <div id="car-info-column">
+            <div id="detail-car-image-container">
+              <img
+                id="detail-car-image"
+                src="/public/assets/images/cars/placeholder-car.png"
+                alt="Selected Car"
+              />
+              <span id="detail-availability-status" class="availability-status"></span> </div>
+            
             <h2 id="detail-car-name">Car Name (Year)</h2>
-            <div id="detail-car-specs"></div>
-          </div>
-          <div id="car-detail-booking-info">
-            <h3>Rental Details</h3>
-            <div id="detail-rental-time">
-              <p>
-                <strong>Pick-up:</strong>
-                <span id="detail-pickup-datetime"></span>
+            
+            <div id="detail-car-specs-icons" class="car-specs-listing">
+              </div>
+
+            <div id="detail-location-price-summary">
+              <p id="detail-car-location" class="car-location-featured">
+                <i class="fas fa-map-marker-alt"></i> Location
               </p>
-              <p>
-                <strong>Return:</strong>
-                <span id="detail-return-datetime"></span>
-              </p>
+              <p id="detail-unit-price-display" class="price">
+                </p>
             </div>
-            <div id="detail-additional-services">
-              <h4>Additional Services</h4>
-              <label
-                ><input
-                  type="checkbox"
-                  id="vehicle-insurance"
-                  data-price="10"
-                />
-                Vehicle Insurance ($10/day)</label
-              ><br />
-              <label
-                ><input type="checkbox" id="include-driver" data-price="50" />
-                Include a Driver ($50/day)</label
-              >
+            
+            <div id="detail-features-section">
+                <h3>Features</h3>
+                <ul id="detail-features-list" class="features-detail-list">
+                    </ul>
             </div>
-            <div id="detail-price-summary">
-              <h4>Price Summary</h4>
+
+            <div id="rental-requirements-section">
+                <h3>Rental Requirements</h3>
+                <div class="requirement-item">
+                    <h4>1. Required Documents</h4>
+                    <ul>
+                        <li>Valid Driver's License (for verification)</li>
+                        <li>National ID Card (verified via VNeID) or Passport</li>
+                    </ul>
+                </div>
+                <div class="requirement-item">
+                    <h4>2. Security Deposit</h4>
+                    A refundable deposit is required at the time of vehicle pickup. You can choose one of the following options:
+                    <ul>
+                        <li>VND 15 million in cash or via bank transfer</li>
+                        <li>A motorbike (with an original registration certificate) valued at VND 15 million or more</li>
+                    </ul>
+                </div>
+                <div class="requirement-item">
+                    <h3>Distance Limitation</h3>
+                    <ul>
+                        <li>Maximum 300 km/day</li>
+                        <li>Additional 3,000 VND/km</li>
+                    </ul>
+                </div>
+                <div class="requirement-item">
+                    <h3>Other Regulations</h3>
+                    <ul>
+                        <li>Use the vehicle for its intended purpose only.</li>
+                        <li>Do not use the rented vehicle for illegal or unlawful activities.</li>
+                        <li>Do not use the rented vehicle as collateral or for pledging.</li>
+                        <li>Maintain cleanliness and return the vehicle on time.</li>
+                        <li>Do not transport prohibited or highly flammable/explosive goods.</li>
+                        <li>Do not transport strong-smelling fruits or food items inside the vehicle.</li>
+                        <li>Before returning the vehicle, if it's dirty or has an odor, please clean it thoroughly or pay an additional cleaning fee.</li>
+                    </ul>
+                </div>
+            </div>
+
+          </div> <div id="booking-summary-column">
+            <div id="rental-details-card" class="detail-card">
+              <h3>Rental Details</h3>
+              <p><strong>Pick-up:</strong> <span id="detail-pickup-datetime"></span></p>
+              <p><strong>Return:</strong> <span id="detail-return-datetime"></span></p>
+            </div>
+
+            <div id="detail-additional-services" class="detail-card">
+              <h3>Additional Services</h3>
+              <label><input type="checkbox" id="vehicle-insurance" data-price="10" /> Vehicle Insurance ($10/day)</label><br />
+              <label><input type="checkbox" id="include-driver" data-price="50" /> Include a Driver ($50/day)</label>
+            </div>
+
+            <div id="price-summary-card" class="detail-card">
+              <h3>Price Summary</h3>
               <p>Unit Price: $<span id="detail-unit-price">0</span>/day</p>
-              <p>
-                Rental Duration: <span id="detail-rental-duration">0</span> days
-              </p>
+              <p>Rental Duration: <span id="detail-rental-duration">0</span> days</p>
               <p>Base Cost: $<span id="detail-base-cost">0</span></p>
-              <p>
-                Additional Services: $<span id="detail-services-cost">0</span>
-              </p>
-              <p>
-                <strong>Total: $<span id="detail-total-price">0</span></strong>
-              </p>
+              <p>Additional Services: $<span id="detail-services-cost">0</span></p>
+              <p class="total-price-final"><strong>Total: $<span id="detail-total-price">0</span></strong></p>
             </div>
+
             <button
               id="proceed-to-customer-info-btn"
-              class="action-button main-cta-button"
+              class="action-button main-cta-button full-width-btn"
             >
               Book This Vehicle
             </button>
-          </div>
-        </div>
-        <button id="back-to-listing-from-detail-page" class="back-button">
-          Back to Car List
-        </button>
-      </main>
+            <button id="back-to-listing-from-detail-page" class="back-button full-width-btn go-back-btn">
+              Go back
+            </button>
+          </div> </div> </main>
       <footer class="main-footer page-footer"><p>&copy; 2025 Vshare</p></footer>
     </section>
 

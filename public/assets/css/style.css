@@ -342,7 +342,6 @@ img {
   right: 0;
 }
 
-
 #featured-cars-list.grid-container {
   display: flex; /* Trước là grid */
   overflow-x: hidden; /* Prevent horizontal scrolling */
@@ -389,10 +388,9 @@ img {
   display: flex;
   justify-content: space-between; /* Đẩy Location sang trái, Price sang phải */
   align-items: center;
-  margin-bottom: 8px; /* Khoảng cách với nút View Details */
+  margin-bottom: 5px; /* Khoảng cách với nút View Details */
 }
 /* end: ver.2.4 */
-
 
 .car-item:hover {
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
@@ -415,12 +413,22 @@ img {
   font-size: 1.05em;
   color: #333;
   font-weight: 600;
-} /* Giảm font size */
+}
+/* Thuộc tính price ở Featured Cars */
 .car-item-content p.price {
   font-weight: bold;
   color: #e67e22;
-  font-size: 1em;
-  margin: 0; 
+  font-size: 0.95em;
+  margin: 0;
+  white-space: nowrap; /* Đảm bảo giá không bị xuống dòng */
+}
+/* Thuộc tính price ở Available Cars */
+#cars-list-container .car-item-content p.price {
+  font-weight: bold;
+  color: #e67e22;
+  font-size: 0.95em; /* Font size giá nhỏ hơn */
+  margin: 0;
+  white-space: nowrap; /* Đảm bảo giá không bị xuống dòng */
 }
 
 .car-item-content button.view-detail-btn {
@@ -767,11 +775,7 @@ img {
 #cars-list-container .car-item-content h4 {
   font-size: 1em; /* Font size tên xe nhỏ hơn */
   margin-bottom: 4px;
-}
-
-#cars-list-container .car-item-content p.price {
-  font-size: 0.95em; /* Font size giá nhỏ hơn */
-  margin-bottom: 6px;
+  white-space: nowrap; /* Đảm bảo giá không bị xuống dòng */
 }
 
 .car-specs-listing {
@@ -791,7 +795,6 @@ car-specs-listing span {
   border-radius: 3px;
   line-height: 1.4;
 }
-
 
 .car-specs-listing i.fas {
   margin-right: 4px;
@@ -820,20 +823,25 @@ car-specs-listing span {
   margin-right: 4px;
 }
 
-/* Location trong Featured Cars */
-p.car-location-featured { /* Giữ lại style cũ nếu chỉ muốn cho featured */
-    font-size: 0.8em;
-    color: #777;
-    margin: 0; 
-    display: flex;
-    align-items: center;
+/* Location trong Featured Cars và trong Available Cars */
+
+p.car-location-featured {
+  font-size: 0.75em;
+  color: #777;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* ✅ Để location và giá chia đều */
+  white-space: nowrap; /* ✅ Ngăn xuống dòng */
+  overflow: hidden; /* ✅ Cắt nội dung nếu quá dài */
+  text-overflow: ellipsis; /* ✅ Thêm dấu "..." nếu tràn */
+  gap: 8px;
 }
 
 p.car-location-featured i.fas {
-    margin-right: 5px;
-    color: #E67E22; /* Màu cam cho icon location */
+  margin-right: 5px;
+  color: #e67e22; /* Màu cam cho icon location */
 }
-
 
 #cars-list-container .car-item-content p.availability-text.car-status-listing {
   /* Style riêng cho status */
@@ -877,12 +885,7 @@ p.car-location-featured i.fas {
   grid-template-columns: 2fr 1.2fr;
   gap: 35px;
 }
-#detail-car-image {
-  width: 100%;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  border: 1px solid #eee;
-}
+
 #detail-car-name {
   font-size: 1.7em;
   color: #2c3e50;
@@ -908,15 +911,15 @@ ul.features-detail-list {
   column-gap: 20px;
 }
 ul.features-detail-list li {
-    margin-bottom: 5px; /* Tăng margin bottom */
-    color: #454545;
-    display: flex;
-    align-items: center;
+  margin-bottom: 5px; /* Tăng margin bottom */
+  color: #454545;
+  display: flex;
+  align-items: center;
 }
 ul.features-detail-list li i.fas {
-    color: #28a745; 
-    margin-right: 8px; /* Tăng margin right */
-    width: 16px; /* Cho icon có không gian cố định */
+  color: #28a745;
+  margin-right: 8px; /* Tăng margin right */
+  width: 16px; /* Cho icon có không gian cố định */
 }
 
 #car-detail-booking-info h3,
@@ -929,10 +932,7 @@ ul.features-detail-list li i.fas {
   font-size: 1.2em;
   font-weight: 600;
 }
-#detail-additional-services label {
-  margin-bottom: 5px;
-  font-size: 0.9em;
-} /* bỏ display: block; */
+
 #detail-price-summary p {
   margin: 6px 0;
   font-size: 1em;
@@ -1027,44 +1027,43 @@ ul.features-detail-list li i.fas {
 
 /* Responsive */
 @media (max-width: 992px) {
+  /* 1.Header  */
+  .header-content {
+    padding: 0 15px;
+  }
+  .header-right .menu {
+    display: none;
+    position: absolute;
+    top: 70px; /* Chiều cao header */
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    flex-direction: column;
+  }
+  .header-right .menu.active {
+    display: flex;
+  }
+  .header-right .menu li {
+    margin: 0;
+    width: 100%;
+    text-align: left;
+  }
+  .header-right .menu li a {
+    display: block;
+    padding: 12px 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .header-right .menu li:last-child a {
+    border-bottom: none;
+  }
+  .menu-toggle {
+    display: flex;
+    margin-left: auto;
+  } /* Để nút burger ở trái */
 
-/* 1.Header  */
-.header-content {
-  padding: 0 15px;
-}
-.header-right .menu {
-  display: none;
-  position: absolute;
-  top: 70px; /* Chiều cao header */
-  left: 0;
-  width: 100%;
-  background-color: #fff;
-  box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
-  padding: 0;
-  flex-direction: column;
-}
-.header-right .menu.active {
-  display: flex;
-}
-.header-right .menu li {
-  margin: 0;
-  width: 100%;
-  text-align: left;
-}
-.header-right .menu li a {
-  display: block;
-  padding: 12px 20px;
-  border-bottom: 1px solid #f0f0f0;
-}
-.header-right .menu li:last-child a {
-  border-bottom: none;
-}
-.menu-toggle {
-  display: flex;
-  margin-left: auto;
-} /* Để nút burger ở trái */
-
-/* 2.Hero Section & Booking Widget */
+  /* 2.Hero Section & Booking Widget */
 
   .hero {
     justify-content: center;
@@ -1080,9 +1079,9 @@ ul.features-detail-list li i.fas {
     width: 480px;
   }
 
-   /* 3.Benefits Section */
+  /* 3.Benefits Section */
 
-   .benefits {
+  .benefits {
     padding: 30px 30px;
     text-align: left;
   }
@@ -1147,10 +1146,270 @@ ul.features-detail-list li i.fas {
   }
 }
 
-
-
 .footer-container {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+/* --- Car Detail View (NEW SECTION) --- */
+#car-detail-view .main-footer.page-footer {
+  background-color: #f8f9fa; /* Màu nền cho footer ở trang chi tiết */
+  padding: 15px;
+  text-align: center;
+  color: #6c757d;
+  font-size: 0.85em;
+  border-top: 1px solid #e9ecef;
+}
+
+#detail-page-content {
+  display: grid;
+  grid-template-columns: 2fr 1.2fr; /* Tỷ lệ cột theo thiết kế */
+  gap: 30px; /* Khoảng cách giữa các cột */
+  align-items: flex-start; /* Căn chỉnh nội dung ở trên cùng */
+}
+
+#car-info-column {
+  /* Các style cho cột thông tin xe bên trái */
+  display: flex;
+  flex-direction: column;
+}
+
+#detail-car-image-container {
+  position: relative;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  overflow: hidden; /* Đảm bảo ảnh bo góc */
+  border: 1px solid #eee;
+}
+
+#detail-car-image {
+  width: 100%;
+  /* height: 380px; /* Chiều cao cố định cho ảnh */
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+#detail-availability-status {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background-color: #28a745; /* Màu xanh cho Available */
+  color: white;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 0.85em;
+  font-weight: 600;
+  z-index: 2;
+  text-transform: uppercase;
+}
+
+#detail-availability-status.unavailable {
+  background-color: #dc3545; /* Màu đỏ cho Unavailable */
+}
+
+#detail-car-name {
+  font-size: 1.8em; /* Tăng font size */
+  color: #2c3e50;
+  margin-bottom: 10px;
+  font-weight: 700; /* Đậm hơn */
+}
+
+#detail-car-specs-icons {
+  /* Style cho các icon specs ở trang chi tiết */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 15px; /* Khoảng cách giữa các spec */
+  margin-bottom: 20px; /* Khoảng cách với phần Location/Price */
+  font-size: 1em; /* Tăng font size */
+}
+
+#detail-car-specs-icons span {
+  display: inline-flex;
+  align-items: center;
+  color: #495057; /* Màu chữ */
+  font-weight: 500;
+}
+
+#detail-car-specs-icons i.fas {
+  margin-right: 8px;
+  color: #e67e22; /* Màu icon */
+  font-size: 1.1em; /* Kích thước icon */
+}
+
+#detail-location-price-summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end; /* Căn chỉnh giá và location */
+  margin-bottom: 25px; /* Khoảng cách với phần Features */
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+#detail-car-location {
+  font-size: 1.1em; /* To hơn một chút */
+  color: #555;
+  margin: 0;
+  font-weight: 500;
+}
+
+#detail-car-location i.fas {
+  margin-right: 8px;
+  color: #e67e22;
+  font-size: 1.1em;
+}
+
+#detail-unit-price-display {
+  font-size: 1.5em; /* Kích thước giá lớn hơn */
+  font-weight: 700;
+  color: #e67e22;
+  margin: 0;
+}
+
+#detail-features-section {
+  margin-bottom: 30px; /* Khoảng cách với Rental Requirements */
+}
+#detail-features-section h3,
+#rental-requirements-section h3 {
+  font-size: 1.3em;
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  font-weight: 600;
+}
+
+ul#detail-features-list {
+  list-style: none;
+  padding-left: 0;
+  font-size: 0.95em; /* Font size lớn hơn so với listing */
+  columns: 2; /* Hiển thị 2 cột */
+  column-gap: 30px; /* Khoảng cách giữa các cột */
+  margin: 0; /* Bỏ margin top/bottom mặc định của ul */
+}
+ul#detail-features-list li {
+  margin-bottom: 10px; /* Khoảng cách giữa các mục */
+  color: #454545;
+  display: flex;
+  align-items: flex-start; /* Căn chỉnh icon và text */
+  line-height: 1.4;
+}
+ul#detail-features-list li i.fas {
+  color: #28a745; /* Màu xanh cho icon check */
+  margin-right: 12px; /* Khoảng cách lớn hơn */
+  font-size: 1.1em;
+  flex-shrink: 0; /* Ngăn icon co lại */
+}
+
+#rental-requirements-section .requirement-item {
+  margin-bottom: 25px;
+}
+#rental-requirements-section .requirement-item h4 {
+  font-size: 1.1em;
+  color: #343a40;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+#rental-requirements-section .requirement-item ul {
+  list-style: disc; /* Dùng dấu chấm mặc định */
+  padding-left: 20px;
+  font-size: 1em;
+  color: #555;
+}
+#rental-requirements-section .requirement-item ul li {
+  margin-bottom: 5px;
+  line-height: 1.5;
+}
+
+/* Booking Summary Column (Right Side) */
+#booking-summary-column {
+  position: sticky; /* Giữ cột này cố định khi cuộn */
+  top: 90px; /* Cách header một khoảng */
+  padding: 0;
+}
+
+.detail-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  margin-bottom: 20px; /* Khoảng cách giữa các card */
+  border: 1px solid #eee; /* Thêm border nhẹ */
+}
+.detail-card h3 {
+  font-size: 1.3em;
+  color: #2c3e50;
+  margin-top: 0;
+  margin-bottom: 15px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 8px;
+  font-weight: 600;
+}
+
+#rental-details-card p,
+#price-summary-card p {
+  font-size: 0.95em;
+  margin-bottom: 8px;
+}
+#rental-details-card p strong,
+#price-summary-card p strong {
+  color: #333;
+}
+
+#detail-additional-services label {
+  font-size: 0.95em;
+ /* bỏ display: block; */
+  margin-bottom: 5px;
+  cursor: pointer;
+  color: #343a40;
+}
+#detail-additional-services input[type="checkbox"] {
+  margin-right: 8px;
+  transform: scale(1.1); /* To hơn một chút */
+  cursor: pointer;
+}
+
+
+.total-price-final {
+  font-size: 1.4em !important; /* To hơn các dòng giá khác */
+  font-weight: 700;
+  color: var(--primary-color) !important;
+  margin-top: 15px !important;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+.total-price-final strong {
+  color: var(--primary-color) !important;
+}
+
+.full-width-btn {
+  width: 100%;
+  display: block;
+  text-align: center;
+  margin-bottom: 10px; /* Khoảng cách giữa các nút */
+}
+.full-width-btn:last-child {
+  margin-bottom: 0;
+}
+.go-back-btn {
+  background-color: #6c757d;
+}
+.go-back-btn:hover {
+  background-color: #5a6268;
+}
+
+/* Responsive adjustments for Detail Page */
+@media (max-width: 992px) {
+  #detail-page-content {
+    grid-template-columns: 1fr; /* Chuyển sang 1 cột trên tablet */
+    gap: 30px;
+  }
+  #booking-summary-column {
+    position: static; /* Không sticky nữa trên mobile/tablet */
+    top: auto;
+  }
+  ul#detail-features-list {
+    columns: 1; /* Một cột trên tablet */
+  }
 }
 
 @media (max-width: 768px) {
@@ -1162,11 +1421,10 @@ ul.features-detail-list li i.fas {
     font-size: 1.6em;
   }
 
-  
   .featured-cars-slider-controls {
     flex-direction: row;
     align-items: stretch;
-    }
+  }
 
   /* Cho phép scroll ngang và trượt từng xe */
   #featured-cars-list.grid-container {
@@ -1177,15 +1435,14 @@ ul.features-detail-list li i.fas {
     padding-bottom: 15px;
   }
 
-
   #featured-cars-list.grid-container .car-item {
-    flex: 0 0 auto;               /* Hiển thị tất cả các xe */
-    width: 85%;                   /* Chiếm khoảng 85% màn hình */
-    min-width: 260px;             /* Đảm bảo đủ chiều rộng */
-    scroll-snap-align: start;     /* Snap mượt */
-    margin-right: 12px;           /* Tạo khoảng cách giữa các item */
+    flex: 0 0 auto; /* Hiển thị tất cả các xe */
+    width: 85%; /* Chiếm khoảng 85% màn hình */
+    min-width: 260px; /* Đảm bảo đủ chiều rộng */
+    scroll-snap-align: start; /* Snap mượt */
+    margin-right: 12px; /* Tạo khoảng cách giữa các item */
   }
-  
+
   .slider-btn {
     display: none !important;
   }
@@ -1202,6 +1459,48 @@ ul.features-detail-list li i.fas {
   #cars-list-container.grid-container,
   #featured-cars-list.grid-container {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .page-view main.container {
+    padding: 20px;
+  }
+  #detail-car-name {
+    font-size: 1.6em;
+  }
+  #detail-availability-status {
+    padding: 5px 10px;
+    font-size: 0.8em;
+  }
+  #detail-car-specs-icons {
+    font-size: 0.9em;
+  }
+  #detail-car-specs-icons i.fas {
+    font-size: 1em;
+  }
+  #detail-location-price-summary {
+    flex-direction: column; /* Stack location and price */
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+  }
+
+  #detail-unit-price-display {
+    font-size: 1.3em;
+    margin-top: 8px;
+  }
+  #detail-features-section h3,
+  #rental-requirements-section h3,
+  .detail-card h3 {
+    font-size: 1.1em;
+  }
+  ul#detail-features-list {
+    font-size: 0.88em;
+  }
+  .detail-card {
+    padding: 15px;
+  }
+  .total-price-final {
+    font-size: 1.2em !important;
   }
 }
 
@@ -1255,4 +1554,3 @@ ul.features-detail-list li i.fas {
     grid-template-columns: 1fr;
   }
 }
-
