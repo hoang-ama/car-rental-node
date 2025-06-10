@@ -444,7 +444,7 @@ if (locationSelect) {
     }
     
      // Cập nhật hàm displayCarDetails để hiển thị thông tin chi tiết xe
-     
+
     async function displayCarDetails() { 
         if (!currentSelectedCarData) { alert("No car selected."); showView('car-listing-view'); return; }
         console.log("[displayCarDetails] Displaying car-detail-view for car ID:", currentSelectedCarData.id);
@@ -487,9 +487,30 @@ if (locationSelect) {
         if (detailFeaturesList) {
             detailFeaturesList.innerHTML = ''; // Clear previous features
             if (currentSelectedCarData.features && currentSelectedCarData.features.length > 0) {
+                const featureIcons = {
+                    "AC": "fa-snowflake", // Điều hòa
+                    "Airbag": "fas fa-user-shield", // Túi khí an toàn (có thể dùng fa-airbag nếu có FA6 pro)
+                    "ETC": "fa-money-check-alt", // ETC (thu phí không dừng)
+                    "Bluetooth": "fa-blog", // dùng tạm
+                    "Reverse Camera": "fa-camera-retro", // camera lùi
+                    "GPS": "fa-map-marker-alt", // định vị GPS
+                    "USB Port": "fa-plug", // khe cắm USB
+                    "Screen Display": "fa-tv", // màn hình DVD
+                    "Spare Tire": "fa-bullseye", // lốp dự phòng (biểu tượng lốp dự phòng không có sẵn, dùng cái này tạm)
+                    "Parking Sensors": "fa-parking", // cảm biến đỗ xe
+                    "Navigation Map": "fa-map-marked-alt",
+                    "Child Seat": "fa-baby", // Ghế trẻ em
+                    "Sunroof": "fa-sun", // Cửa sổ trời
+                    "Dashcam": "fa-video", // camera hành trình
+                    "Tire Pressure Sensor": "fa-exclamation-triangle", // cảm biến lốp (Font Awesome 6)
+                    "Speed Warning": "fa-tachometer-alt", // cảnh báo tốc độ
+                    // Thêm các tính năng khác và icon tương ứng ở đây
+                };
+
                 currentSelectedCarData.features.forEach(feature => {
                     const li = document.createElement('li');
-                    li.innerHTML = `<i class="fas fa-check-circle"></i> ${feature}`;
+                    const iconClass = featureIcons[feature] || "fa-check-circle"; // Mặc định là check-circle nếu không tìm thấy icon cụ thể
+                    li.innerHTML = `<i class="fas ${iconClass}"></i> ${feature}`;
                     detailFeaturesList.appendChild(li);
                 });
             } else {

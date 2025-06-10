@@ -37,7 +37,7 @@
     "pricePerDay": 45,
     "available": true,
     "imageUrl": "https://media.auto5.vn/files/quanganh/2024/08/03/2025-honda-civic-rs-jdm%20(6)-184359.jpg",
-    "location": "Danang",
+    "location": "Da Nang",
     "specifications": {
       "bodyType": "Sedan",
       "transmission": "AT",
@@ -175,7 +175,10 @@
       "Screen Display",
       "Spare Tire",
       "Parking Sensors",
-      "Navigation Map"
+      "Navigation Map",
+      "Sunroof",
+      "Tire Pressure Sensor",
+      "Speed Warning"
     ],
     "isFeatured": true
   },
@@ -217,7 +220,7 @@
     "pricePerDay": 55,
     "available": true,
     "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf6plus001.png&w=750&q=75",
-    "location": "Danang",
+    "location": "Da Nang",
     "specifications": {
       "bodyType": "SUV",
       "transmission": "AT",
@@ -295,7 +298,10 @@
       "Screen Display",
       "Spare Tire",
       "Parking Sensors",
-      "Navigation Map"
+      "Navigation Map",
+      "Sunroof",
+      "Tire Pressure Sensor",
+      "Speed Warning"
     ],
     "isFeatured": true
   },
@@ -457,7 +463,7 @@
     "pricePerDay": 45,
     "available": true,
     "imageUrl": "https://phuclamauto.vn/?attachment_id=11203",
-    "location": "Danang",
+    "location": "Da Nang",
     "specifications": {
       "bodyType": "Hatchback",
       "transmission": "AT",
@@ -534,7 +540,11 @@
       "Spare Tire",
       "Parking Sensors",
       "Navigation Map",
-      "Child Seat"
+      "Sunroof",
+      "Child Seat",
+      "Dashcam",
+      "Tire Pressure Sensor",
+      "Speed Warning"
     ],
     "isFeatured": true
   },
@@ -565,7 +575,11 @@
       "Spare Tire",
       "Parking Sensors",
       "Navigation Map",
-      "Child Seat"
+      "Sunroof",
+      "Child Seat",
+      "Dashcam",
+      "Tire Pressure Sensor",
+      "Speed Warning"
     ],
     "isFeatured": true
   }

@@ -653,7 +653,7 @@ img {
   position: sticky;
   top: 0;
   z-index: 1010;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.05); /* Mạnh hơn, tạo cảm giác 3D */
 }
 .page-header .top-bar {
   border-bottom: none;
@@ -687,15 +687,18 @@ img {
   height: 30px; /* Đồng bộ kích thước logo nếu muốn */
 }
 
-.page-header h1 {
-  font-size: 1.7em;
-  color: #2c3e50;
+.page-header h2 {
+  font-size: 1.5em;
+  color: var(--text-dark); /* Sử dụng biến màu đã định nghĩa */
   margin: 0;
-  padding: 20px;
-  border-bottom: 1px solid #e9ecef;
-  border-top: 1px solid #e9ecef;
-  font-weight: 600;
+  padding: 10px;
+  font-weight: 700; /* Tăng độ đậm */
+  letter-spacing: 1px; /* Tăng khoảng cách chữ */
+  background-color: #f8f9fa; /* Màu nền nhẹ cho title bar */
+  box-shadow: inset 0 -2px 5px rgba(0,0,0,0.05); /* Đổ bóng nhẹ từ dưới lên cho title */
+  padding-bottom: 18px; /* Tăng nhẹ padding bottom */
 }
+
 .page-view main.container {
   max-width: 1000px;
   margin: 25px auto;
@@ -1151,14 +1154,6 @@ ul.features-detail-list li i.fas {
 }
 
 /* --- Car Detail View (NEW SECTION) --- */
-#car-detail-view .main-footer.page-footer {
-  background-color: #f8f9fa; /* Màu nền cho footer ở trang chi tiết */
-  padding: 15px;
-  text-align: center;
-  color: #6c757d;
-  font-size: 0.85em;
-  border-top: 1px solid #e9ecef;
-}
 
 #detail-page-content {
   display: grid;
@@ -1235,6 +1230,30 @@ ul.features-detail-list li i.fas {
   font-size: 1.1em; /* Kích thước icon */
 }
 
+/* Tô màu cho phần thủ tục */
+.requirement-item-detail {
+  margin-bottom: 20px; /* Khoảng cách giữa các mục */
+  padding: 15px;
+  background-color: #FEF7F4; /* Màu nền nhẹ */
+  border-radius: 6px;
+  border: 1px solid #eee; /* Viền nhẹ */
+
+}
+
+.requirement-item p {
+  display: flex;
+  align-items: center;
+} /* Đảm bảo icon và text cùng hàng */
+
+
+.requirement-item p i.fa-solid  {
+  margin-right: 10px;
+  color: #e67e22;
+  font-size: 1.5em;
+  text-align: center;
+  flex-shrink: 0;
+}
+
 #detail-location-price-summary {
   display: flex;
   justify-content: space-between;
@@ -1282,15 +1301,16 @@ ul#detail-features-list {
   list-style: none;
   padding-left: 0;
   font-size: 0.95em; /* Font size lớn hơn so với listing */
-  columns: 2; /* Hiển thị 2 cột */
-  column-gap: 30px; /* Khoảng cách giữa các cột */
+  columns: 3; /* Hiển thị 4 cột */
+  column-gap: 10px; /* Khoảng cách giữa các cột */
   margin: 0; /* Bỏ margin top/bottom mặc định của ul */
 }
 ul#detail-features-list li {
   margin-bottom: 10px; /* Khoảng cách giữa các mục */
   color: #454545;
   display: flex;
-  align-items: flex-start; /* Căn chỉnh icon và text */
+  align-items: center; /* Căn chỉnh icon và text trên cùng một dòng */
+  /* align-items: flex-start; /* Căn chỉnh icon và text */
   line-height: 1.4;
 }
 ul#detail-features-list li i.fas {
@@ -1366,8 +1386,8 @@ ul#detail-features-list li i.fas {
   margin-right: 8px;
   transform: scale(1.1); /* To hơn một chút */
   cursor: pointer;
+  accent-color: var(--primary-color); /* Sử dụng biến màu chính */
 }
-
 
 .total-price-final {
   font-size: 1.4em !important; /* To hơn các dòng giá khác */
@@ -1417,8 +1437,8 @@ ul#detail-features-list li i.fas {
   .info-section h2,
   .info-section h3,
   #featured-cars-section h3,
-  .page-header h1 {
-    font-size: 1.6em;
+  .page-header h2 {
+    font-size: 1.3em;
   }
 
   .featured-cars-slider-controls {
@@ -1543,8 +1563,8 @@ ul#detail-features-list li i.fas {
   .info-section h2,
   .info-section h3,
   #featured-cars-section h3,
-  .page-header h1 {
-    font-size: 1.4em;
+  .page-header h2 {
+    font-size: 1.2em;
   }
   .car-item img {
     height: 160px;
