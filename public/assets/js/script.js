@@ -61,6 +61,22 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailFeaturesList = document.getElementById('detail-features-list'); // NEW
     const detailCarLocation = document.getElementById('detail-car-location'); // NEW
     const detailUnitPriceDisplay = document.getElementById('detail-unit-price-display'); // NEW
+ // new const variables for customer summary view
+    const customerSummaryCarImage = document.getElementById('customer-summary-car-image'); // NEW
+    const customerSummaryAvailabilityStatus = document.getElementById('customer-summary-availability-status'); // NEW
+    const customerSummaryCarName = document.getElementById('customer-summary-car-name'); // NEW
+    const customerSummaryCarSpecsIcons = document.getElementById('customer-summary-car-specs-icons'); // NEW
+    const customerSummaryCarLocation = document.getElementById('customer-summary-car-location'); // NEW
+
+    const customerSummaryPickupDateTime = document.getElementById('customer-summary-pickup-datetime'); // NEW
+    const customerSummaryReturnDateTime = document.getElementById('customer-summary-return-datetime'); // NEW
+    const customerSummaryUnitPrice = document.getElementById('customer-summary-unit-price'); // NEW
+    const customerSummaryRentalDuration = document.getElementById('customer-summary-rental-duration'); // NEW
+    const customerSummaryBaseCost = document.getElementById('customer-summary-base-cost'); // NEW
+    const customerSummaryServicesCost = document.getElementById('customer-summary-services-cost'); // NEW
+    const customerSummaryTotalPrice = document.getElementById('customer-summary-total-price'); // NEW
+    const customerSummaryDepositPrice = document.getElementById('customer-summary-deposit-price'); // NEW
+
 
     // Slider variables
     let itemsPerSlide = 3; // Fixed to 3 items per slide
@@ -457,7 +473,7 @@ if (locationSelect) {
             detailAvailabilityStatus.classList.toggle('unavailable', !currentSelectedCarData.available);
         }
 
-        if(detailCarName) detailCarName.textContent = `${currentSelectedCarData.make} ${currentSelectedCarData.model} (${currentSelectedCarData.year})`;
+       if(detailCarName) detailCarName.textContent = `${currentSelectedCarData.make} ${currentSelectedCarData.model} (${currentSelectedCarData.year})`;
         
         // Hiển thị thông số kỹ thuật dạng icon
         if(detailCarSpecsIcons) {
@@ -491,12 +507,12 @@ if (locationSelect) {
                     "AC": "fa-snowflake", // Điều hòa
                     "Airbag": "fas fa-user-shield", // Túi khí an toàn (có thể dùng fa-airbag nếu có FA6 pro)
                     "ETC": "fa-money-check-alt", // ETC (thu phí không dừng)
-                    "Bluetooth": "fa-blog", // dùng tạm
+                    "Bluetooth": "fa-blog", // dùng tạm 
                     "Reverse Camera": "fa-camera-retro", // camera lùi
                     "GPS": "fa-map-marker-alt", // định vị GPS
-                    "USB Port": "fa-plug", // khe cắm USB
+                    "USB Port": "fa-plug", // khe cắm USB <i class="fas fa-usb"></i> ko có trong FA5
                     "Screen Display": "fa-tv", // màn hình DVD
-                    "Spare Tire": "fa-bullseye", // lốp dự phòng (biểu tượng lốp dự phòng không có sẵn, dùng cái này tạm)
+                    "Spare Tire": "fa-compact-disc", // lốp dự phòng (biểu tượng lốp dự phòng không có sẵn, dùng cái này tạm)
                     "Parking Sensors": "fa-parking", // cảm biến đỗ xe
                     "Navigation Map": "fa-map-marked-alt",
                     "Child Seat": "fa-baby", // Ghế trẻ em
@@ -542,21 +558,80 @@ if (locationSelect) {
             displayCustomerInfoForm();
         });
     }
-    
+
+    // Page 4_ Customer Info Form // 
+
     function displayCustomerInfoForm() { 
         console.log("[displayCustomerInfoForm] Displaying customer-info-view."); 
         showView('customer-info-view');
+    
+        // Điền thông tin tóm tắt xe vào cột trái
+        if (currentSelectedCarData) {
+            if (customerSummaryCarImage) customerSummaryCarImage.src = currentSelectedCarData.imageUrl || 'assets/images/placeholder-car.png';
+            if (customerSummaryAvailabilityStatus) {
+                customerSummaryAvailabilityStatus.textContent = currentSelectedCarData.available ? 'Available' : 'Unavailable';
+                customerSummaryAvailabilityStatus.classList.toggle('unavailable', !currentSelectedCarData.available);
+            }
+           if (customerSummaryCarName) customerSummaryCarName.textContent = `${currentSelectedCarData.make} ${currentSelectedCarData.model} (${currentSelectedCarData.year})`; 
+    
+            // Thông số kỹ thuật dạng icon
+            if (customerSummaryCarSpecsIcons) {
+                let specsHtml = '';
+                if (currentSelectedCarData.specifications) {
+                    if (currentSelectedCarData.specifications.bodyType) specsHtml += `<span><i class="fas fa-car-side"></i> ${currentSelectedCarData.specifications.bodyType}</span>`;
+                    if (currentSelectedCarData.specifications.transmission) specsHtml += `<span><i class="fas fa-cogs"></i> ${currentSelectedCarData.specifications.transmission}</span>`;
+                    if (currentSelectedCarData.specifications.fuelType) {
+                        let fuelIcon = currentSelectedCarData.specifications.fuelType.toLowerCase() === "electric" ? "fa-bolt" :
+                                       currentSelectedCarData.specifications.fuelType.toLowerCase() === "diesel" ? "fa-tint" : "fa-gas-pump";
+                        specsHtml += `<span><i class="fas ${fuelIcon}"></i> ${currentSelectedCarData.specifications.fuelType}</span>`;
+                    }
+                    if (currentSelectedCarData.specifications.seats) specsHtml += `<span><i class="fas fa-users"></i> ${currentSelectedCarData.specifications.seats} seats</span>`;
+                }
+                customerSummaryCarSpecsIcons.innerHTML = specsHtml;
+            }
+            if (customerSummaryCarLocation) customerSummaryCarLocation.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${currentSelectedCarData.location || 'N/A'}`;
+        }
+    
+        // Điền thông tin Rental Details
+        if (customerSummaryPickupDateTime) customerSummaryPickupDateTime.textContent = formatDateTimeForDisplay(currentBookingDetails.pickupDateTime);
+        if (customerSummaryReturnDateTime) customerSummaryReturnDateTime.textContent = formatDateTimeForDisplay(currentBookingDetails.returnDateTime);
+    
+        // Điền thông tin Price Summary
+        if (customerSummaryUnitPrice) customerSummaryUnitPrice.textContent = currentSelectedCarData.pricePerDay.toLocaleString('en-US');
+        if (customerSummaryRentalDuration) customerSummaryRentalDuration.textContent = currentBookingDetails.rentalDurationDays;
+        if (customerSummaryBaseCost) customerSummaryBaseCost.textContent = currentBookingDetails.baseCost.toLocaleString('en-US');
+        if (customerSummaryServicesCost) customerSummaryServicesCost.textContent = currentBookingDetails.servicesCost.toLocaleString('en-US');
+        if (customerSummaryTotalPrice) customerSummaryTotalPrice.textContent = currentBookingDetails.totalPrice.toLocaleString('en-US');
+        if (customerSummaryDepositPrice) customerSummaryDepositPrice.textContent = currentBookingDetails.depositAmount.toLocaleString('en-US'); // Sẽ được cập nhật lại bởi updateDepositDisplay()
+    
+        // Khôi phục trạng thái form nếu có
+        if (currentBookingDetails.customerInfo) {
+            customerFullnameInput.value = currentBookingDetails.customerInfo.name;
+            customerPhoneInput.value = currentBookingDetails.customerInfo.phone;
+            customerEmailInput.value = currentBookingDetails.customerInfo.email;
+            customerNotesInput.value = currentBookingDetails.customerInfo.notes;
+        } else {
+            customerFullnameInput.value = '';
+            customerPhoneInput.value = '';
+            customerEmailInput.value = '';
+            customerNotesInput.value = '';
+        }
+    
+        // Cập nhật giá cuối cùng và deposit dựa trên lựa chọn thanh toán
         if (finalTotalPriceSpan) finalTotalPriceSpan.textContent = currentBookingDetails.totalPrice.toLocaleString('en-US');
+        // Không cần finalDepositPriceSpan ở đây vì nó sẽ được updateDepositDisplay() xử lý.
+    
         const paymentMethodRadios = document.querySelectorAll('input[name="paymentMethod"]');
         paymentMethodRadios.forEach(radio => {
-            radio.addEventListener('change', function() {
+            // Đặt lại checked status dựa trên currentBookingDetails.paymentMethod
+            radio.checked = (radio.value === currentBookingDetails.paymentMethod);
+            radio.onchange = function() { // Sử dụng onchange thay vì addEventListener mới mỗi lần
                 currentBookingDetails.paymentMethod = this.value;
                 updateDepositDisplay();
-            });
+            };
         });
-        const defaultPaymentMethod = document.querySelector('input[name="paymentMethod"]:checked');
-        if (defaultPaymentMethod) currentBookingDetails.paymentMethod = defaultPaymentMethod.value;
-        updateDepositDisplay();
+        // Gọi updateDepositDisplay để đảm bảo deposit hiển thị chính xác khi vào trang
+        updateDepositDisplay(); 
     }
     
     function updateDepositDisplay() { 

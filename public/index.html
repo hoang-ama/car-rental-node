@@ -6,14 +6,8 @@
     <title>Vshare, Residental Car-sharing at Vinhomes</title>
     <link rel="icon" type="image/png" href="assets/logo/favicon.png" />
     <link rel="stylesheet" href="assets/css/style.css" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
   </head>
   <body>
     <div id="popup-overlay" class="hidden">
@@ -23,6 +17,8 @@
         <p>Sign up today and get 10% off your first rental.</p>
       </div>
     </div>
+  
+    <!-- P0: HEADER -->
 
     <header class="header" id="main-page-header">
       <div class="header-content">
@@ -48,6 +44,8 @@
         </nav>
       </div>
     </header>
+ 
+    <!-- P1: HOMEPAGE VIEW -->
 
     <section id="home-view">
       <main>
@@ -293,6 +291,8 @@
       </footer>
     </section>
 
+    <!-- P2: CAR LISTING VIEW -->
+
     <section id="car-listing-view" class="page-view hidden">
       <header class="page-header">
         <div class="top-bar">
@@ -410,6 +410,8 @@
       </footer>
     </section>
 
+    <!-- P3: CAR DETAIL VIEW & REQUIREMENT   -->
+
     <section id="car-detail-view" class="page-view hidden">
       <header class="page-header">
         <div class="top-bar">
@@ -439,7 +441,7 @@
               />
               <span id="detail-availability-status" class="availability-status"></span> </div>
             
-            <h2 id="detail-car-name">Car Name (Year)</h2>
+          <h2 id="detail-car-name">Car Name (Year)</h2>
             
             <div id="detail-car-specs-icons" class="car-specs-listing">
               </div>
@@ -463,8 +465,8 @@
                 <div class="requirement-item">
                     <h4>1. Required Documents</h4>
                     <ul class="requirement-item-detail">
-                        <p> <i class="fa-solid fa-money-check"></i>&nbsp; Valid Driver's License (for verification) </p>
-                        <p> <i class="fa-solid fa-address-card"></i>&nbsp; National ID Card (verified via VNeID) or Passport </p>
+                        <p> <i class="fa-solid fa-address-card"></i>&nbsp; Valid Driver's License (for verification) </p>
+                        <p> <i class="fa-solid fa-passport"></i>&nbsp; ID Card (verified via VNeID) or Passport </p>
                     </ul>
                 </div>
                 <div class="requirement-item">
@@ -483,8 +485,8 @@
                     </ul>
                 </div>
                 <div class="requirement-item">
-                    <h3>Other Regulations</h3>
-                    <ul>
+                    <h4>Other Regulations</h4>
+                    <ul class="requirement-item-other">
                         <li>Use the vehicle for its intended purpose only.</li>
                         <li>Do not use the rented vehicle for illegal or unlawful activities.</li>
                         <li>Do not use the rented vehicle as collateral or for pledging.</li>
@@ -619,6 +621,8 @@
           </footer>
     </section>
 
+<!-- P4: CUSTOMER INFO & PAYMENT -->
+
     <section id="customer-info-view" class="page-view hidden">
       <header class="page-header">
         <div class="top-bar">
@@ -637,91 +641,114 @@
         </div>
         <h2>Customer Information & Payment</h2>
       </header>
+      
       <main class="container">
-        <div id="customer-info-form-area">
-          <h3>Your Information</h3>
-          <form id="customer-booking-form">
-            <div>
-              <label for="customer-fullname">Full Name (*):</label>
-              <input
-                type="text"
-                id="customer-fullname"
-                name="customerName"
-                required
-              />
-            </div>
-            <div>
-              <label for="customer-phone">Phone Number (*):</label>
-              <input
-                type="tel"
-                id="customer-phone"
-                name="customerPhone"
-                required
-              />
-            </div>
-            <div>
-              <label for="customer-email">Email (*):</label>
-              <input
-                type="email"
-                id="customer-email"
-                name="customerEmail"
-                required
-              />
-            </div>
-            <div>
-              <label for="customer-notes">Message:</label>
-              <textarea
-                id="customer-notes"
-                name="customerNotes"
-                rows="3"
-              ></textarea>
-            </div>
-            <h3>Payment Method</h3>
-            <div id="payment-options">
-              <label
-                ><input
-                  type="radio"
-                  name="paymentMethod"
-                  value="Pay Now"
-                  checked
-                />
-                Pay Now (Full Amount)</label
-              ><br />
-              <label
-                ><input type="radio" name="paymentMethod" value="Pay Later" />
-                Pay Later (30% Deposit)</label
-              ><br />
-              <p class="payment-details">
-                Payment instructions will be provided upon booking completion.
-              </p>
-            </div>
-            <div id="final-price-summary">
-              <p>
-                <strong
-                  >Total Amount: $<span id="final-total-price">0</span></strong
-                >
-              </p>
-              <p>
-                <strong
-                  >Deposit (if Pay Later): $<span id="final-deposit-price"
-                    >0</span
-                  ></strong
-                >
-              </p>
-            </div>
-            <button
-              type="submit"
-              id="complete-booking-btn"
-              class="action-button main-cta-button"
-            >
-              Complete Booking
-            </button>
-          </form>
-        </div>
-        <button id="back-to-car-detail-from-customer" class="back-button">
-          Back to Vehicle Details
-        </button>
+        <div id="customer-page-content"> <div id="customer-car-summary-column">
+                <div class="car-item customer-summary-car-item"> <img id="customer-summary-car-image" src="/public/assets/images/cars/placeholder-car.png" alt="Selected Car Summary">
+                    <span id="customer-summary-availability-status" class="availability-status"></span>
+                    <div class="car-item-content">
+                        <h4 id="customer-summary-car-name">Car Name (Year)</h4>
+                        <div id="customer-summary-car-specs-icons" class="car-specs-listing">
+                            </div>
+                        <p id="customer-summary-car-location" class="car-location-featured">
+                            <i class="fas fa-map-marker-alt"></i> Location
+                        </p>
+                        </div>
+                </div>
+
+                <div id="customer-rental-details-card" class="detail-card">
+                    <h3>Rental Details</h3>
+                    <p><strong>Pick-up:</strong> <span id="customer-summary-pickup-datetime"></span></p>
+                    <p><strong>Return:</strong> <span id="customer-summary-return-datetime"></span></p>
+                </div>
+
+                <div id="customer-price-summary-card" class="detail-card">
+                    <h3>Price Summary</h3>
+                    <p>Unit Price: $<span id="customer-summary-unit-price">0</span>/day</p>
+                    <p>Rental Duration: <span id="customer-summary-rental-duration">0</span> days</p>
+                    <p>Base Cost: $<span id="customer-summary-base-cost">0</span></p>
+                    <p>Additional Services: $<span id="customer-summary-services-cost">0</span></p>
+                    <p class="total-price-final"><strong>Total: $<span id="customer-summary-total-price">0</span></strong></p>
+                    <p class="deposit-price-info">
+                        <strong>Deposit (if Pay Later): $<span id="customer-summary-deposit-price">0</span></strong>
+                    </p>
+                </div>
+            </div> <div id="customer-info-form-column">
+                <div id="customer-info-form-area" class="detail-card">
+                    <h3>Your Information</h3>
+                    <p class="form-instruction">Enter your personal information to conduct book</p>
+                    <form id="customer-booking-form">
+                        <div class="form-group">
+                            <label for="customer-fullname">Full Name (*):</label>
+                            <input
+                                type="text"
+                                id="customer-fullname"
+                                name="customerName"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-phone">Phone Number (*):</label>
+                            <input
+                                type="tel"
+                                id="customer-phone"
+                                name="customerPhone"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-email">Email (*):</label>
+                            <input
+                                type="email"
+                                id="customer-email"
+                                name="customerEmail"
+                                required
+                            />
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-notes">Message:</label>
+                            <textarea
+                                id="customer-notes"
+                                name="customerNotes"
+                                rows="3"
+                            ></textarea>
+                        </div>
+                        <h3 class="mt-20">Payment Method</h3>
+                        <div id="payment-options" class="form-group">
+                            <label class="radio-label">
+                                <input type="radio" name="paymentMethod" value="Pay Now" checked />
+                                Pay Now (Full Amount)
+                            </label>
+                            <label class="radio-label">
+                                <input type="radio" name="paymentMethod" value="Pay Later" />
+                                Pay Later (30% Deposit)
+                            </label>
+                            <p class="payment-details">
+                                Payment instructions will be provided upon booking completion.
+                            </p>
+                        </div>
+
+                        <div class="form-group promotion-code-group">
+                            <label for="promotion-code">Promotion code</label>
+                            <input type="text" id="promotion-code" name="promotionCode" placeholder="Enter Promotion code">
+                        </div>
+
+                        <button
+                            type="submit"
+                            id="complete-booking-btn"
+                            class="action-button main-cta-button full-width-btn"
+                        >
+                            Complete Booking
+                        </button>
+                        <button id="back-to-car-detail-from-customer" class="back-button full-width-btn go-back-btn">
+                            Go Back
+                        </button>
+                    </form>
+                </div>
+            </div> 
+          </div> 
       </main>
+
       <footer class="footer">
         <div class="footer-container">
           <div class="footer-column">
@@ -812,6 +839,8 @@
         </div>
       </footer>
     </section>
+
+<!-- P5: BOOKING CONFIRMATION VIEW -->    
 
     <section id="booking-confirmation-view" class="page-view hidden">
       <header class="page-header">
@@ -859,6 +888,7 @@
           Back to Homepage
         </button>
       </main>
+
       <footer class="footer">
         <div class="footer-container">
           <div class="footer-column">
@@ -950,6 +980,8 @@
       </footer>
     </section>
 
+<!-- ANNEX: FLOATING BUTTONS -->    
+
     <div class="floating-buttons">
       <a
         href="tel:0903229906"
@@ -966,6 +998,8 @@
         <img src="assets/images/zalo-icon.svg" alt="Chat with us via Zalo" />
       </a>
     </div>
+
+    <!-- ANNEX: LOGIN MODAL -->
 
     <script src="assets/js/script.js"></script>
   </body>
