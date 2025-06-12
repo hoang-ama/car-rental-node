@@ -11,10 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const homeBookingForm = document.getElementById('home-booking-form');
     const locationSelect = document.getElementById('location');
-    const pickupDateInput = document.getElementById('pickup-date');
-    const pickupTimeInput = document.getElementById('pickup-time');
-    const returnDateInput = document.getElementById('return-date');
-    const returnTimeInput = document.getElementById('return-time');
+    
+    
+    const pickupDateTimeInput = document.getElementById('pickup-datetime'); // NEW
+    const returnDateTimeInput = document.getElementById('return-datetime'); // NEW
 
     const featuredCarsListDiv = document.getElementById('featured-cars-list');
     const prevFeaturedBtn = document.getElementById('prev-featured-car');
@@ -233,17 +233,23 @@ if (locationSelect) {
         window.scrollTo(0, 0); 
     }
     
-    function formatDateForInput(date) {
+    function formatDateTimeForInput(date) {
         if (!date) return '';
         try {
-            const d = new Date(date);
-            const year = d.getFullYear();
-            const month = (d.getMonth() + 1).toString().padStart(2, '0');
-            const day = d.getDate().toString().padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        } catch (e) { return ''; }
-    }
-    
+          const d = new Date(date);
+          const year = d.getFullYear();
+          const month = (d.getMonth() + 1).toString().padStart(2, '0');
+          const day = d.getDate().toString().padStart(2, '0');
+          const hours = d.getHours().toString().padStart(2, '0');
+          const minutes = d.getMinutes().toString().padStart(2, '0');
+          return `${year}-${month}-${day}T${hours}:${minutes}`;
+        } catch (e) {
+          console.error("Error formatting date for datetime-local input:", date, e);
+          return '';
+        }
+      }
+      
+
     function formatDateTimeForDisplay(isoString) {
         if (!isoString) return 'N/A';
         try {
@@ -253,17 +259,33 @@ if (locationSelect) {
     }
 
     function setDefaultPickupReturnTimes() {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1); 
-        console.log("[setDefaultPickupReturnTimes] Tomorrow's date object:", tomorrow);
-
-        if (pickupDateInput && returnDateInput && pickupTimeInput && returnTimeInput) {
-            pickupDateInput.value = formatDateForInput(tomorrow);
-            const defaultReturnDate = new Date(tomorrow); 
-            returnDateInput.value = formatDateForInput(defaultReturnDate);
-            console.log('[setDefaultPickupReturnTimes] Default dates set. Pickup:', pickupDateInput.value, "Return:", returnDateInput.value);
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(now.getDate() + 1); // Ngày mai
+    
+        // Tạo ngày và giờ mặc định cho Pick-up (7:00 AM ngày mai)
+        let defaultPickup = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 7, 0); // 7:00 AM
+    
+        // Tạo ngày và giờ mặc định cho Return (7:00 PM ngày mai)
+        let defaultReturn = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 19, 0); // 7:00 PM
+    
+        // Nếu thời gian hiện tại đã qua 7:00 AM của ngày mai,
+        // hoặc nếu defaultPickup (7h sáng ngày mai) đã nhỏ hơn hoặc bằng thời gian hiện tại,
+        // thì chuyển pick-up sang ngày kia (ngày + 2).
+        if (defaultPickup <= now) {
+            const dayAfterTomorrow = new Date(now);
+            dayAfterTomorrow.setDate(now.getDate() + 2); // Ngày kia
+            defaultPickup = new Date(dayAfterTomorrow.getFullYear(), dayAfterTomorrow.getMonth(), dayAfterTomorrow.getDate(), 7, 0);
+            defaultReturn = new Date(dayAfterTomorrow.getFullYear(), dayAfterTomorrow.getMonth(), dayAfterTomorrow.getDate(), 19, 0);
+        }
+    
+        // Gán giá trị vào input datetime-local
+        if (pickupDateTimeInput && returnDateTimeInput) { // Sử dụng biến mới
+            pickupDateTimeInput.value = formatDateTimeForInput(defaultPickup);
+            returnDateTimeInput.value = formatDateTimeForInput(defaultReturn);
+            console.log('[setDefaultPickupReturnTimes] Default datetime-local set. Pickup:', pickupDateTimeInput.value, "Return:", returnDateTimeInput.value);
         } else {
-            console.error('[setDefaultPickupReturnTimes] Date input elements not all found.');
+            console.error('[setDefaultPickupReturnTimes] Datetime-local input elements not all found.');
         }
     }
 
@@ -327,13 +349,13 @@ if (locationSelect) {
             carDiv.querySelector('.view-detail-btn').addEventListener('click', () => {
                 console.log(`[displayCarItems] Button clicked for car ID: ${car.id}, isFeatured: ${isFeatured}`);
                 if (isFeatured || !currentBookingDetails.pickupDateTime) {
-                    if (!pickupDateInput.value || !pickupTimeInput.value || !returnDateInput.value || !returnTimeInput.value) {
+                    if (!pickupDateTimeInput.value || !returnDateTimeInput.value) {
                         alert("Please ensure dates and times are set in the search form.");
                         setDefaultPickupReturnTimes();
                         return;
                     }
-                    currentBookingDetails.pickupDateTime = new Date(`${pickupDateInput.value}T${pickupTimeInput.value}:00Z`).toISOString();
-                    currentBookingDetails.returnDateTime = new Date(`${returnDateInput.value}T${returnTimeInput.value}:00Z`).toISOString();
+                    currentBookingDetails.pickupDateTime = new Date(`${pickupDateTimeInput.value}:00Z`).toISOString();
+                    currentBookingDetails.returnDateTime = new Date(`${returnDateTimeInput.value}:00Z`).toISOString();
                     currentBookingDetails.location = locationSelect.value || "Any Location";
                 }
                 handleCarSelection(car.id);
@@ -345,19 +367,24 @@ if (locationSelect) {
     async function handleHomeBookingFormSubmit(event) {
         if (event) event.preventDefault();
         console.log("[handleHomeBookingFormSubmit] Form submitted.");
-        const pickupDateVal = pickupDateInput.value;
-        const pickupTimeVal = pickupTimeInput.value;
-        const returnDateVal = returnDateInput.value;
-        const returnTimeVal = returnTimeInput.value;
+
+        const pickupDateTimeVal = pickupDateTimeInput.value; // Giá trị sẽ là "YYYY-MM-DDTHH:mm"
+        const returnDateTimeVal = returnDateTimeInput.value; // Giá trị sẽ là "YYYY-MM-DDTHH:mm"
+
         const locationVal = locationSelect.value;
-      
-        if (!pickupDateVal || !pickupTimeVal || !returnDateVal || !returnTimeVal) {
+        
+        if (!pickupDateTimeVal || !returnDateTimeVal) {
             alert("Please select pick-up and return dates/times.");
             return;
         }
-      
-        const pickupDateTime = new Date(`${pickupDateVal}T${pickupTimeVal}`);
-        const returnDateTime = new Date(`${returnDateVal}T${returnTimeVal}`);
+        // datetime-local input đã cung cấp định dạng chuẩn ISO (không có giây và múi giờ)
+        // Chúng ta cần đảm bảo nó được hiểu là UTC để tránh sai lệch múi giờ nếu server mong đợi UTC
+        // hoặc điều chỉnh logic của bạn nếu server xử lý theo múi giờ cục bộ.
+        // Cách an toàn nhất là thêm ":00Z" để force UTC cho trình duyệt client -> new Date(`${returnDateTimeVal}:00Z`);
+        const pickupDateTime = new Date(`${pickupDateTimeVal}`);
+        const returnDateTime = new Date(`${returnDateTimeVal}`);
+
+
         if (isNaN(pickupDateTime.getTime()) || isNaN(returnDateTime.getTime())) {
             alert("Invalid date or time.");
             return;
@@ -457,6 +484,8 @@ if (locationSelect) {
         if(detailBaseCost) detailBaseCost.textContent = currentBookingDetails.baseCost.toLocaleString('en-US');
         if(detailServicesCost) detailServicesCost.textContent = currentBookingDetails.servicesCost.toLocaleString('en-US');
         if(detailTotalPrice) detailTotalPrice.textContent = currentBookingDetails.totalPrice.toLocaleString('en-US');
+        // ✅ GỌI SAU KHI TÍNH xong
+        updateDepositDisplay();
     }
     
      // Cập nhật hàm displayCarDetails để hiển thị thông tin chi tiết xe
@@ -564,7 +593,6 @@ if (locationSelect) {
     function displayCustomerInfoForm() { 
         console.log("[displayCustomerInfoForm] Displaying customer-info-view."); 
         showView('customer-info-view');
-    
         // Điền thông tin tóm tắt xe vào cột trái
         if (currentSelectedCarData) {
             if (customerSummaryCarImage) customerSummaryCarImage.src = currentSelectedCarData.imageUrl || 'assets/images/placeholder-car.png';
@@ -627,7 +655,7 @@ if (locationSelect) {
             radio.checked = (radio.value === currentBookingDetails.paymentMethod);
             radio.onchange = function() { // Sử dụng onchange thay vì addEventListener mới mỗi lần
                 currentBookingDetails.paymentMethod = this.value;
-                updateDepositDisplay();
+                updateDepositDisplay(); // Gọi updateDepositDisplay khi phương thức thanh toán thay đổi
             };
         });
         // Gọi updateDepositDisplay để đảm bảo deposit hiển thị chính xác khi vào trang
@@ -636,7 +664,7 @@ if (locationSelect) {
     
     function updateDepositDisplay() { 
         if (currentBookingDetails.paymentMethod === "Pay Later") {
-            currentBookingDetails.depositAmount = currentBookingDetails.totalPrice * 0.30; 
+            currentBookingDetails.depositAmount = Math.round(currentBookingDetails.totalPrice * 0.3); // 30% deposit, làm tròn số 
         } else { currentBookingDetails.depositAmount = 0; }
         if(finalDepositPriceSpan) finalDepositPriceSpan.textContent = currentBookingDetails.depositAmount.toLocaleString('en-US');
     }

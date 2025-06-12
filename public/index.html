@@ -61,52 +61,18 @@
                 <label for="location">Location:</label>
                 <select id="location" name="location" required>
                   <option value="Hanoi">Hanoi</option>
-                  <option value="Da Nang">Da Nang</option> <!-- value sẽ là Da Nang sẽ dùng trong các hàm, Da Nang chi là tên hiển thị ở đây  -->
+                  <option value="Da Nang">Da Nang</option> 
                   <option value="Ho Chi Minh City">Ho Chi Minh City</option>
                   <option value="Any Location">Any Location</option>
                 </select>
               </div>
-              <div class="date-time-group">
-                <div>
-                  <label for="pickup-date">Pick-up Date:</label>
-                  <input
-                    type="date"
-                    id="pickup-date"
-                    name="pickupDate"
-                    required
-                  />
-                </div>
-                <div>
-                  <label for="pickup-time">Pick-up Time:</label>
-                  <input
-                    type="time"
-                    id="pickup-time"
-                    name="pickupTime"
-                    value="07:00"
-                    required
-                  />
-                </div>
+              <div class="form-group"> <label for="pickup-datetime">Pick-up Date & Time:</label>
+                <input type="datetime-local" id="pickup-datetime" name="pickupDateTime" required />
               </div>
-              <div class="date-time-group">
-                <div>
-                  <label for="return-date">Return Date:</label>
-                  <input
-                    type="date"
-                    id="return-date"
-                    name="returnDate"
-                    required
-                  />
-                </div>
-                <div>
-                  <label for="return-time">Return Time:</label>
-                  <input
-                    type="time"
-                    id="return-time"
-                    name="returnTime"
-                    value="19:00"
-                    required
-                  />
-                </div>
+              <div class="form-group">
+                <label for="return-datetime">Return Date & Time:</label>
+                <input
+                  type="datetime-local" id="return-datetime"  name="returnDateTime" required />
               </div>
               <button type="submit" class="search-cars-btn main-cta-button">
                 Find a Vehicle

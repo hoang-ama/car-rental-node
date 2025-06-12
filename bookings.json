@@ -171,5 +171,41 @@
     "depositAmount": 30,
     "status": "Completed",
     "bookingDate": "2025-06-04T11:18:37.790Z"
+  },
+  {
+    "id": 11,
+    "carId": "VF9-30G49792",
+    "carMake": "VinFast",
+    "carModel": "VF 9 Plus",
+    "customerName": "Minh Hong Hoang",
+    "notes": "Done v.3.4 on Jun.11, 2015",
+    "pickupLocation": "Hanoi",
+    "startDate": "2025-06-12T00:00:00.000Z",
+    "endDate": "2025-06-12T12:00:00.000Z",
+    "paymentMethod": "Pay Later",
+    "totalPrice": 120,
+    "baseCost": null,
+    "servicesCost": null,
+    "depositAmount": null,
+    "status": "Pending",
+    "bookingDate": "2025-06-11T10:29:52.487Z"
+  },
+  {
+    "id": 12,
+    "carId": "VF3-30S49795",
+    "carMake": "VinFast",
+    "carModel": "VF 3",
+    "customerName": "Minh Hong Hoang",
+    "notes": "",
+    "pickupLocation": "Hanoi",
+    "startDate": "2025-06-13T00:00:00.000Z",
+    "endDate": "2025-06-13T12:00:00.000Z",
+    "paymentMethod": "Pay Later",
+    "totalPrice": 90,
+    "baseCost": null,
+    "servicesCost": null,
+    "depositAmount": null,
+    "status": "Pending",
+    "bookingDate": "2025-06-12T10:59:14.520Z"
   }
 ]
