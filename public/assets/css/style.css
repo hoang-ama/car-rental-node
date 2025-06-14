@@ -463,6 +463,7 @@ img {
   border: 1px solid #ced4da;
   box-sizing: border-box;
   font-family: "Montserrat", sans-serif;
+  text-align: left; /* Ensure input text is left-aligned */
 }
 #home-booking-form input[type="datetime-local"]:focus,
 #home-booking-form select:focus {
@@ -1883,7 +1884,7 @@ ul#detail-features-list li i.fas {
   }
 
   #home-booking-form {
-    flex-direction: column;
+    flex-direction: column; /* Đặt các trường booking theo cột */
     gap: 5px; /* Space between fields */
   }
 
@@ -2112,7 +2113,7 @@ ul#detail-features-list li i.fas {
     font-size: 1.3em;
   }
   .booking-widget-overlay .form-group {
-    flex-direction: column;
+    flex-direction: column; /* Đặt các trường booking theo cột, trên kia đã đặt rồi thì xem cần ko? */
     gap: 0;
   }
   .info-section {
@@ -2133,4 +2134,3 @@ ul#detail-features-list li i.fas {
     grid-template-columns: 1fr;
   }
 }
-
