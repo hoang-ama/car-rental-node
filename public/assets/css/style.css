@@ -79,6 +79,253 @@ img {
   border-radius: 2px;
 }
 
+/* --- Auth Modals (Login/Signup) --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Cao hơn các popup khác */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+  position: relative;
+  width: 100%;
+  max-width: 420px; /* Chiều rộng modal */
+  text-align: center;
+  transform: translateY(-20px); /* Hiệu ứng nhẹ khi mở */
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-content {
+  transform: translateY(0);
+}
+
+.modal-content .close-button {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  font-size: 1.8em;
+  font-weight: bold;
+  color: #aaa;
+  cursor: pointer;
+  line-height: 1;
+}
+.modal-content .close-button:hover {
+  color: #333;
+}
+
+.modal-title {
+  font-size: 1.8em;
+  color: var(--text-dark);
+  margin-bottom: 25px;
+  font-weight: 700;
+}
+
+.auth-form {
+  text-align: left;
+}
+
+.auth-form .form-group {
+  margin-bottom: 18px;
+}
+
+.auth-form label {
+  display: block;
+  font-size: 0.9em;
+  color: #333;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="email"],
+.auth-form input[type="password"],
+.auth-form input[type="tel"] {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.auth-form input:focus {
+  border-color: var(--primary-color);
+  outline: none;
+  box-shadow: 0 0 0 0.15rem rgba(230, 126, 34, 0.25);
+}
+
+.password-input-group {
+  position: relative;
+}
+.password-input-group input {
+  padding-right: 40px; /* Chừa chỗ cho icon */
+}
+.password-input-group .toggle-password {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #999;
+}
+.password-input-group .toggle-password:hover {
+  color: #333;
+}
+
+.optional-content {
+  font-size: 0.75em;
+  color: #777;
+  text-align: right;
+  margin-top: -10px;
+  margin-bottom: 15px;
+}
+
+.auth-button {
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1em;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-top: 15px;
+}
+
+.login-button {
+  background-color: #28a745; /* Màu xanh lá cho login */
+  color: white;
+}
+.login-button:hover {
+  background-color: #218838;
+}
+
+.signup-button {
+  background-color: var(--primary-color); /* Màu cam cho signup */
+  color: white;
+}
+.signup-button:hover {
+  background-color: var(--primary-hover);
+}
+
+.social-login-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 30px 0;
+  color: #888;
+  font-size: 0.85em;
+}
+.social-login-divider::before,
+.social-login-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #eee;
+}
+.social-login-divider:not(:empty)::before {
+  margin-right: .5em;
+}
+.social-login-divider:not(:empty)::after {
+  margin-left: .5em;
+}
+
+.social-login-buttons {
+  display: flex;
+  flex-direction: column; /* Xếp chồng lên nhau */
+  gap: 12px;
+}
+
+.social-button {
+  width: 100%;
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-size: 0.95em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.social-button i.fab {
+  margin-right: 10px;
+  font-size: 1.2em;
+}
+
+.facebook-button {
+  background-color: #3b5998;
+  color: white;
+  border: 1px solid #3b5998;
+}
+.facebook-button:hover {
+  background-color: #2d4373;
+}
+
+.google-button {
+  background-color: #fff;
+  color: #555;
+  border: 1px solid #ccc;
+}
+.google-button:hover {
+  background-color: #f8f8f8;
+  border-color: #bbb;
+}
+
+.auth-links {
+  margin-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9em;
+}
+.auth-links a {
+  color: #555;
+  text-decoration: none;
+  font-weight: 500;
+}
+.auth-links a:hover {
+  color: var(--primary-color);
+}
+.auth-links a i.fas {
+  margin: 0 5px;
+}
+
+.form-message-placeholder {
+    font-size: 0.85em;
+    padding: 10px;
+    margin-top: 15px;
+    border-radius: 4px;
+    text-align: center;
+}
+.form-message-placeholder.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.form-message-placeholder.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+
 /* --- Header --- */
 .header {
   background-color: #fff;
@@ -188,25 +435,28 @@ img {
   font-size: 0.9em;
   line-height: 1.4;
 }
-#home-booking-form div:not(.form-group) { /* Bỏ margin-bottom cho các div không phải form-group */
-  margin-bottom: 10px;
+#home-booking-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px; /* Space between fields */
 }
-/* Thêm đoạn này */
-#home-booking-form .form-group {
-  margin-bottom: 10px; /* Khoảng cách giữa các trường */
+
+#home-booking-form div {
+  flex: 1; /* Equal width for all fields */
+  min-width: 200px; /* Minimum width for smaller screens */
 }
 
 #home-booking-form label {
+  display: block;
   font-weight: 500;
   margin-bottom: 4px;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   color: #333;
-  display: block;
 }
 
-#home-booking-form input[type="datetime-local"]
+#home-booking-form input[type="datetime-local"],
 #home-booking-form select {
-  padding: 9px 10px;
+  padding: 10px;
   font-size: 1em;
   border-radius: 4px;
   width: 100%;
@@ -216,7 +466,7 @@ img {
 }
 #home-booking-form input[type="datetime-local"]:focus,
 #home-booking-form select:focus {
-  border-color: #e67e22;
+  border-color: var(--primary-color);
   outline: none;
   box-shadow: 0 0 0 0.15rem rgba(230, 126, 34, 0.2);
 }
@@ -1026,133 +1276,6 @@ ul.features-detail-list li i.fas {
   margin-bottom: 8px;
 }
 
-/* Responsive */
-@media (max-width: 992px) {
-  /* 1.Header  */
-  .header-content {
-    padding: 0 15px;
-  }
-  .header-right .menu {
-    display: none;
-    position: absolute;
-    top: 70px; /* Chiều cao header */
-    left: 0;
-    width: 100%;
-    background-color: #fff;
-    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
-    padding: 0;
-    flex-direction: column;
-  }
-  .header-right .menu.active {
-    display: flex;
-  }
-  .header-right .menu li {
-    margin: 0;
-    width: 100%;
-    text-align: left;
-  }
-  .header-right .menu li a {
-    display: block;
-    padding: 12px 20px;
-    border-bottom: 1px solid #f0f0f0;
-  }
-  .header-right .menu li:last-child a {
-    border-bottom: none;
-  }
-  .menu-toggle {
-    display: flex;
-    margin-left: auto;
-  } /* Để nút burger ở trái */
-
-  /* 2.Hero Section & Booking Widget */
-
-  .hero {
-    justify-content: center;
-    padding: 20px;
-  } /* Canh giữa widget trên tablet */
-  .booking-widget-overlay {
-    position: relative;
-    top: auto;
-    right: auto;
-    transform: none;
-    margin: 20px auto;
-    max-width: 90%;
-    width: 480px;
-  }
-  /* Style cho form-group nếu cần */
-.booking-widget-overlay .form-group {
-  /* margin-bottom: 15px;  Khoảng cách giữa các input group */
-  display: flex;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-  /* 3.Benefits Section */
-
-  .benefits {
-    padding: 30px 30px;
-    text-align: left;
-  }
-
-  .benefits-grid {
-    display: flex; /* các benefit-item được xếp theo hàng ngang. */
-    overflow-x: auto; /* để cho phép nội dung tràn theo chiều ngang và hiển thị thanh cuộn khi cần. */
-    flex-wrap: nowrap; /* Đảm bảo các benefit-item không bị xuống dòng. */
-    scroll-snap-type: x mandatory; /* Buộc cuộn dừng ở các điểm neo */
-    -webkit-overflow-scrolling: touch; /* Cuộn mượt hơn trên iOS */
-    gap: 16px;
-    padding-bottom: 10px; /* Thêm khoảng đệm nhỏ để thanh cuộn không che nội dung */
-  }
-  .benefit-item {
-    flex: 0 0 auto; /* Ngăn item co lại hoặc giãn ra, giữ kích thước gốc */
-    width: 85%; /* Đặt chiều rộng cố định cho mỗi item, bạn có thể điều chỉnh cho phù hợp */
-    height: auto;
-    scroll-snap-align: start; /* Neo item vào điểm bắt đầu khi cuộn */
-  }
-  /* 4.Steps Section */
-  .steps {
-    padding: 30px 30px;
-    text-align: left;
-  }
-
-  .steps-grid {
-    display: flex; /* các benefit-item được xếp theo hàng ngang. */
-    overflow-x: auto; /* để cho phép nội dung tràn theo chiều ngang và hiển thị thanh cuộn khi cần. */
-    flex-wrap: nowrap; /* Đảm bảo các benefit-item không bị xuống dòng. */
-    scroll-snap-type: x mandatory; /* Buộc cuộn dừng ở các điểm neo */
-    -webkit-overflow-scrolling: touch; /* Cuộn mượt hơn trên iOS */
-    gap: 16px;
-    padding-bottom: 10px; /* Thêm khoảng đệm nhỏ để thanh cuộn không che nội dung */
-  }
-  .step-item {
-    flex: 0 0 auto; /* Ngăn item co lại hoặc giãn ra, giữ kích thước gốc */
-    width: 85%; /* Đặt chiều rộng cố định cho mỗi item, bạn có thể điều chỉnh cho phù hợp */
-    height: auto;
-    scroll-snap-align: start; /* Neo item vào điểm bắt đầu khi cuộn */
-  }
-  /* 5.Featured Cars Section */
-
-  #car-detail-content-wrapper {
-    grid-template-columns: 1fr;
-  }
-
-  #featured-cars-list.grid-container {
-    display: flex;
-    overflow-x: hidden;
-    transition: transform 0.3s ease;
-    width: 100%;
-    max-width: calc(100% - 80px);
-    margin: 0 auto;
-  }
-
-  .featured-cars-slider-controls {
-    padding: 0; /* Bỏ padding để nút gần hơn khi list co lại */
-  }
-  #cars-list-container.grid-container,
-  #featured-cars-list.grid-container {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
 
 .footer-container {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1638,8 +1761,200 @@ ul#detail-features-list li i.fas {
 }
 
 
-/* Responsive adjustments for Detail Page */
+/* --- Customer Information & Payment View (NEW SECTION) --- */
+#customer-page-content {
+  gap: 20px;
+}
+.customer-summary-car-item {
+  padding: 12px;
+}
+#customer-summary-car-image {
+  height: 180px;
+}
+#customer-summary-car-name {
+  font-size: 1.1em;
+}
+#customer-summary-car-specs-icons {
+  font-size: 0.8em;
+  gap: 4px 10px;
+}
+#customer-rental-details-card,
+#customer-price-summary-card,
+#customer-info-form-area {
+  padding: 15px;
+}
+#customer-rental-details-card h3,
+#customer-price-summary-card h3,
+#customer-info-form-area h3 {
+  font-size: 1.1em;
+}
+.form-group label,
+#customer-info-form-area input,
+#customer-info-form-area textarea,
+.radio-label {
+  font-size: 0.9em;
+}
+#complete-booking-btn,
+#back-to-car-detail-from-customer {
+  padding: 10px 15px;
+  font-size: 0.95em;
+}
+
+
+/* --- Customer Information & Payment View (NEW SECTION) --- */
+#customer-page-content {
+  gap: 15px;
+}
+.customer-summary-car-item {
+  margin-bottom: 15px;
+}
+#customer-summary-car-image {
+  height: 160px;
+}
+#customer-info-form-area {
+  padding: 12px;
+}
+.form-group {
+  margin-bottom: 12px;
+}
+.promotion-code-group {
+  margin-top: 15px;
+}
+#complete-booking-btn,
+#back-to-car-detail-from-customer {
+  margin-top: 15px;
+  padding: 8px 12px;
+  font-size: 0.9em;
+}
+
+
+/* Responsive */
 @media (max-width: 992px) {
+  /* 1.Header  */
+  .header-content {
+    padding: 0 15px;
+  }
+  .header-right .menu {
+    display: none;
+    position: absolute;
+    top: 70px; /* Chiều cao header */
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    box-shadow: 0 3px 5px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    flex-direction: column;
+  }
+  .header-right .menu.active {
+    display: flex;
+  }
+  .header-right .menu li {
+    margin: 0;
+    width: 100%;
+    text-align: left;
+  }
+  .header-right .menu li a {
+    display: block;
+    padding: 12px 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .header-right .menu li:last-child a {
+    border-bottom: none;
+  }
+  .menu-toggle {
+    display: flex;
+    margin-left: auto;
+  } /* Để nút burger ở trái */
+
+  /* 2.Hero Section & Booking Widget */
+
+  .hero {
+    justify-content: center;
+    padding: 20px;
+  } /* Canh giữa widget trên tablet */
+  .booking-widget-overlay {
+    position: relative;
+    top: auto;
+    right: auto;
+    transform: none;
+    margin: 20px auto;
+    max-width: 90%;
+    width: 480px;
+  }
+  /* Style cho form-group nếu cần */
+.booking-widget-overlay .form-group {
+  /* margin-bottom: 15px;  Khoảng cách giữa các input group */
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+  /* 3.Benefits Section */
+
+  .benefits {
+    padding: 30px 30px;
+    text-align: left;
+  }
+
+  .benefits-grid {
+    display: flex; /* các benefit-item được xếp theo hàng ngang. */
+    overflow-x: auto; /* để cho phép nội dung tràn theo chiều ngang và hiển thị thanh cuộn khi cần. */
+    flex-wrap: nowrap; /* Đảm bảo các benefit-item không bị xuống dòng. */
+    scroll-snap-type: x mandatory; /* Buộc cuộn dừng ở các điểm neo */
+    -webkit-overflow-scrolling: touch; /* Cuộn mượt hơn trên iOS */
+    gap: 16px;
+    padding-bottom: 10px; /* Thêm khoảng đệm nhỏ để thanh cuộn không che nội dung */
+  }
+  .benefit-item {
+    flex: 0 0 auto; /* Ngăn item co lại hoặc giãn ra, giữ kích thước gốc */
+    width: 85%; /* Đặt chiều rộng cố định cho mỗi item, bạn có thể điều chỉnh cho phù hợp */
+    height: auto;
+    scroll-snap-align: start; /* Neo item vào điểm bắt đầu khi cuộn */
+  }
+  /* 4.Steps Section */
+  .steps {
+    padding: 30px 30px;
+    text-align: left;
+  }
+
+  .steps-grid {
+    display: flex; /* các benefit-item được xếp theo hàng ngang. */
+    overflow-x: auto; /* để cho phép nội dung tràn theo chiều ngang và hiển thị thanh cuộn khi cần. */
+    flex-wrap: nowrap; /* Đảm bảo các benefit-item không bị xuống dòng. */
+    scroll-snap-type: x mandatory; /* Buộc cuộn dừng ở các điểm neo */
+    -webkit-overflow-scrolling: touch; /* Cuộn mượt hơn trên iOS */
+    gap: 16px;
+    padding-bottom: 10px; /* Thêm khoảng đệm nhỏ để thanh cuộn không che nội dung */
+  }
+  .step-item {
+    flex: 0 0 auto; /* Ngăn item co lại hoặc giãn ra, giữ kích thước gốc */
+    width: 85%; /* Đặt chiều rộng cố định cho mỗi item, bạn có thể điều chỉnh cho phù hợp */
+    height: auto;
+    scroll-snap-align: start; /* Neo item vào điểm bắt đầu khi cuộn */
+  }
+  /* 5.Featured Cars Section */
+
+  #car-detail-content-wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  #featured-cars-list.grid-container {
+    display: flex;
+    overflow-x: hidden;
+    transition: transform 0.3s ease;
+    width: 100%;
+    max-width: calc(100% - 80px);
+    margin: 0 auto;
+  }
+
+  .featured-cars-slider-controls {
+    padding: 0; /* Bỏ padding để nút gần hơn khi list co lại */
+  }
+  #cars-list-container.grid-container,
+  #featured-cars-list.grid-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  /* Responsive adjustments for Detail Page */
   #detail-page-content {
     grid-template-columns: 1fr; /* Chuyển sang 1 cột trên tablet */
     gap: 30px;
@@ -1757,46 +2072,27 @@ ul#detail-features-list li i.fas {
   }
 }
 
-/* --- Customer Information & Payment View (NEW SECTION) --- */
-#customer-page-content {
-  gap: 20px;
-}
-.customer-summary-car-item {
-  padding: 12px;
-}
-#customer-summary-car-image {
-  height: 180px;
-}
-#customer-summary-car-name {
-  font-size: 1.1em;
-}
-#customer-summary-car-specs-icons {
-  font-size: 0.8em;
-  gap: 4px 10px;
-}
-#customer-rental-details-card,
-#customer-price-summary-card,
-#customer-info-form-area {
-  padding: 15px;
-}
-#customer-rental-details-card h3,
-#customer-price-summary-card h3,
-#customer-info-form-area h3 {
-  font-size: 1.1em;
-}
-.form-group label,
-#customer-info-form-area input,
-#customer-info-form-area textarea,
-.radio-label {
-  font-size: 0.9em;
-}
-#complete-booking-btn,
-#back-to-car-detail-from-customer {
-  padding: 10px 15px;
-  font-size: 0.95em;
-}
-
 @media (max-width: 480px) {
+  /* Responsive cho Auth Modals */
+  .modal-content {
+    margin: 15px;
+    padding: 20px;
+  }
+  .modal-title {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+  }
+  .auth-form label,
+  .auth-form input,
+  .social-button,
+  .auth-links {
+    font-size: 0.85em;
+  }
+  .social-login-divider {
+    margin: 20px 0;
+  }
+/* END: Responsive cho Auth Modals */
+
   .header-content {
     padding: 0 15px;
   }
@@ -1840,28 +2136,3 @@ ul#detail-features-list li i.fas {
   }
 }
 
-/* --- Customer Information & Payment View (NEW SECTION) --- */
- #customer-page-content {
-        gap: 15px;
-    }
-    .customer-summary-car-item {
-        margin-bottom: 15px;
-    }
-    #customer-summary-car-image {
-        height: 160px;
-    }
-    #customer-info-form-area {
-        padding: 12px;
-    }
-    .form-group {
-        margin-bottom: 12px;
-    }
-    .promotion-code-group {
-        margin-top: 15px;
-    }
-    #complete-booking-btn,
-    #back-to-car-detail-from-customer {
-        margin-top: 15px;
-        padding: 8px 12px;
-        font-size: 0.9em;
-    }
