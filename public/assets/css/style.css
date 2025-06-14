@@ -1866,6 +1866,28 @@ ul#detail-features-list li i.fas {
     margin-left: auto;
   } /* Để nút burger ở trái */
 
+  /* 2.Hero Section & Booking Widget */
+
+  .hero {
+    justify-content: center;
+    padding: 20px;
+  } /* Canh giữa widget trên tablet */
+  .booking-widget-overlay {
+    position: relative;
+    top: auto;
+    right: auto;
+    transform: none;
+    margin: 20px auto;
+    max-width: 90%;
+    width: 480px;
+  }
+  /* Style cho form-group nếu cần */
+.booking-widget-overlay .form-group {
+  /* margin-bottom: 15px;  Khoảng cách giữa các input group */
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
 
   /* 3.Benefits Section */
 
@@ -2113,3 +2135,4 @@ ul#detail-features-list li i.fas {
     grid-template-columns: 1fr;
   }
 }
+
