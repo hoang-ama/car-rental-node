@@ -2084,6 +2084,17 @@ ul#detail-features-list li i.fas {
     height: auto;
     align-items: flex-start;
   }
+  .booking-widget-overlay {
+    padding: 15px;
+    margin-top: 0;
+  } /* Widget sát top hero hơn */
+  .booking-widget-overlay h2 {
+    font-size: 1.3em;
+  }
+  .booking-widget-overlay .form-group {
+    flex-direction: column;
+    gap: 0;
+  }
   .info-section {
     padding: 25px 15px;
   }
