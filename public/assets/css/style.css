@@ -1881,6 +1881,12 @@ ul#detail-features-list li i.fas {
     max-width: 90%;
     width: 480px;
   }
+
+  #home-booking-form {
+    flex-direction: column;
+    gap: 5px; /* Space between fields */
+  }
+
   /* 3.Benefits Section */
 
   .benefits {
