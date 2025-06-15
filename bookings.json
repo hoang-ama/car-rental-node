@@ -207,5 +207,23 @@
     "depositAmount": null,
     "status": "Pending",
     "bookingDate": "2025-06-12T10:59:14.520Z"
+  },
+  {
+    "id": 13,
+    "carId": "VF8-50G49799",
+    "carMake": "VinFast",
+    "carModel": "VF 8 Plus",
+    "customerName": "Phong Hoang",
+    "notes": "Pick up at the airport",
+    "pickupLocation": "Ho Chi Minh City",
+    "startDate": "2025-06-20T00:00:00.000Z",
+    "endDate": "2025-06-29T12:00:00.000Z",
+    "paymentMethod": "Pay Later",
+    "totalPrice": 1500,
+    "baseCost": 900,
+    "servicesCost": 600,
+    "depositAmount": 450,
+    "status": "Pending",
+    "bookingDate": "2025-06-15T15:51:00.672Z"
   }
 ]

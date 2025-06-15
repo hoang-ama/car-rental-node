@@ -1,0 +1,34 @@
+[
+  {
+    "id": "customer_1",
+    "name": "Henry",
+    "phone": "0906106066",
+    "email": "minhhh@chungxe.vn",
+    "password": "hashed_password_1",
+    "registeredAt": "2025-01-15T10:00:00Z"
+  },
+  {
+    "id": "customer_2",
+    "name": "Nam Trần",
+    "phone": "0906106099",
+    "email": "namtran@chungxe.vn",
+    "password": "hashed_password_2",
+    "registeredAt": "2025-02-20T14:30:00Z"
+  },
+  {
+    "id": "customer_3",
+    "name": "Huong Ly",
+    "phone": "098765432",
+    "email": "huongly@gmail.com",
+    "password": "vshare@321",
+    "registeredAt": "2025-06-15T15:43:49.990Z"
+  },
+  {
+    "id": "customer_4",
+    "name": "Lê Bình",
+    "phone": "0976543212",
+    "email": "lebinh@gmail.com",
+    "password": "binh@123",
+    "registeredAt": "2025-06-15T15:47:16.004Z"
+  }
+]

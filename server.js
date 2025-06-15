@@ -14,16 +14,19 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin', express.static(path.join(__dirname, 'admin-public')));
 
 // File paths
-// const carsFile = path.join(__dirname, 'cars.json');
+
 const CARS_FILE_PATH = path.join(__dirname, 'cars.json');
-
 const BOOKINGS_FILE_PATH = path.join(__dirname, 'bookings.json');
+const CUSTOMERS_FILE_PATH = path.join(__dirname, 'customers.json'); // NEW
 
+// Initialize empty arrays for cars, bookings, and customers
 let cars = [];
 let bookings = [];
+let customers = []; // NEW
 let nextBookingId = 1;   // ID tự tăng cho bản ghi booking
+let nextCustomerId = 1; // NEW: ID tự tăng cho khách hàng
 
-// Helper function to read JSON file
+//  Function to read JSON file
 async function readData(filePath) {
     try {
       const data = await fs.readFile(filePath, 'utf8');
@@ -34,7 +37,7 @@ async function readData(filePath) {
     }
   }
 
-  // Helper function to write JSON file
+  // Function to write JSON file
 async function writeData(filePath, data) {
     try {
       await fs.writeFile(filePath, JSON.stringify(data, null, 2));
@@ -43,15 +46,18 @@ async function writeData(filePath, data) {
     }
   }
 
-// --- Helper Functions ---
+// --- Đọc dữ liệu ---
 async function loadData() {
     try {
         const carsData = await fs.readFile(CARS_FILE_PATH, 'utf-8');
         cars = JSON.parse(carsData);
-        console.log('Cars data loaded. Number of cars:', cars.length);
-
+        
         const bookingsData = await fs.readFile(BOOKINGS_FILE_PATH, 'utf-8');
         bookings = JSON.parse(bookingsData);
+
+        const customersData = await fs.readFile(CUSTOMERS_FILE_PATH, 'utf-8'); // NEW
+        customers = JSON.parse(customersData); // NEW
+
         if (bookings.length > 0) {
             const maxBookingId = bookings.reduce((max, b) => b.id > max ? b.id : max, 0);
             nextBookingId = maxBookingId + 1;
@@ -59,31 +65,46 @@ async function loadData() {
             nextBookingId = 1;
         }
         console.log('Bookings data loaded. Next Booking ID:', nextBookingId);
-    } catch (error) {
+
+        if (customers.length > 0) { // NEW: Cập nhật nextCustomerId
+            const maxCustomerId = customers.reduce((max, c) => {
+                const idNum = parseInt(c.id.replace('customer_', '')); // Chuyển "customer_X" thành số
+                return idNum > max ? idNum : max;
+            }, 0);
+            nextCustomerId = maxCustomerId + 1;
+        } else {
+            nextCustomerId = 1;
+        }
+        console.log('Customers data loaded. Next Customer ID:', nextCustomerId); // NEW
+
+
+        } catch (error) {
         console.warn('Error loading data or files not found, initializing with example data:', error.message);
-        // Khởi tạo dữ liệu mẫu nếu file không tồn tại hoặc rỗng
+        // Khởi tạo dữ liệu mẫu cho car và booking nếu file không tồn tại hoặc rỗng
         cars = [
             { "id": "VF8-29A12345", "make": "VinFast", "model": "VF 8 Eco", "year": 2024, "pricePerDay": 80, "available": true, "imageUrl": "assets/images/cars/vinfast_vf8.png", "specifications": { "bodyType": "SUV", "transmission": "AT", "fuelType": "Electric", "seats": 5 }, "features": ["AC", "GPS", "Bluetooth", "Reverse Camera"], "location": "Hanoi", "type": "SUV", "seats": 5 }, // Thêm type, seats ở ngoài cho dễ filter
             { "id": "CAMRY-30E98765", "make": "Toyota", "model": "Camry", "year": 2022, "pricePerDay": 50, "available": true, "imageUrl": "assets/images/cars/toyota_camry.png", "specifications": { "bodyType": "Sedan", "transmission": "AT", "fuelType": "Petrol", "seats": 5 }, "features": ["AC", "Airbag", "Bluetooth"], "location": "Ho Chi Minh City", "type": "Sedan", "seats": 5 },
-            { "id": "CIVIC-51K54321", "make": "Honda", "model": "Civic", "year": 2023, "pricePerDay": 45, "available": true, "imageUrl": "assets/images/placeholder-car.png", "specifications": { "bodyType": "Sedan", "transmission": "AT", "fuelType": "Petrol", "seats": 5 }, "features": ["AC", "USB Port"], "location": "Danang", "type": "Sedan", "seats": 5 }
+            { "id": "CIVIC-51K54321", "make": "Honda", "model": "Civic", "year": 2023, "pricePerDay": 45, "available": true, "imageUrl": "assets/images/placeholder-car.png", "specifications": { "bodyType": "Sedan", "transmission": "AT", "fuelType": "Petrol", "seats": 5 }, "features": ["AC", "USB Port"], "location": "Da Nang", "type": "Sedan", "seats": 5 }
         ];
         bookings = [];
         nextBookingId = 1;
+        customers = []; // NEW: Khởi tạo rỗng hoặc với dữ liệu mẫu
+        nextCustomerId = 1; // NEW
         await saveData();
-    }
+        }
 }
 
+// --- Lưu dữ liệu ---
 async function saveData() {
     try {
         await fs.writeFile(CARS_FILE_PATH, JSON.stringify(cars, null, 2), 'utf-8');
         await fs.writeFile(BOOKINGS_FILE_PATH, JSON.stringify(bookings, null, 2), 'utf-8');
+        await fs.writeFile(CUSTOMERS_FILE_PATH, JSON.stringify(customers, null, 2), 'utf-8'); // NEW
         // console.log('Data saved successfully.');
     } catch (error) {
         console.error('Error saving data:', error);
     }
 }
-
-// --- Client API Endpoints ---
 
 // API endpoint to fetch cars
 app.get('/api/cars', async (req, res) => {
@@ -160,7 +181,7 @@ app.get('/api/bookings', (req, res) => {
 });
 
 
-// --- Admin API Endpoints ---
+// --- Admin Car API Endpoints ---
 app.get('/admin/cars', (req, res) => {
     res.json(cars);
 });
@@ -261,6 +282,8 @@ app.delete('/admin/cars/:carIdToDelete', async (req, res) => {
     console.log('Admin deleted car ID:', carIdParam);
     res.json({ message: 'Car deleted successfully by admin', car: deletedCar[0] });
 });
+
+// Admin Bookings API Endpoints
 
 app.get('/admin/bookings', (req, res) => {
     res.json(bookings);
@@ -364,6 +387,131 @@ app.delete('/admin/bookings/:bookingId', async (req, res) => {
     console.log('Admin deleted booking ID:', bookingIdParam);
     res.json({ message: 'Booking deleted successfully by admin', booking: deletedBooking[0] });
 });
+
+// --- Admin Customer API Endpoints (NEW) ---
+// GET all customers
+app.get('/admin/customers', (req, res) => {
+    // Trong ứng dụng thực tế, không bao giờ gửi mật khẩu (dù đã hash) ra frontend.
+    // Chỉ gửi các trường cần thiết.
+    const customersWithoutPasswords = customers.map(({ password, ...rest }) => rest);
+    res.json(customersWithoutPasswords);
+});
+
+// POST a new customer (Admin creates user)
+app.post('/admin/customers', async (req, res) => {
+    const { name, phone, email, password } = req.body;
+
+    if (!name || !phone || !email || !password) {
+        return res.status(400).json({ message: 'Name, Phone, Email, and Password are required.' });
+    }
+
+    // Check for existing customer (by phone or email)
+    const customerExists = customers.some(c => c.phone === phone || c.email === email);
+    if (customerExists) {
+        return res.status(400).json({ message: 'Customer with this phone or email already exists.' });
+    }
+
+    const newCustomer = {
+        id: `customer_${nextCustomerId++}`, // Generate unique ID
+        name,
+        phone,
+        email,
+        password, // In real app: HASH THIS PASSWORD!
+        registeredAt: new Date().toISOString()
+    };
+    customers.push(newCustomer);
+    await saveData();
+    console.log('Admin added new customer:', newCustomer.id);
+    res.status(201).json({ message: 'Customer added successfully', customer: { id: newCustomer.id, name: newCustomer.name, email: newCustomer.email, phone: newCustomer.phone } });
+});
+
+// PUT (Update) an existing customer by ID
+app.put('/admin/customers/:customerId', async (req, res) => {
+    const customerIdParam = req.params.customerId;
+    const customerIndex = customers.findIndex(c => c.id === customerIdParam);
+
+    if (customerIndex === -1) {
+        return res.status(404).json({ message: `Customer with ID ${customerIdParam} not found` });
+    }
+
+    const { name, phone, email, password } = req.body;
+    const updatedCustomer = { ...customers[customerIndex] };
+
+    if (name !== undefined) updatedCustomer.name = name;
+    if (phone !== undefined) updatedCustomer.phone = phone;
+    if (email !== undefined) updatedCustomer.email = email;
+    if (password !== undefined && password !== '') { // Only update password if provided and not empty
+        updatedCustomer.password = password; // In real app: HASH THIS PASSWORD!
+    }
+
+    customers[customerIndex] = updatedCustomer;
+    await saveData();
+    console.log('Admin updated customer ID:', customerIdParam);
+    res.json({ message: 'Customer updated successfully', customer: { id: updatedCustomer.id, name: updatedCustomer.name, email: updatedCustomer.email, phone: updatedCustomer.phone } });
+});
+
+// DELETE a customer by ID
+app.delete('/admin/customers/:customerId', async (req, res) => {
+    const customerIdParam = req.params.customerId;
+    const customerIndex = customers.findIndex(c => c.id === customerIdParam);
+
+    if (customerIndex === -1) {
+        return res.status(404).json({ message: `Customer with ID ${customerIdParam} not found` });
+    }
+
+    // Optional: Check if customer has active bookings before deleting
+    const customerHasBookings = bookings.some(b => b.customerEmail === customers[customerIndex].email); // Giả sử booking liên kết qua email
+    if (customerHasBookings) {
+        // Trong thực tế, bạn có thể cấm xóa hoặc chuyển trạng thái khách hàng thành 'Inactive'
+        console.warn(`Attempting to delete customer ${customerIdParam} who has bookings.`);
+        // return res.status(400).json({ message: `Customer ${customerIdParam} has existing bookings. Cannot delete.` });
+    }
+
+    const deletedCustomer = customers.splice(customerIndex, 1);
+    await saveData();
+    console.log('Admin deleted customer ID:', customerIdParam);
+    res.json({ message: 'Customer deleted successfully', customer: deletedCustomer[0] });
+});
+
+// NEW: Client-side Login API (if you decide to implement direct user login/signup)
+// POST /api/signup
+app.post('/api/signup', async (req, res) => {
+    const { name, phone, email, password } = req.body;
+
+    if (!name || !phone || !email || !password) {
+        return res.status(400).json({ message: 'Name, Phone, Email, and Password are required.' });
+    }
+
+    const customerExists = customers.some(c => c.phone === phone || c.email === email);
+    if (customerExists) {
+        return res.status(400).json({ message: 'User with this phone number or email already exists.' });
+    }
+
+    const newCustomer = {
+        id: `customer_${nextCustomerId++}`,
+        name,
+        phone,
+        email,
+        password, // AGAIN: HASH THIS PASSWORD IN REAL APP!
+        registeredAt: new Date().toISOString()
+    };
+    customers.push(newCustomer);
+    await saveData();
+    console.log('Client registered new user:', newCustomer.id);
+    res.status(201).json({ message: 'Registration successful! You can now log in.', user: { id: newCustomer.id, name: newCustomer.name, email: newCustomer.email } });
+});
+// POST /api/login
+app.post('/api/login', async (req, res) => {
+    const { identifier, password } = req.body; // identifier can be email or phone
+    const user = customers.find(c => (c.email === identifier || c.phone === identifier));
+
+    if (!user || user.password !== password) { // In real app: compare hashed password
+        return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    // In real app: create and return a JWT token or session
+    res.json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email } });
+});
+
 
 // --- Start the server ---
 async function startServer() {

@@ -62,32 +62,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const detailCarLocation = document.getElementById('detail-car-location'); // NEW
     const detailUnitPriceDisplay = document.getElementById('detail-unit-price-display'); // NEW
  // new const variables for customer summary view
-    const customerSummaryCarImage = document.getElementById('customer-summary-car-image'); // NEW
-    const customerSummaryAvailabilityStatus = document.getElementById('customer-summary-availability-status'); // NEW
-    const customerSummaryCarName = document.getElementById('customer-summary-car-name'); // NEW
-    const customerSummaryCarSpecsIcons = document.getElementById('customer-summary-car-specs-icons'); // NEW
-    const customerSummaryCarLocation = document.getElementById('customer-summary-car-location'); // NEW
+    const customerSummaryCarImage = document.getElementById('customer-summary-car-image');
+    const customerSummaryAvailabilityStatus = document.getElementById('customer-summary-availability-status'); 
+    const customerSummaryCarName = document.getElementById('customer-summary-car-name'); 
+    const customerSummaryCarSpecsIcons = document.getElementById('customer-summary-car-specs-icons');
+    const customerSummaryCarLocation = document.getElementById('customer-summary-car-location'); 
+    const customerSummaryPickupDateTime = document.getElementById('customer-summary-pickup-datetime'); 
+    const customerSummaryReturnDateTime = document.getElementById('customer-summary-return-datetime'); 
+    const customerSummaryUnitPrice = document.getElementById('customer-summary-unit-price'); 
+    const customerSummaryRentalDuration = document.getElementById('customer-summary-rental-duration');
+    const customerSummaryBaseCost = document.getElementById('customer-summary-base-cost'); 
+    const customerSummaryServicesCost = document.getElementById('customer-summary-services-cost');
+    const customerSummaryTotalPrice = document.getElementById('customer-summary-total-price'); 
+    const customerSummaryDepositPrice = document.getElementById('customer-summary-deposit-price'); 
+    
+    // NEW: Biến cho Auth Modals
+    const loginButtonNav = document.getElementById('login-button'); 
+    const loginModal = document.getElementById('login-modal');
+    const signupModal = document.getElementById('signup-modal');
+    const closeButtons = document.querySelectorAll('.modal-content .close-button'); 
+    const loginForm = document.getElementById('login-form');
+    const signupForm = document.getElementById('signup-form');
+    const loginEmailPhoneInput = document.getElementById('login-email-phone');
+    const loginPasswordInput = document.getElementById('login-password');
+    const loginMessageDiv = document.getElementById('login-message');
+    const signupPhoneInput = document.getElementById('signup-phone'); // Dùng cho input "Phone number"
+    const signupEmailInput = document.getElementById('signup-email');
+    const signupPasswordInput = document.getElementById('signup-password');
+    const signupConfirmPasswordInput = document.getElementById('signup-confirm-password');
+    const signupMessageDiv = document.getElementById('signup-message');
+    const signupLink = document.getElementById('signup-link');
+    const loginLink = document.getElementById('login-link');
+    const passwordToggleIcons = document.querySelectorAll('.toggle-password'); 
 
-    const customerSummaryPickupDateTime = document.getElementById('customer-summary-pickup-datetime'); // NEW
-    const customerSummaryReturnDateTime = document.getElementById('customer-summary-return-datetime'); // NEW
-    const customerSummaryUnitPrice = document.getElementById('customer-summary-unit-price'); // NEW
-    const customerSummaryRentalDuration = document.getElementById('customer-summary-rental-duration'); // NEW
-    const customerSummaryBaseCost = document.getElementById('customer-summary-base-cost'); // NEW
-    const customerSummaryServicesCost = document.getElementById('customer-summary-services-cost'); // NEW
-    const customerSummaryTotalPrice = document.getElementById('customer-summary-total-price'); // NEW
-    const customerSummaryDepositPrice = document.getElementById('customer-summary-deposit-price'); // NEW
-
-
+     // Global variable để lưu trữ người dùng hiện tại
+     let currentUser = null; 
     // Slider variables
     let itemsPerSlide = 3; // Fixed to 3 items per slide
     let currentSlideStartIndex = 0;
     let allFeaturedCars = [];
 
+    // --- UTILITY FUNCTIONS ---
+
     function updateItemsPerSlide() {
         itemsPerSlide = 3; // Force 3 items per slide
         console.log('[updateItemsPerSlide] Items per slide set to:', itemsPerSlide);
     }
-
 
 // Optional improvement: limit max currentSlideStartIndex
 function limitSlideIndex() {
@@ -114,7 +134,6 @@ function displayInitialFeaturedCarItems(carsArray) {
     if (prevFeaturedBtn) prevFeaturedBtn.style.display = 'block';
     if (nextFeaturedBtn) nextFeaturedBtn.style.display = allFeaturedCars.length > itemsPerSlide ? 'block' : 'none';
 }
-// 🔴 [UPDATE END: displayInitialFeaturedCarItems function] 🔴
 
 // 🔴 [Add thêm START: renderFeaturedCarSlide ] 🔴
 function renderFeaturedCarSlide() {
@@ -127,8 +146,8 @@ function renderFeaturedCarSlide() {
     if (prevFeaturedBtn) prevFeaturedBtn.disabled = currentSlideStartIndex === 0;
     if (nextFeaturedBtn) nextFeaturedBtn.disabled = (currentSlideStartIndex + itemsPerSlide) >= allFeaturedCars.length;
 }
-// 🔴 [UPDATE END: renderFeaturedCarSlide function] 🔴
 
+// Fetches and displays featured cars based on location.
 async function fetchAndDisplayFeaturedCars() {
     if (!featuredCarsListDiv) return;
     featuredCarsListDiv.innerHTML = '<p>Loading featured vehicles...</p>';
@@ -177,26 +196,250 @@ if (nextFeaturedBtn) {
         }
     });
 }
-// 🔴 [UPDATE END: Navigation Event Listeners] 🔴
-    
+ // Event Listener for Location Select    
 if (locationSelect) {
     locationSelect.addEventListener('change', () => {
         fetchAndDisplayFeaturedCars();
     });
 }
-
+ // Toggle Mobile Menu
     if (menuToggle && menu) {
         menuToggle.addEventListener('click', () => {
             menu.classList.toggle('active'); 
         });
     }
-    
+// Global booking and car data    
     let currentSelectedCarData = null; 
     let currentBookingDetails = {
         pickupDateTime: null, returnDateTime: null, location: "Hanoi", carId: null, 
         carData: null, totalPrice: 0, baseCost: 0, servicesCost: 0, rentalDurationDays: 0,
         customerInfo: null, paymentMethod: 'Pay Now', depositAmount: 0
     };
+
+    // --- AUTH LOGIC (NEW) ---
+
+    // Hàm mở modal
+    function openModal(modalElement) {
+        if (modalElement) {
+            modalElement.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modalElement.classList.add('active');
+            });
+        }
+    }
+    // Hàm đóng modal
+    function closeModal(modalElement) {
+        if (modalElement) {
+            modalElement.classList.remove('active');
+            modalElement.addEventListener('transitionend', function handler() {
+                modalElement.classList.add('hidden');
+                modalElement.removeEventListener('transitionend', handler);
+                // Reset form messages
+                if (loginMessageDiv) { loginMessageDiv.textContent = ''; loginMessageDiv.className = 'form-message-placeholder'; }
+                if (signupMessageDiv) { signupMessageDiv.textContent = ''; signupMessageDiv.className = 'form-message-placeholder'; }
+                // Clear form inputs
+                if (loginForm) loginForm.reset();
+                if (signupForm) signupForm.reset();
+            });
+        }
+    }
+    // Toggle password visibility
+    passwordToggleIcons.forEach(icon => {
+        icon.addEventListener('click', () => {
+            const passwordInput = icon.previousElementSibling; 
+            if (passwordInput && passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            } else if (passwordInput) {
+                passwordInput.type = 'password';
+                icon.innerHTML = '<i class="fas fa-eye"></i>';
+            }
+        });
+    });
+    // Event Listeners cho các nút đóng modal
+    closeButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+            const modalToClose = event.target.closest('.modal-overlay');
+            if (modalToClose) {
+                closeModal(modalToClose);
+            }
+        });
+    });
+    // Đóng modal khi click ra ngoài
+    if (loginModal) {
+        loginModal.addEventListener('click', (event) => {
+            if (event.target === loginModal) {
+                closeModal(loginModal);
+            }
+        });
+    }
+    if (signupModal) {
+        signupModal.addEventListener('click', (event) => {
+            if (event.target === signupModal) {
+                closeModal(signupModal);
+            }
+        });
+    }
+    // Mở Login Modal khi click nút "Login" trên header
+    if (loginButtonNav) {
+        loginButtonNav.addEventListener('click', () => {
+            openModal(loginModal);
+        });
+    }
+    // Chuyển từ Login sang Signup
+    if (signupLink) {
+        signupLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModal(loginModal);
+            openModal(signupModal);
+        });
+    }
+    // Chuyển từ Signup sang Login
+    if (loginLink) {
+        loginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeModal(signupModal);
+            openModal(loginModal);
+        });
+    }
+    // Hàm validate email
+    function validateEmail(email) { 
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; 
+        return re.test(String(email).toLowerCase()); 
+    }
+    // Update UI after login/logout (e.g., change "Login" button text)
+    function updateLoginStateUI() {
+        // Trong môi trường thực tế, bạn sẽ lấy trạng thái đăng nhập từ cookie/local storage token
+        // hoặc từ một API check session.
+        // Với setup hiện tại, chúng ta mô phỏng bằng cách lưu currentUser vào localStorage khi login.
+        currentUser = JSON.parse(localStorage.getItem('vshare_currentUser')); 
+        const loginButton = document.getElementById('login-button'); 
+
+        if (loginButton) {
+            if (currentUser && currentUser.name) { // Kiểm tra currentUser và có thuộc tính name
+                loginButton.textContent = `Welcome, ${currentUser.name}`;
+                // Bạn có thể thêm một nút logout hoặc dropdown menu ở đây
+                // Ví dụ: loginButton.onclick = () => { /* show user menu */ };
+            } else if (currentUser && (currentUser.email || currentUser.phone)) {
+                loginButton.textContent = `Welcome, ${currentUser.email || currentUser.phone}`;
+            }
+            else {
+                loginButton.textContent = 'Login';
+                loginButton.onclick = () => openModal(loginModal); 
+            }
+        }
+    }
+    // Xử lý form Đăng ký (gửi đến API /api/signup)
+    if (signupForm) {
+        signupForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            signupMessageDiv.textContent = ''; 
+            signupMessageDiv.className = 'form-message-placeholder';
+
+            const phone = signupPhoneInput.value.trim();
+            const email = signupEmailInput.value.trim();
+            const password = signupPasswordInput.value;
+            const confirmPassword = signupConfirmPasswordInput.value;
+
+            // Frontend validation
+            if (!phone || !email || !password || !confirmPassword) {
+                signupMessageDiv.textContent = 'Please fill in all required fields (*).';
+                signupMessageDiv.classList.add('error');
+                return;
+            }
+            if (password !== confirmPassword) {
+                signupMessageDiv.textContent = 'Passwords do not match.';
+                signupMessageDiv.classList.add('error');
+                return;
+            }
+            if (password.length < 6) {
+                signupMessageDiv.textContent = 'Password must be at least 6 characters long.';
+                signupMessageDiv.classList.add('error');
+                return;
+            }
+            if (!validateEmail(email)) {
+                signupMessageDiv.textContent = 'Please enter a valid email address.';
+                signupMessageDiv.classList.add('error');
+                return;
+            }
+
+            try {
+                // Gửi dữ liệu đăng ký tới API backend /api/signup
+                const response = await fetch('/api/signup', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: phone, phone, email, password }) // Tên tạm bằng số điện thoại
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    signupMessageDiv.textContent = result.message || 'Registration successful!';
+                    signupMessageDiv.classList.add('success');
+                    signupForm.reset(); 
+                    setTimeout(() => {
+                        closeModal(signupModal);
+                        openModal(loginModal); 
+                    }, 1500);
+                } else {
+                    signupMessageDiv.textContent = result.message || 'Registration failed.';
+                    signupMessageDiv.classList.add('error');
+                }
+            } catch (error) {
+                console.error("Signup error:", error);
+                signupMessageDiv.textContent = 'An error occurred during registration. Please try again.';
+                signupMessageDiv.classList.add('error');
+            }
+        });
+    }
+    // Xử lý form Đăng nhập (gửi đến API /api/login)
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            loginMessageDiv.textContent = ''; 
+            loginMessageDiv.className = 'form-message-placeholder';
+
+            const identifier = loginEmailPhoneInput.value.trim(); 
+            const password = loginPasswordInput.value;
+
+            if (!identifier || !password) {
+                loginMessageDiv.textContent = 'Please enter your email/phone and password.';
+                loginMessageDiv.classList.add('error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/login', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identifier, password })
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    currentUser = result.user; // Store user info in global var
+                    localStorage.setItem('vshare_currentUser', JSON.stringify(currentUser)); // Persist login status
+                    loginMessageDiv.textContent = `Welcome, ${currentUser.name || currentUser.email || currentUser.phone}!`;
+                    loginMessageDiv.classList.add('success');
+                    loginForm.reset();
+                    setTimeout(() => {
+                        closeModal(loginModal);
+                        updateLoginStateUI(); // Update header button
+                    }, 1000);
+                } else {
+                    loginMessageDiv.textContent = result.message || 'Invalid credentials. Please try again.';
+                    loginMessageDiv.classList.add('error');
+                }
+            } catch (error) {
+                console.error("Login error:", error);
+                loginMessageDiv.textContent = 'An error occurred during login. Please try again.';
+                loginMessageDiv.classList.add('error');
+            }
+        });
+    }
+    // Call updateLoginStateUI on page load to check initial login status
+    updateLoginStateUI();
+
+    // --- END AUTH LOGIC ---
 
     function showView(viewId) {
         console.log(`[showView] Attempting to show view: '${viewId}'`);
@@ -264,17 +507,17 @@ if (locationSelect) {
         tomorrow.setDate(now.getDate() + 1); // Ngày mai
     
         // Tạo ngày và giờ mặc định cho Pick-up (7:00 AM ngày mai)
-        let defaultPickup = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 7, 0); // 7:00 AM
+        let defaultPickup = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 7, 0);
     
         // Tạo ngày và giờ mặc định cho Return (7:00 PM ngày mai)
-        let defaultReturn = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 19, 0); // 7:00 PM
+        let defaultReturn = new Date(tomorrow.getFullYear(), tomorrow.getMonth(), tomorrow.getDate(), 19, 0); 
     
         // Nếu thời gian hiện tại đã qua 7:00 AM của ngày mai,
         // hoặc nếu defaultPickup (7h sáng ngày mai) đã nhỏ hơn hoặc bằng thời gian hiện tại,
         // thì chuyển pick-up sang ngày kia (ngày + 2).
         if (defaultPickup <= now) {
             const dayAfterTomorrow = new Date(now);
-            dayAfterTomorrow.setDate(now.getDate() + 2); // Ngày kia
+            dayAfterTomorrow.setDate(now.getDate() + 2);
             defaultPickup = new Date(dayAfterTomorrow.getFullYear(), dayAfterTomorrow.getMonth(), dayAfterTomorrow.getDate(), 7, 0);
             defaultReturn = new Date(dayAfterTomorrow.getFullYear(), dayAfterTomorrow.getMonth(), dayAfterTomorrow.getDate(), 19, 0);
         }
@@ -327,8 +570,7 @@ if (locationSelect) {
             }
             specsHtml += '</div>';
         
-            let featuresHtml = ''; // Đảm bảo featuresHtml luôn là chuỗi rỗng trong hàm này.
-            // Nó sẽ được xây dựng và hiển thị trong displayCarDetails.
+            let featuresHtml = ''; // featuresHtml luôn là rỗng ở đây, chỉ hiển thị ở trang chi tiết
       
             let locationHtmlCarItem = car.location
                 ? `<p class="car-location-featured"><i class="fas fa-map-marker-alt"></i> ${car.location}</p>`
@@ -363,7 +605,7 @@ if (locationSelect) {
             targetContainerElement.appendChild(carDiv);
         });
     }
-
+// Xử lý form tìm kiếm xe trên trang chủ (đã điều chỉnh cho datetime-local)
     async function handleHomeBookingFormSubmit(event) {
         if (event) event.preventDefault();
         console.log("[handleHomeBookingFormSubmit] Form submitted.");
@@ -405,7 +647,8 @@ if (locationSelect) {
     }
     
     if (homeBookingForm) homeBookingForm.addEventListener('submit', handleHomeBookingFormSubmit);
-
+ 
+    // Hiển thị danh sách xe
     async function displayCarListing() {
         console.log("[displayCarListing] Displaying cars for location:", currentBookingDetails.location);
         showView('car-listing-view');
@@ -443,7 +686,7 @@ if (locationSelect) {
             carsListContainer.innerHTML = `<p>Error loading cars: ${error.message}. Please try again.</p>`;
         }
     }
-    
+  // Xử lý chọn xe   
     async function handleCarSelection(carId) {
         console.log(`[handleCarSelection] Car ID: ${carId}. Fetching details...`); 
         currentBookingDetails.carId = carId;
@@ -484,8 +727,7 @@ if (locationSelect) {
         if(detailBaseCost) detailBaseCost.textContent = currentBookingDetails.baseCost.toLocaleString('en-US');
         if(detailServicesCost) detailServicesCost.textContent = currentBookingDetails.servicesCost.toLocaleString('en-US');
         if(detailTotalPrice) detailTotalPrice.textContent = currentBookingDetails.totalPrice.toLocaleString('en-US');
-        // ✅ GỌI SAU KHI TÍNH xong
-        updateDepositDisplay();
+        updateDepositDisplay();    // Gọi sau khi tính xong
     }
     
      // Cập nhật hàm displayCarDetails để hiển thị thông tin chi tiết xe
@@ -661,14 +903,15 @@ if (locationSelect) {
         // Gọi updateDepositDisplay để đảm bảo deposit hiển thị chính xác khi vào trang
         updateDepositDisplay(); 
     }
-    
+// Cập nhật hiển thị tiền đặt cọc (đã làm tròn)    
     function updateDepositDisplay() { 
         if (currentBookingDetails.paymentMethod === "Pay Later") {
             currentBookingDetails.depositAmount = Math.round(currentBookingDetails.totalPrice * 0.3); // 30% deposit, làm tròn số 
         } else { currentBookingDetails.depositAmount = 0; }
         if(finalDepositPriceSpan) finalDepositPriceSpan.textContent = currentBookingDetails.depositAmount.toLocaleString('en-US');
+        if(customerSummaryDepositPrice) customerSummaryDepositPrice.textContent = currentBookingDetails.depositAmount.toLocaleString('en-US');
     }
-
+// Xử lý submit form booking
     if (customerBookingForm) { 
         customerBookingForm.addEventListener('submit', async (event) => {
             event.preventDefault();
@@ -684,7 +927,11 @@ if (locationSelect) {
                 startDate: currentBookingDetails.pickupDateTime, endDate: currentBookingDetails.returnDateTime,
                 totalPrice: currentBookingDetails.totalPrice, paymentMethod: currentBookingDetails.paymentMethod,
                 notes: currentBookingDetails.customerInfo.notes,
-                carMake: currentBookingDetails.carData.make, carModel: currentBookingDetails.carData.model
+                carMake: currentBookingDetails.carData.make, carModel: currentBookingDetails.carData.model,
+                pickupLocation: currentBookingDetails.location, // Thêm pickupLocation vào payload
+                baseCost: currentBookingDetails.baseCost,
+                servicesCost: currentBookingDetails.servicesCost,
+                depositAmount: currentBookingDetails.depositAmount,
             };
             console.log("[customerBookingForm] Submitting booking:", bookingPayload); 
             try {
@@ -707,7 +954,7 @@ if (locationSelect) {
             }
         });
     }
-    
+ // Hiển thị trang xác nhận booking   
     function displayBookingConfirmation() { 
         showView('booking-confirmation-view');
         const booking = currentBookingDetails.bookingConfirmation; if(!booking) return;
@@ -818,16 +1065,22 @@ if (locationSelect) {
         console.log("VShare App Initializing...");
         if (!homeView || !carListingView || !carDetailView || !customerInfoView || !bookingConfirmationView) {
             console.error("One or more main view elements are missing from the DOM!");
-            return;
         }
         if (!featuredCarsListDiv || !carsListContainer) {
             console.warn("Car list containers (featured or listing) are missing!");
         }
       
+        // Đặt thời gian mặc định cho form tìm kiếm
         setDefaultPickupReturnTimes();
-        currentBookingDetails.location = locationSelect ? locationSelect.value : "Any Location";
+        // Cập nhật vị trí mặc định cho booking details
+        currentBookingDetails.location = locationSelect ? locationSelect.value : "AnyLocation";
+        // Tải và hiển thị các xe nổi bật
         fetchAndDisplayFeaturedCars();
+        // Hiển thị view mặc định (trang chủ)
         showView('home-view');
+        // Cập nhật trạng thái đăng nhập ban đầu
+        updateLoginStateUI();
+
     }
     
     initApp(); 

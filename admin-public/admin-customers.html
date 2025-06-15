@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Management - Admin Portal</title>
+    <link rel="icon" type="image/png" href="/public/assets/logo/favicon.png" />
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+</head>
+<body>
+    <header>
+        <h1>Customer Management</h1>
+        <nav>
+            <a href="admin-cars.html" style="color: white; margin-right: 15px;">Car Management</a>
+            <a href="admin-bookings.html" style="color: white; margin-right: 15px;">Booking Management</a>
+            <a href="admin-customers.html" style="color: #3498db; font-weight: bold;">Customer Management</a>
+        </nav>
+    </header>
+    <main>
+        <section id="add-customer-section">
+            <h2>Add New Customer / Update Customer</h2>
+            <form id="customer-form">
+                <input type="hidden" id="customer-id-form" name="customerIdForm"> <div>
+                    <label for="customer-name">Name:</label>
+                    <input type="text" id="customer-name" name="name" required>
+                </div>
+                <div>
+                    <label for="customer-phone">Phone:</label>
+                    <input type="tel" id="customer-phone" name="phone" required>
+                </div>
+                <div>
+                    <label for="customer-email">Email:</label>
+                    <input type="email" id="customer-email" name="email" required>
+                </div>
+                <div>
+                    <label for="customer-password">Password (leave blank to keep current):</label>
+                    <input type="password" id="customer-password" name="password">
+                </div>
+
+                <button type="submit" id="submit-customer-button">Add Customer</button>
+                <button type="button" id="cancel-edit-customer-button" style="display:none;">Cancel Update</button>
+            </form>
+            <div id="form-message" class="form-message-placeholder"></div>
+        </section>
+
+        <section id="customers-list-section">
+            <h2>Current Customer List</h2>
+            <div id="action-message" class="action-message-placeholder"></div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Email</th>
+                        <th>Registered At</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="customers-table-body">
+                    </tbody>
+            </table>
+        </section>
+    </main>
+
+    <footer><p>&copy; 2025 Vshare Admin Portal</p></footer>
+
+    <script src="admin-customers-script.js"></script>
+</body>
+</html>
