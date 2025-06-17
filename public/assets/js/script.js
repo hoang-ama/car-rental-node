@@ -596,8 +596,8 @@ if (locationSelect) {
                         setDefaultPickupReturnTimes();
                         return;
                     }
-                    currentBookingDetails.pickupDateTime = new Date(`${pickupDateTimeInput.value}:00Z`).toISOString();
-                    currentBookingDetails.returnDateTime = new Date(`${returnDateTimeInput.value}:00Z`).toISOString();
+                    currentBookingDetails.pickupDateTime = new Date(`${pickupDateTimeInput.value}`).toISOString(); // Bỏ đi ":00Z"
+                    currentBookingDetails.returnDateTime = new Date(`${returnDateTimeInput.value}`).toISOString(); 
                     currentBookingDetails.location = locationSelect.value || "Any Location";
                 }
                 handleCarSelection(car.id);
