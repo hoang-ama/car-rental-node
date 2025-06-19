@@ -59,6 +59,10 @@
         <h2 class="modal-title">Sign up</h2>
         <form id="signup-form" class="auth-form">
           <div class="form-group">
+            <label for="signup-name">Full Name (*)</label> 
+            <input type="text" id="signup-name" placeholder="Enter your full name..." required>
+          </div>
+          <div class="form-group">
             <label for="signup-phone">Phone number (*)</label>
             <input type="tel" id="signup-phone" placeholder="Enter your phone number..." required>
           </div>
@@ -84,13 +88,6 @@
           <button type="submit" class="auth-button signup-button">Sign up</button>
           <div class="form-message-placeholder" id="signup-message"></div>
         </form>
-        <div class="social-login-divider">
-          <span>Login by social account</span>
-        </div>
-        <div class="social-login-buttons">
-          <button class="social-button facebook-button"><i class="fab fa-facebook-f"></i> Sign in with Facebook</button>
-          <button class="social-button google-button"><i class="fab fa-google"></i> Sign in with Google</button>
-        </div>
         <div class="auth-links">
           <a href="#" id="login-link"><i class="fas fa-arrow-left"></i> Log in</a>
           <a href="#" id="signup-forgot-password-link">Forgot password</a>
@@ -117,8 +114,9 @@
             <li>
               <a href="#featured-cars-section" class="nav-link">Vehicles</a>
             </li>
-            <li>
+            <li class="user-auth-controls">
               <button class="menu-button" id="login-button">Login</button>
+              <button class="menu-button hidden" id="logout-button">Logout</button> 
             </li>
           </ul>
         </nav>

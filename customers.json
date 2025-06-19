@@ -30,5 +30,21 @@
     "email": "lebinh@gmail.com",
     "password": "binh@123",
     "registeredAt": "2025-06-15T15:47:16.004Z"
+  },
+  {
+    "id": "customer_5",
+    "name": "Tracy Lee",
+    "phone": "09816106099",
+    "email": "tracylee@gmail.com",
+    "password": "vshare@123",
+    "registeredAt": "2025-06-19T06:59:03.417Z"
+  },
+  {
+    "id": "customer_6",
+    "name": "Le Linh",
+    "phone": "0978653415",
+    "email": "lelinh@hotmail.com",
+    "password": "vshare@123",
+    "registeredAt": "2025-06-19T07:42:38.947Z"
   }
 ]

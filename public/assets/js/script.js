@@ -95,6 +95,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const loginLink = document.getElementById('login-link');
     const passwordToggleIcons = document.querySelectorAll('.toggle-password'); 
 
+    const signupNameInput = document.getElementById('signup-name'); // NEW: Input cho tên
+    const logoutButton = document.getElementById('logout-button'); // NEW: Nút Logout
+
      // Global variable để lưu trữ người dùng hiện tại
      let currentUser = null; 
     // Slider variables
@@ -309,23 +312,26 @@ if (locationSelect) {
     }
     // Update UI after login/logout (e.g., change "Login" button text)
     function updateLoginStateUI() {
-        // Trong môi trường thực tế, bạn sẽ lấy trạng thái đăng nhập từ cookie/local storage token
-        // hoặc từ một API check session.
-        // Với setup hiện tại, chúng ta mô phỏng bằng cách lưu currentUser vào localStorage khi login.
         currentUser = JSON.parse(localStorage.getItem('vshare_currentUser')); 
         const loginButton = document.getElementById('login-button'); 
 
         if (loginButton) {
             if (currentUser && currentUser.name) { // Kiểm tra currentUser và có thuộc tính name
                 loginButton.textContent = `Welcome, ${currentUser.name}`;
-                // Bạn có thể thêm một nút logout hoặc dropdown menu ở đây
-                // Ví dụ: loginButton.onclick = () => { /* show user menu */ };
+                loginButton.classList.add('user-logged-in'); // Thêm class để có thể style riêng nếu cần
+                // Giả sử nút logout nằm bên cạnh, thì hiện nó lên
+                if (logoutButton) logoutButton.classList.remove('hidden');
             } else if (currentUser && (currentUser.email || currentUser.phone)) {
+                // Trường hợp không có tên, hiển thị email hoặc phone
                 loginButton.textContent = `Welcome, ${currentUser.email || currentUser.phone}`;
+                loginButton.classList.add('user-logged-in');
+                if (logoutButton) logoutButton.classList.remove('hidden');
             }
             else {
                 loginButton.textContent = 'Login';
-                loginButton.onclick = () => openModal(loginModal); 
+                loginButton.classList.remove('user-logged-in');
+                loginButton.onclick = () => openModal(loginModal); // Đặt lại event listener
+                if (logoutButton) logoutButton.classList.add('hidden'); // Ẩn nút logout
             }
         }
     }
@@ -336,13 +342,14 @@ if (locationSelect) {
             signupMessageDiv.textContent = ''; 
             signupMessageDiv.className = 'form-message-placeholder';
 
+            const name = signupNameInput.value.trim(); // Lấy giá trị tên
             const phone = signupPhoneInput.value.trim();
             const email = signupEmailInput.value.trim();
             const password = signupPasswordInput.value;
             const confirmPassword = signupConfirmPasswordInput.value;
 
             // Frontend validation
-            if (!phone || !email || !password || !confirmPassword) {
+            if (!name || !phone || !email || !password || !confirmPassword) { // Thêm name vào validation
                 signupMessageDiv.textContent = 'Please fill in all required fields (*).';
                 signupMessageDiv.classList.add('error');
                 return;
@@ -368,7 +375,7 @@ if (locationSelect) {
                 const response = await fetch('/api/signup', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: phone, phone, email, password }) // Tên tạm bằng số điện thoại
+                    body: JSON.stringify({ name, phone, email, password }) // Gửi cả 'name'
                 });
                 const result = await response.json();
 
@@ -435,6 +442,18 @@ if (locationSelect) {
                 loginMessageDiv.classList.add('error');
             }
         });
+    }
+    // Xử lý nút Đăng xuất
+    if (logoutButton) {
+    logoutButton.addEventListener('click', () => {
+        if (confirm("Are you sure you want to log out?")) {
+            currentUser = null; // Xóa thông tin người dùng hiện tại
+            localStorage.removeItem('vshare_currentUser'); // Xóa khỏi Local Storage
+            updateLoginStateUI(); // Cập nhật lại giao diện
+            alert("You have been logged out.");
+            showView('home-view'); // Về lại trang chủ
+        }
+    });
     }
     // Call updateLoginStateUI on page load to check initial login status
     updateLoginStateUI();

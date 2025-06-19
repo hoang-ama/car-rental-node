@@ -509,7 +509,7 @@ app.post('/api/login', async (req, res) => {
         return res.status(401).json({ message: 'Invalid credentials' });
     }
     // In real app: create and return a JWT token or session
-    res.json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email } });
+    res.json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email, phone: user.phone } });
 });
 
 

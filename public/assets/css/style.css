@@ -290,7 +290,7 @@ img {
 }
 
 .auth-links {
-  margin-top: 15px;
+  margin-top: 10px;
   display: flex;
   justify-content: space-between;
   font-size: 0.9em;
@@ -309,8 +309,8 @@ img {
 
 .form-message-placeholder {
     font-size: 0.85em;
-    padding: 10px;
-    margin-top: 15px;
+    padding: 0px;
+    margin-top: 5px;
     border-radius: 4px;
     text-align: center;
 }
@@ -375,6 +375,23 @@ img {
 .header-right .menu li a:hover {
   color: #e67e22;
 }
+
+/* Header - User Auth Controls */
+.header-right .menu .user-auth-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Khoảng cách giữa nút login/user và nút logout */
+}
+
+#logout-button {
+  background-color: #e74c3c; /* Màu đỏ cho nút logout */
+  color: white !important;
+  /* Kế thừa các style khác từ .menu-button */
+}
+#logout-button:hover {
+  background-color: #c0392b;
+}
+
 .menu-button {
   background-color: #e67e22;
   color: white !important;
@@ -1862,6 +1879,20 @@ ul#detail-features-list li i.fas {
   .header-right .menu li:last-child a {
     border-bottom: none;
   }
+
+  .header-right .menu li.user-auth-controls {
+    flex-direction: column; /* Xếp dọc các nút trên mobile menu */
+    width: 100%;
+    margin-top: 10px; /* Thêm khoảng cách */
+    padding: 0 20px; /* Giữ padding ngang */
+    gap: 8px; /* Khoảng cách giữa các nút */
+    margin-bottom: 15px; /* Khoảng cách mép dưới */
+  }
+  .header-right .menu li.user-auth-controls button {
+    width: 100%; /* Các nút chiếm toàn bộ chiều rộng */
+    margin-left: 0; /* Đảm bảo không có margin trái */
+  }
+
   .menu-toggle {
     display: flex;
     margin-left: auto;
@@ -1999,6 +2030,7 @@ ul#detail-features-list li i.fas {
     font-size: 1.3em;
   }
 
+
   .featured-cars-slider-controls {
     flex-direction: row;
     align-items: stretch;
@@ -2109,6 +2141,9 @@ ul#detail-features-list li i.fas {
   .header-left .logo img {
     height: 28px;
   }
+  
+
+
   .hero {
     min-height: auto;
     padding-top: 20px;
