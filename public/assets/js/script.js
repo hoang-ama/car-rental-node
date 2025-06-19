@@ -894,17 +894,28 @@ if (locationSelect) {
         if (customerSummaryDepositPrice) customerSummaryDepositPrice.textContent = currentBookingDetails.depositAmount.toLocaleString('en-US'); // Sẽ được cập nhật lại bởi updateDepositDisplay()
     
         // Khôi phục trạng thái form nếu có
-        if (currentBookingDetails.customerInfo) {
-            customerFullnameInput.value = currentBookingDetails.customerInfo.name;
-            customerPhoneInput.value = currentBookingDetails.customerInfo.phone;
-            customerEmailInput.value = currentBookingDetails.customerInfo.email;
-            customerNotesInput.value = currentBookingDetails.customerInfo.notes;
-        } else {
-            customerFullnameInput.value = '';
-            customerPhoneInput.value = '';
-            customerEmailInput.value = '';
-            customerNotesInput.value = '';
-        }
+// === LOGIC MỚI ĐỂ TỰ ĐỘNG ĐIỀN THÔNG TIN KHÁCH HÀNG ===
+if (currentUser) { // Kiểm tra nếu có người dùng đang đăng nhập
+    console.log("[displayCustomerInfoForm] User logged in, pre-filling customer info.");
+    customerFullnameInput.value = currentUser.name || ''; // Điền tên
+    customerPhoneInput.value = currentUser.phone || ''; // Điền số điện thoại
+    customerEmailInput.value = currentUser.email || ''; // Điền email
+    // Để lại notes rỗng hoặc lấy từ currentBookingDetails.customerInfo nếu muốn giữ lại giữa các lần quay lại
+    customerNotesInput.value = currentBookingDetails.customerInfo ? currentBookingDetails.customerInfo.notes : '';
+} else if (currentBookingDetails.customerInfo) { // Nếu không có user đăng nhập, nhưng có info từ lần nhập trước
+    console.log("[displayCustomerInfoForm] No user logged in, but pre-filling from previous booking info.");
+    customerFullnameInput.value = currentBookingDetails.customerInfo.name;
+    customerPhoneInput.value = currentBookingDetails.customerInfo.phone;
+    customerEmailInput.value = currentBookingDetails.customerInfo.email;
+    customerNotesInput.value = currentBookingDetails.customerInfo.notes;
+} else { // Nếu không có cả hai, để form trống
+    console.log("[displayCustomerInfoForm] No user or previous info, form is empty.");
+    customerFullnameInput.value = '';
+    customerPhoneInput.value = '';
+    customerEmailInput.value = '';
+    customerNotesInput.value = '';
+}
+// === KẾT THÚC LOGIC MỚI ===
     
         // Cập nhật giá cuối cùng và deposit dựa trên lựa chọn thanh toán
         if (finalTotalPriceSpan) finalTotalPriceSpan.textContent = currentBookingDetails.totalPrice.toLocaleString('en-US');
