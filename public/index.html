@@ -111,9 +111,8 @@
           <ul class="menu" id="menu">
             <li><a href="#benefits-section" class="nav-link">Why Vshare</a></li>
             <li><a href="#steps-section" class="nav-link">How to Rent</a></li>
-            <li>
-              <a href="#featured-cars-section" class="nav-link">Vehicles</a>
-            </li>
+            <li><a href="#featured-cars-section" class="nav-link">Vehicles</a></li>
+            <li><a href="#" id="my-bookings-link" class="nav-link hidden">My Bookings</a></li> 
             <li class="user-auth-controls">
               <button class="menu-button" id="login-button">Login</button>
               <button class="menu-button hidden" id="logout-button">Logout</button> 
@@ -1021,6 +1020,143 @@
       </footer>
     </section>
 
+<!-- P5.1: MY BOOKING VIEW -->   
+    <section id="my-bookings-view" class="page-view hidden">
+      <header class="page-header">
+        <div class="top-bar">
+          <a href="#home-view" class="logo-link">
+            <img
+              src="assets/logo/logo.png"
+              alt="Vshare Logo"
+              class="logo-img-page"
+            />
+          </a>
+          <nav>
+            <a href="#home-view" id="nav-home-from-mybookings" class="nav-link"
+              >Home</a
+            >
+            <a href="#" id="nav-listing-from-mybookings" class="nav-link"
+              >Car List</a
+            >
+          </nav>
+        </div>
+        <h2>My Bookings</h2>
+      </header>
+      <main class="container">
+        <div id="my-bookings-content">
+          <p class="greeting-message">Welcome, <span id="my-bookings-user-name"></span>!</p>
+          <h3>Your Rental History</h3>
+          <div id="my-bookings-list-message" class="form-message-placeholder"></div>
+          <table>
+            <thead>
+              <tr>
+                <th>Booking ID</th>
+                <th>Car</th>
+                <th>Pick-up</th>
+                <th>Return</th>
+                <th>Location</th>
+                <th>Total Price</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="my-bookings-table-body">
+              </tbody>
+          </table>
+        </div>
+      </main>
+      <footer class="footer">
+        <div class="footer-container">
+          <div class="footer-column">
+            <h3>CONTACT</h3>
+            <p>
+              <b><i>Vshare, car rental at Vinhomes</i></b>
+            </p>
+            <p>Branch 1: Park 2, Sh.09, Times City</p>
+            <p>Branch 2: S2.19, Vinhomes Ocean Park</p>
+            <p class="contact-line">
+              <i class="fas fa-envelope"></i>&nbsp;<a
+                href="mailto:contact@vshare.asia"
+                >contact@vshare.asia</a
+              >
+            </p>
+            <p class="contact-line">
+              <i class="fas fa-phone"></i>&nbsp;<a href="tel:0903229906"
+                >0903.229.906 (8:00 AM - 9:00 PM)</a
+              >
+            </p>
+            <div class="social-icons">
+              <a href="#" target="_blank"
+                ><img src="assets/images/facebookicon.png" alt="Facebook"
+              /></a>
+              <a href="#" target="_blank"
+                ><img
+                  src="assets/images/youtube-20200619043955.png"
+                  alt="Youtube"
+              /></a>
+              <a href="#" target="_blank"
+                ><img src="assets/images/linkedin.png" alt="Linkedin"
+              /></a>
+              <a href="#" target="_blank"
+                ><img src="assets/images/twitter.png" alt="Twitter"
+              /></a>
+            </div>
+          </div>
+          <div class="footer-column">
+            <h3>INTRODUCTION</h3>
+            <a href="#">About Us</a>
+            <div class="email-subscription">
+              <form name="email-subscription-form" class="subscribe-form">
+                <p>Subscribe to receive promotions</p>
+                <div class="subscribe-wrapper">
+                  <input
+                    type="email"
+                    id="subscriber-email"
+                    name="email"
+                    placeholder="Enter your email..."
+                    class="subscribe-input"
+                    required
+                  />
+                  <button type="submit" class="subscribe-button">
+                    Sign-up
+                  </button>
+                </div>
+              </form>
+            </div>
+            <a
+              href="#"
+              target="_blank"
+              style="margin-top: 15px; display: inline-block"
+            >
+              <img
+                src="assets/images/tmdtlogo.png"
+                alt="E-commerce Registered"
+                style="height: 50px"
+              />
+            </a>
+          </div>
+          <div class="footer-column">
+            <h3>POLICIES</h3>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Service Regulations</a>
+            <a href="#">Incidents & Complaints</a>
+            <a href="#">Become a Partner</a>
+          </div>
+          <div class="footer-column">
+            <h3>SUPPORT</h3>
+            <a href="#">Car Rental Guide</a>
+            <a href="#">FAQs</a>
+            <a href="#">ETC Top-up Guide</a>
+            <a href="#">Blog</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <p>Copyright &copy; 2025 by Vshare. All rights reserved.</p>
+        </div>
+      </footer>
+    </section>
+    
+    
 <!-- ANNEX: FLOATING BUTTONS -->    
 
     <div class="floating-buttons">

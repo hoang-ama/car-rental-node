@@ -98,6 +98,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const signupNameInput = document.getElementById('signup-name'); // NEW: Input cho tên
     const logoutButton = document.getElementById('logout-button'); // NEW: Nút Logout
 
+    const myBookingsView = document.getElementById('my-bookings-view'); // NEW
+    const myBookingsLink = document.getElementById('my-bookings-link'); // NEW
+    const myBookingsUserName = document.getElementById('my-bookings-user-name'); // NEW
+    const myBookingsTableBody = document.getElementById('my-bookings-table-body'); // NEW
+    const myBookingsListMessage = document.getElementById('my-bookings-list-message'); // NEW
+
      // Global variable để lưu trữ người dùng hiện tại
      let currentUser = null; 
     // Slider variables
@@ -321,17 +327,20 @@ if (locationSelect) {
                 loginButton.classList.add('user-logged-in'); // Thêm class để có thể style riêng nếu cần
                 // Giả sử nút logout nằm bên cạnh, thì hiện nó lên
                 if (logoutButton) logoutButton.classList.remove('hidden');
+                if (myBookingsLink) myBookingsLink.classList.remove('hidden'); // HIỆN LINK MY BOOKINGS
             } else if (currentUser && (currentUser.email || currentUser.phone)) {
                 // Trường hợp không có tên, hiển thị email hoặc phone
                 loginButton.textContent = `Welcome, ${currentUser.email || currentUser.phone}`;
                 loginButton.classList.add('user-logged-in');
                 if (logoutButton) logoutButton.classList.remove('hidden');
+                if (myBookingsLink) myBookingsLink.classList.remove('hidden'); // HIỆN LINK MY BOOKINGS
             }
             else {
                 loginButton.textContent = 'Login';
                 loginButton.classList.remove('user-logged-in');
                 loginButton.onclick = () => openModal(loginModal); // Đặt lại event listener
                 if (logoutButton) logoutButton.classList.add('hidden'); // Ẩn nút logout
+                if (myBookingsLink) myBookingsLink.classList.add('hidden'); // ẨN LINK MY BOOKINGS
             }
         }
     }
@@ -453,7 +462,121 @@ if (locationSelect) {
             alert("You have been logged out.");
             showView('home-view'); // Về lại trang chủ
         }
-    });
+    }); 
+    }
+
+    // Event Listener cho My Bookings Link
+    if (myBookingsLink) {
+        myBookingsLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentUser) {
+                displayMyBookings();
+            } else {
+                alert("Please log in to view your bookings.");
+                openModal(loginModal);
+            }
+        });
+    }
+       // Hàm hiển thị trang My Bookings View
+    async function displayMyBookings() {
+        // Kiểm tra xem người dùng đã đăng nhập chưa. Nếu chưa, cảnh báo và chuyển hướng hoặc mở modal login.
+        if (!currentUser) {
+            alert("You must be logged in to view your bookings.");
+            showView('home-view'); // Chuyển về trang chủ
+            openModal(loginModal); // Mở modal đăng nhập
+            return;
+        }
+
+        // Hiển thị view "My Bookings"
+        showView('my-bookings-view');
+
+        // Hiển thị tên người dùng đã đăng nhập trên trang "My Bookings"
+        if (myBookingsUserName) {
+            myBookingsUserName.textContent = currentUser.name || currentUser.email || currentUser.phone;
+        }
+
+        // Tải và hiển thị danh sách bookings của người dùng hiện tại
+        // Chúng ta sẽ truyền email của người dùng để API backend biết lấy booking của ai.
+        // LƯU Ý BẢO MẬT: Trong hệ thống thực tế, không nên truyền email qua query param.
+        // Thay vào đó, bạn sẽ gửi một JWT (JSON Web Token) trong header 'Authorization'
+        // và backend sẽ giải mã JWT để lấy user ID/email an toàn.
+        await fetchAndDisplayMyBookings(currentUser.email); 
+    }
+
+    // Hàm fetch và hiển thị lịch sử bookings của người dùng từ API
+    async function fetchAndDisplayMyBookings(userEmail) {
+        // Kiểm tra xem phần tử bảng đã sẵn sàng chưa
+        if (!myBookingsTableBody) {
+            console.error("[fetchAndDisplayMyBookings] myBookingsTableBody element not found.");
+            return;
+        }
+
+        // Hiển thị thông báo đang tải dữ liệu
+        myBookingsTableBody.innerHTML = '<tr><td colspan="8">Loading your bookings...</td></tr>';
+        // Xóa các thông báo lỗi/thành công cũ
+        if (myBookingsListMessage) {
+            myBookingsListMessage.textContent = '';
+            myBookingsListMessage.className = 'form-message-placeholder';
+        }
+
+        try {
+            // Gửi yêu cầu GET tới API backend để lấy bookings của người dùng
+            // Sử dụng encodeURIComponent để mã hóa email, tránh lỗi URL
+            const response = await fetch(`/api/my-bookings?email=${encodeURIComponent(userEmail)}`); 
+            
+            // Kiểm tra trạng thái phản hồi HTTP
+            if (!response.ok) {
+                // Nếu phản hồi không thành công (ví dụ: 404, 500), ném lỗi
+                throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
+            }
+            
+            // Phân tích phản hồi JSON
+            const userBookings = await response.json();
+
+            // Xóa nội dung cũ của bảng trước khi điền dữ liệu mới
+            myBookingsTableBody.innerHTML = '';
+
+            // Nếu không có booking nào được tìm thấy, hiển thị thông báo
+            if (!userBookings || userBookings.length === 0) {
+                myBookingsTableBody.innerHTML = '<tr><td colspan="8">You have no bookings yet.</td></tr>';
+                return;
+            }
+
+            // Duyệt qua từng booking và thêm vào bảng
+            userBookings.forEach(booking => {
+                const row = myBookingsTableBody.insertRow(); // Thêm một hàng mới vào bảng
+
+                row.innerHTML = `
+                    <td>${booking.id}</td>
+                    <td>${booking.carMake || ''} ${booking.carModel || ''}</td>
+                    <td>${formatDateTimeForDisplay(booking.startDate)}</td>
+                    <td>${formatDateTimeForDisplay(booking.endDate)}</td>
+                    <td>${booking.pickupLocation || 'N/A'}</td>
+                    <td>$${booking.totalPrice !== undefined ? Number(booking.totalPrice).toLocaleString('en-US') : 'N/A'}</td>
+                    <td><span class="booking-status booking-status-${(booking.status || 'N/A').toLowerCase().replace(/\s/g, '-') || 'pending'}">${booking.status || 'N/A'}</span></td>
+                    <td><button class="view-booking-detail-btn action-button" data-booking-id="${booking.id}">View Details</button></td>
+                `;
+
+                // Tùy chọn: Thêm Event Listener cho nút "View Details"
+                // Nếu bạn muốn người dùng có thể nhấp vào để xem chi tiết từng booking
+                // (ví dụ: mở một modal hoặc chuyển đến một trang chi tiết booking riêng)
+                row.querySelector('.view-booking-detail-btn').addEventListener('click', () => {
+                    console.log(`View Details for Booking ID: ${booking.id}`);
+                    // Đây là nơi bạn sẽ gọi một hàm khác để hiển thị chi tiết booking
+                    // Ví dụ: displaySpecificBookingDetails(booking.id);
+                    alert(`Viewing details for booking ID: ${booking.id}\n(This feature is under development!)`);
+                });
+            });
+
+        } catch (error) {
+            // Xử lý và hiển thị lỗi nếu có vấn đề khi fetch dữ liệu
+            console.error("[fetchAndDisplayMyBookings] Error fetching user bookings:", error);
+            myBookingsTableBody.innerHTML = '<tr><td colspan="8">Error loading your bookings. Please try again.</td></tr>';
+            if (myBookingsListMessage) {
+                myBookingsListMessage.textContent = 'Failed to load bookings: ' + error.message;
+                myBookingsListMessage.classList.add('error'); // Thêm class error để tô màu đỏ
+            }
+        }
     }
     // Call updateLoginStateUI on page load to check initial login status
     updateLoginStateUI();
@@ -462,7 +585,7 @@ if (locationSelect) {
 
     function showView(viewId) {
         console.log(`[showView] Attempting to show view: '${viewId}'`);
-        const views = [homeView, carListingView, carDetailView, customerInfoView, bookingConfirmationView];
+        const views = [homeView, carListingView, carDetailView, customerInfoView, bookingConfirmationView, myBookingsView]; // THÊM myBookingsView
         const mainPageHeader = document.getElementById('main-page-header'); 
         let foundView = false;
 
@@ -953,15 +1076,21 @@ if (currentUser) { // Kiểm tra nếu có người dùng đang đăng nhập
                 email: customerEmailInput.value, notes: customerNotesInput.value
             };
             const bookingPayload = {
-                carId: currentBookingDetails.carId, customerName: currentBookingDetails.customerInfo.name,
-                startDate: currentBookingDetails.pickupDateTime, endDate: currentBookingDetails.returnDateTime,
-                totalPrice: currentBookingDetails.totalPrice, paymentMethod: currentBookingDetails.paymentMethod,
+                carId: currentBookingDetails.carId, 
+                customerName: currentBookingDetails.customerInfo.name,
+                customerPhone: currentBookingDetails.customerInfo.phone, // THÊM DÒNG NÀY
+                customerEmail: currentBookingDetails.customerInfo.email, // THÊM DÒNG NÀY
+                startDate: currentBookingDetails.pickupDateTime, 
+                endDate: currentBookingDetails.returnDateTime,
+                totalPrice: currentBookingDetails.totalPrice, 
+                paymentMethod: currentBookingDetails.paymentMethod,
                 notes: currentBookingDetails.customerInfo.notes,
-                carMake: currentBookingDetails.carData.make, carModel: currentBookingDetails.carData.model,
-                pickupLocation: currentBookingDetails.location, // Thêm pickupLocation vào payload
-                baseCost: currentBookingDetails.baseCost,
-                servicesCost: currentBookingDetails.servicesCost,
-                depositAmount: currentBookingDetails.depositAmount,
+                carMake: currentBookingDetails.carData.make, 
+                carModel: currentBookingDetails.carData.model,
+                pickupLocation: currentBookingDetails.location, // Đảm bảo trường này cũng được gửi nếu cần
+                baseCost: currentBookingDetails.baseCost, // Đảm bảo trường này cũng được gửi
+                servicesCost: currentBookingDetails.servicesCost, // Đảm bảo trường này cũng được gửi
+                depositAmount: currentBookingDetails.depositAmount // Đảm bảo trường này cũng được gửi
             };
             console.log("[customerBookingForm] Submitting booking:", bookingPayload); 
             try {
@@ -1044,7 +1173,10 @@ if (currentUser) { // Kiểm tra nếu có người dùng đang đăng nhập
         'nav-home-from-confirmation': 'home-view', 'back-to-home-from-listing': 'home-view',
         'back-to-listing-from-detail-page': 'car-listing-view',
         'back-to-car-detail-from-customer': 'car-detail-view',
-        'back-to-home-from-confirmation-main': 'home-view'
+        'back-to-home-from-confirmation-main': 'home-view',
+        // NEW: Navigation từ My Bookings
+        'nav-home-from-mybookings': 'home-view', 
+        'nav-listing-from-mybookings': 'car-listing-view'
     };
 
     for (const id in commonNavButtons) {

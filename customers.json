@@ -4,7 +4,7 @@
     "name": "Henry",
     "phone": "0906106066",
     "email": "minhhh@chungxe.vn",
-    "password": "hashed_password_1",
+    "password": "vshare@123",
     "registeredAt": "2025-01-15T10:00:00Z"
   },
   {
@@ -12,7 +12,7 @@
     "name": "Nam Trần",
     "phone": "0906106099",
     "email": "namtran@chungxe.vn",
-    "password": "hashed_password_2",
+    "password": "vshare@123",
     "registeredAt": "2025-02-20T14:30:00Z"
   },
   {
@@ -20,7 +20,7 @@
     "name": "Huong Ly",
     "phone": "098765432",
     "email": "huongly@gmail.com",
-    "password": "vshare@321",
+    "password": "vshare@123",
     "registeredAt": "2025-06-15T15:43:49.990Z"
   },
   {
@@ -28,7 +28,7 @@
     "name": "Lê Bình",
     "phone": "0976543212",
     "email": "lebinh@gmail.com",
-    "password": "binh@123",
+    "password": "vshare@123",
     "registeredAt": "2025-06-15T15:47:16.004Z"
   },
   {

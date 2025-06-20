@@ -155,7 +155,7 @@
     "model": "VF 9 Plus",
     "year": 2024,
     "pricePerDay": 120,
-    "available": true,
+    "available": false,
     "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf9-plus-10.jpg&w=750&q=75",
     "location": "Hanoi",
     "specifications": {
@@ -431,7 +431,7 @@
     "model": "Kona",
     "year": 2019,
     "pricePerDay": 55,
-    "available": true,
+    "available": false,
     "imageUrl": "assets/images/cars/Kona.jpg",
     "location": "Ho Chi Minh City",
     "specifications": {
@@ -554,7 +554,7 @@
     "model": "Sealion 6",
     "year": 2025,
     "pricePerDay": 80,
-    "available": true,
+    "available": false,
     "imageUrl": "https://xehay.vn/uploads/images/2025/1/01/xehay-BYD-171024-2.jpg",
     "location": "Ho Chi Minh City",
     "specifications": {

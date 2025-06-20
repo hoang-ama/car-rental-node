@@ -45,7 +45,19 @@ async function writeData(filePath, data) {
       console.error(`Error writing file ${filePath}:`, error);
     }
   }
-
+  // Add updateCarAvailability function to update car availability
+  async function updateCarAvailability(carId, isAvailable) {
+    const carIndex = cars.findIndex(c => c.id === carId);
+    if (carIndex !== -1) {
+        if (cars[carIndex].available !== isAvailable) { // Chỉ cập nhật nếu trạng thái thay đổi
+            cars[carIndex].available = isAvailable;
+            await saveData(); // Lưu lại cars.json
+            console.log(`Car ID ${carId} availability updated to: ${isAvailable}`);
+        }
+    } else {
+        console.warn(`Attempted to update availability for non-existent car ID: ${carId}`);
+    }
+    }  
 // --- Đọc dữ liệu ---
 async function loadData() {
     try {
@@ -139,6 +151,7 @@ app.post('/api/bookings', async (req, res) => {
         customerName, customerPhone, customerEmail, notes,
         pickupLocation, startDate, endDate,
         paymentMethod, totalPrice, baseCost, servicesCost, depositAmount
+        // status field không có trong payload từ client frontend, mặc định là 'Pending'
     } = req.body;
 
     if (!carId || !customerName || !startDate || !endDate || totalPrice === undefined) {
@@ -149,7 +162,8 @@ app.post('/api/bookings', async (req, res) => {
     if (!car) {
         return res.status(404).json({ message: `Car with ID ${carId} not found for booking.` });
     }
-    
+    const newBookingStatus = 'Pending'; // Hoặc lấy từ req.body nếu client có thể gửi status ban đầu
+
     const newBooking = {
         id: nextBookingId++, 
         carId: car.id, 
@@ -167,15 +181,33 @@ app.post('/api/bookings', async (req, res) => {
         baseCost: baseCost ? parseFloat(baseCost) : null,
         servicesCost: servicesCost ? parseFloat(servicesCost) : null,
         depositAmount: depositAmount ? parseFloat(depositAmount) : null,
-        status: 'Pending', 
+        status: newBookingStatus, // Sử dụng trạng thái mặc định
         bookingDate: new Date().toISOString()
     };
     bookings.push(newBooking);
     await saveData();
     console.log('New Booking by client:', newBooking);
+    // ✅ Cập nhật trạng thái xe nếu booking mới có trạng thái làm xe không khả dụng
+    if (newBookingStatus === 'Confirmed' || newBookingStatus === 'Rented Out') {
+    await updateCarAvailability(carId, false);  
+    }
     res.status(201).json({ message: 'Booking successful!', booking: newBooking });
 });
+// GET bookings for a specific customer (NEW)
+app.get('/api/my-bookings', (req, res) => {
+    // Trong một ứng dụng thực tế, bạn sẽ lấy customer ID từ session/JWT token
+    // được gửi trong header của request, không phải từ query param như thế này
+    // vì query param rất dễ bị giả mạo.
+    const customerEmail = req.query.email; // Ví dụ đơn giản lấy từ email
+    
+    if (!customerEmail) {
+        return res.status(400).json({ message: 'Customer email is required.' });
+    }
 
+    const customerBookings = bookings.filter(b => b.customerEmail === customerEmail);
+    
+    res.json(customerBookings);
+});
 app.get('/api/bookings', (req, res) => {
     res.json(bookings);
 });
@@ -336,13 +368,17 @@ app.put('/admin/bookings/:bookingId', async (req, res) => {
         return res.status(404).json({ message: `Booking with ID ${bookingIdParam} not found` });
     }
 
+    // ✅ ĐỊNH NGHĨA oldStatus TẠI ĐÂY, SAU KHI bookingIndex ĐÃ ĐƯỢC KIỂM TRA
+    const oldStatus = bookings[bookingIndex].status; // Lấy trạng thái cũ từ booking hiện có
+    const currentCarId = bookings[bookingIndex].carId; // Lấy carId của booking hiện tại
+
     const {
         customerName, customerPhone, customerEmail, notes,
         carId, // vehicleId của xe
         pickupLocation, startDate, endDate,
         paymentMethod, totalPrice, baseCost, servicesCost, depositAmount, status
     } = req.body;
-
+    
     const updatedBooking = { ...bookings[bookingIndex] };
 
     if (customerName !== undefined) updatedBooking.customerName = customerName;
@@ -355,7 +391,7 @@ app.put('/admin/bookings/:bookingId', async (req, res) => {
     if (paymentMethod !== undefined) updatedBooking.paymentMethod = paymentMethod;
     if (totalPrice !== undefined) updatedBooking.totalPrice = parseFloat(totalPrice);
     updatedBooking.baseCost = baseCost !== undefined && baseCost !== null ? parseFloat(baseCost) : updatedBooking.baseCost;
-    updatedBooking.servicesCost = servicesCost !== undefined && servicesCost !== null ? parseFloat(servicesCost) : updatedBooking.servicesCost;
+    updatedBooking.servicesCost = servicesCost !== undefined && servicesCost !== null ? parseFloat(servicesCost) :              updatedBooking.servicesCost;
     updatedBooking.depositAmount = depositAmount !== undefined && depositAmount !== null ? parseFloat(depositAmount) : updatedBooking.depositAmount;
     if (status !== undefined) updatedBooking.status = status;
 
@@ -372,6 +408,35 @@ app.put('/admin/bookings/:bookingId', async (req, res) => {
     bookings[bookingIndex] = updatedBooking;
     await saveData();
     console.log('Admin updated booking ID:', bookingIdParam, updatedBooking);
+
+    // ✅ LOGIC MỚI: Cập nhật trạng thái available của xe
+    // Nếu trạng thái thay đổi và liên quan đến tình trạng khả dụng của xe
+    if (oldStatus !== updatedBooking.status) {
+        if (updatedBooking.status === 'Confirmed' || updatedBooking.status === 'Rented Out') {
+            await updateCarAvailability(currentCarId, false); // Xe không còn khả dụng
+        } else if (oldStatus === 'Confirmed' || oldStatus === 'Rented Out') {
+            // Nếu trạng thái cũ là 'Confirmed' hoặc 'Rented Out' và trạng thái mới không phải là vậy
+            // Thì kiểm tra xem còn booking nào khác đang chiếm dụng xe đó không
+            const carStillBooked = bookings.some(b => 
+                b.carId === currentCarId && 
+                (b.status === 'Confirmed' || b.status === 'Rented Out') &&
+                b.id !== updatedBooking.id // Loại trừ booking hiện tại nếu nó đang được cập nhật
+            );
+            if (!carStillBooked) {
+                await updateCarAvailability(currentCarId, true); // Xe trở lại khả dụng nếu không bị chiếm bởi booking khác
+            }
+        } else if (updatedBooking.status === 'Cancelled by Customer' || updatedBooking.status === 'Cancelled by Admin' || updatedBooking.status === 'Completed') {
+            // Nếu trạng thái chuyển sang Hủy hoặc Hoàn thành, kiểm tra để set lại available
+            const carStillBooked = bookings.some(b => 
+                b.carId === currentCarId && 
+                (b.status === 'Confirmed' || b.status === 'Rented Out')
+            );
+            if (!carStillBooked) {
+                await updateCarAvailability(currentCarId, true);
+            }
+        }
+    }
+    // ✅ KẾT THÚC LOGIC MỚI
     res.json({ message: 'Booking updated successfully by admin', booking: updatedBooking });
 });
 
@@ -385,6 +450,19 @@ app.delete('/admin/bookings/:bookingId', async (req, res) => {
     const deletedBooking = bookings.splice(bookingIndex, 1);
     await saveData();
     console.log('Admin deleted booking ID:', bookingIdParam);
+
+    // ✅ LOGIC MỚI: Cập nhật trạng thái available của xe sau khi xóa booking
+    const deletedCarId = deletedBooking[0].carId;
+    // Kiểm tra xem còn booking nào khác đang chiếm dụng xe này không
+    const carStillBooked = bookings.some(b => 
+        b.carId === deletedCarId && 
+        (b.status === 'Confirmed' || b.status === 'Rented Out')
+    );
+    if (!carStillBooked) {
+        await updateCarAvailability(deletedCarId, true); // Xe trở lại khả dụng
+    }
+    // ✅ KẾT THÚC LOGIC MỚI
+
     res.json({ message: 'Booking deleted successfully by admin', booking: deletedBooking[0] });
 });
 
