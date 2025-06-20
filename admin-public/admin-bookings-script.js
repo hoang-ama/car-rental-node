@@ -218,6 +218,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(bookingData)
                 });
+
+                // ✅ THÊM LOGIC KIỂM TRA CONTENT-TYPE VÀ LỖI HTTP TẠI ĐÂY
+            if (!response.ok) {
+                const errorText = await response.text(); // Đọc response dạng text
+                console.error("Server responded with an error:", response.status, errorText);
+                try {
+                    const errorJson = JSON.parse(errorText); // Thử parse JSON nếu có
+                    showMessage(bookingFormMessage, errorJson.message || `Operation failed: ${response.status}`, 'error');
+                } catch (e) {
+                    // Nếu không phải JSON, hiển thị thông báo chung
+                    showMessage(bookingFormMessage, `Server error: ${response.status}. Received HTML/text instead of JSON. Check server console.`, 'error');
+                    // Thậm chí bạn có thể hiển thị errorText nếu muốn
+                    console.log("Raw server response (HTML/text):", errorText); 
+                }
+                return; // Dừng hàm nếu có lỗi
+            }
+
+            // Nếu response.ok, bây giờ an toàn để parse JSON
                 const result = await response.json();
 
                 if (response.ok) {
