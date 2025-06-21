@@ -1,6 +1,6 @@
 // admin-public/admin-bookings-script.js
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("Admin Bookings Script Initializing..."); // DEBUG
+    console.log("Admin Bookings Script Initializing...");
 
     // --- DOM Elements ---
     const bookingsTableBody = document.getElementById('bookings-table-body');
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const depositAmountInput = document.getElementById('deposit-amount-booking');
     const bookingStatusSelectAdmin = document.getElementById('booking-status-select');
     const notesInputBooking = document.getElementById('notes-booking');
-    
+
     const submitBookingBtn = document.getElementById('submit-booking-button');
     const cancelEditBookingBtn = document.getElementById('cancel-edit-booking-button');
     const bookingFormMessage = document.getElementById('booking-form-message'); // Message for form actions
@@ -37,28 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         element.textContent = message;
-        element.className = ''; // Clear previous classes
+        element.className = 'form-message-placeholder'; // Reset base class
         element.classList.add(type); // 'success' hoặc 'error'
-        
-        // Apply some basic styling if not done by CSS classes already
-        element.style.padding = '10px';
-        element.style.marginBottom = '15px';
-        element.style.borderRadius = '4px';
-        element.style.backgroundColor = type === 'success' ? '#d4edda' : '#f8d7da';
-        element.style.color = type === 'success' ? '#155724' : '#721c24';
-        element.style.border = `1px solid ${type === 'success' ? '#c3e6cb' : '#f5c6cb'}`;
 
         setTimeout(() => {
             element.textContent = '';
             element.className = '';
-            element.style.padding = '0';
-            element.style.marginBottom = '0';
-            element.style.border = 'none';
-            element.style.backgroundColor = 'transparent';
         }, 5000); // Message visible for 5 seconds
     }
 
-    // Formats an ISO dateTimeString (like "2025-06-10T07:00:00.000Z") 
+    // Formats an ISO dateTimeString (like "2025-06-10T07:00:00.000Z")
     // into "YYYY-MM-DDTHH:mm" for datetime-local input.
     function formatDateTimeForInput(dateTimeString) {
         if (!dateTimeString) return '';
@@ -78,14 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     // Formats an ISO dateTimeString for display (e.g., dd/mm/yyyy, hh:mm)
-     function formatDateTimeForDisplayList(isoString) {
+    function formatDateTimeForDisplayList(isoString) {
         if (!isoString) return 'N/A';
         try {
             const date = new Date(isoString);
             return date.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false });
         } catch (e) { return 'Invalid Date';}
     }
-
 
     // --- Load Cars into Select Dropdown ---
     async function loadCarsIntoBookingSelect() {
@@ -115,11 +102,10 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchAndDisplayBookings() {
         if (!bookingsTableBody) return;
         try {
-            // Assuming ADMIN_BOOKINGS_API_URL or /api/bookings fetches all bookings
-            const response = await fetch(ADMIN_BOOKINGS_API_URL); 
+            const response = await fetch(ADMIN_BOOKINGS_API_URL);
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
             const bookings = await response.json();
-            bookingsTableBody.innerHTML = ''; 
+            bookingsTableBody.innerHTML = ''; // Clear existing rows
 
             if (bookings.length === 0) {
                 bookingsTableBody.innerHTML = '<tr><td colspan="10">No bookings found.</td></tr>';
@@ -128,18 +114,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
             bookings.forEach(booking => {
                 const row = bookingsTableBody.insertRow();
-                // Pass the whole booking object to data-booking for easy editing
+                // Determine status class for styling
+                const statusClass = (booking.status || 'N/A').toLowerCase().replace(/\s/g, '-');
+
                 row.innerHTML = `
-                    <td>${booking.id}</td>
-                    <td>${booking.customerName || 'N/A'}</td>
-                    <td>${booking.customerPhone || 'N/A'}</td>
-                    <td>${booking.customerEmail || 'N/A'}</td>
-                    <td>${booking.carMake || ''} ${booking.carModel || ''}</td>
-                    <td>${formatDateTimeForDisplayList(booking.startDate)}</td>
-                    <td>${formatDateTimeForDisplayList(booking.endDate)}</td>
-                    <td>$${booking.totalPrice !== undefined ? Number(booking.totalPrice).toFixed(2) : 'N/A'}</td>
-                    <td>${booking.status || 'N/A'}</td>
-                    <td>
+                    <td data-label="Booking ID">${booking.id}</td>
+                    <td data-label="Customer Name">${booking.customerName || 'N/A'}</td>
+                    <td data-label="Phone">${booking.customerPhone || 'N/A'}</td>
+                    <td data-label="Email">${booking.customerEmail || 'N/A'}</td>
+                    <td data-label="Car Name">${booking.carMake || ''} ${booking.carModel || ''}</td>
+                    <td data-label="Start Date">${formatDateTimeForDisplayList(booking.startDate)}</td>
+                    <td data-label="End Date">${formatDateTimeForDisplayList(booking.endDate)}</td>
+                    <td data-label="Total Price">$${booking.totalPrice !== undefined ? Number(booking.totalPrice).toFixed(2) : 'N/A'}</td>
+                    <td data-label="Status">
+                        <span class="status-badge status-${statusClass}">${booking.status || 'N/A'}</span>
+                    </td>
+                    <td data-label="Actions">
                         <button class="edit-booking-btn" data-booking='${JSON.stringify(booking)}'>Edit</button>
                         <button class="delete-booking-btn" data-id="${booking.id}">Delete</button>
                     </td>
@@ -165,9 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const carMake = selectedCarOption ? selectedCarOption.dataset.carMake : '';
             const carModel = selectedCarOption ? selectedCarOption.dataset.carModel : '';
 
-            // Ensure date/time values are converted to ISO strings (UTC)
-            // datetime-local input directly gives a string that can be used to construct a Date object
-            // which is then converted to ISOString
             const startDateISO = startDateInputBooking.value ? new Date(startDateInputBooking.value).toISOString() : null;
             const endDateISO = endDateInputBooking.value ? new Date(endDateInputBooking.value).toISOString() : null;
 
@@ -175,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 customerName: customerNameInputBooking.value.trim(),
                 customerPhone: customerPhoneInput.value.trim(),
                 customerEmail: customerEmailInput.value.trim(),
-                carId: carSelectBooking.value, // This should be the unique car ID like "VF8-29A12345"
+                carId: carSelectBooking.value,
                 carMake: carMake,
                 carModel: carModel,
                 pickupLocation: pickupLocationInput.value.trim(),
@@ -189,10 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 status: bookingStatusSelectAdmin.value,
                 notes: notesInputBooking.value.trim()
             };
-            
+
             // Basic validation
-            if (!bookingData.customerName || !bookingData.carId || !bookingData.startDate || !bookingData.endDate || bookingData.totalPrice === null) {
-                showMessage(bookingFormMessage, 'Customer Name, Car, Start/End Dates, and Total Price are required.', 'error');
+            if (!bookingData.customerName || !bookingData.carId || !bookingData.startDate || !bookingData.endDate || bookingData.totalPrice === null || !bookingData.status) {
+                showMessage(bookingFormMessage, 'Customer Name, Car, Start/End Dates, Total Price, and Status are required.', 'error');
                 return;
             }
             if (new Date(bookingData.endDate) <= new Date(bookingData.startDate)) {
@@ -200,12 +187,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-
-            const editingBookingId = bookingIdFormInput.value; // This is the system ID (1, 2, 3...)
+            const editingBookingId = bookingIdFormInput.value;
             let method = editingBookingId ? 'PUT' : 'POST';
             let url = editingBookingId ? `${ADMIN_BOOKINGS_API_URL}/${editingBookingId}` : ADMIN_BOOKINGS_API_URL;
 
-            console.log("Submitting booking data:", bookingData, "Method:", method, "URL:", url); // DEBUG
+            console.log("Submitting booking data:", bookingData, "Method:", method, "URL:", url);
 
             try {
                 if(submitBookingBtn) {
@@ -219,23 +205,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify(bookingData)
                 });
 
-                // ✅ THÊM LOGIC KIỂM TRA CONTENT-TYPE VÀ LỖI HTTP TẠI ĐÂY
-            if (!response.ok) {
-                const errorText = await response.text(); // Đọc response dạng text
-                console.error("Server responded with an error:", response.status, errorText);
-                try {
-                    const errorJson = JSON.parse(errorText); // Thử parse JSON nếu có
-                    showMessage(bookingFormMessage, errorJson.message || `Operation failed: ${response.status}`, 'error');
-                } catch (e) {
-                    // Nếu không phải JSON, hiển thị thông báo chung
-                    showMessage(bookingFormMessage, `Server error: ${response.status}. Received HTML/text instead of JSON. Check server console.`, 'error');
-                    // Thậm chí bạn có thể hiển thị errorText nếu muốn
-                    console.log("Raw server response (HTML/text):", errorText); 
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error("Server responded with an error:", response.status, errorText);
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        showMessage(bookingFormMessage, errorJson.message || `Operation failed: ${response.status}`, 'error');
+                    } catch (e) {
+                        showMessage(bookingFormMessage, `Server error: ${response.status}. Received HTML/text instead of JSON. Check server console.`, 'error');
+                        console.log("Raw server response (HTML/text):", errorText);
+                    }
+                    return;
                 }
-                return; // Dừng hàm nếu có lỗi
-            }
 
-            // Nếu response.ok, bây giờ an toàn để parse JSON
                 const result = await response.json();
 
                 if (response.ok) {
@@ -245,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     showMessage(bookingFormMessage, result.message || 'Operation failed. Please try again.', 'error');
                 }
-            } catch (error) { 
+            } catch (error) {
                 console.error("Error submitting booking form:", error);
                 showMessage(bookingFormMessage, 'Client-side error: ' + error.message, 'error');
             } finally {
@@ -261,7 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (bookingsTableBody) {
         bookingsTableBody.addEventListener('click', async (event) => {
             const target = event.target;
-            
+
             // Edit Booking
             if (target.classList.contains('edit-booking-btn')) {
                 const bookingDataString = target.dataset.booking;
@@ -274,22 +256,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     const bookingToEdit = JSON.parse(bookingDataString);
                     console.log("Editing booking:", bookingToEdit);
 
-                    bookingIdFormInput.value = bookingToEdit.id; // System ID of the booking
+                    bookingIdFormInput.value = bookingToEdit.id;
                     customerNameInputBooking.value = bookingToEdit.customerName || '';
                     customerPhoneInput.value = bookingToEdit.customerPhone || '';
                     customerEmailInput.value = bookingToEdit.customerEmail || '';
-                    
-                    // Ensure car selection dropdown is populated before setting value
-                    if (carSelectBooking.options.length <= 1) { // Only default option present
-                        await loadCarsIntoBookingSelect(); // Wait for cars to load
+
+                    if (carSelectBooking.options.length <= 1) {
+                        await loadCarsIntoBookingSelect();
                     }
-                    carSelectBooking.value = bookingToEdit.carId || ''; // carId is the unique ID like "VF8-29A12345"
+                    carSelectBooking.value = bookingToEdit.carId || '';
 
                     pickupLocationInput.value = bookingToEdit.pickupLocation || '';
-                    // Format for datetime-local input: YYYY-MM-DDTHH:mm
                     startDateInputBooking.value = formatDateTimeForInput(bookingToEdit.startDate);
                     endDateInputBooking.value = formatDateTimeForInput(bookingToEdit.endDate);
-                    
+
                     paymentMethodSelect.value = bookingToEdit.paymentMethod || 'Cash';
                     totalPriceInput.value = bookingToEdit.totalPrice !== undefined ? bookingToEdit.totalPrice : '';
                     baseCostInput.value = bookingToEdit.baseCost !== undefined ? bookingToEdit.baseCost : '';
@@ -297,7 +277,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     depositAmountInput.value = bookingToEdit.depositAmount !== undefined ? bookingToEdit.depositAmount : '';
                     bookingStatusSelectAdmin.value = bookingToEdit.status || 'Pending';
                     notesInputBooking.value = bookingToEdit.notes || '';
-                    
+
                     if(submitBookingBtn) submitBookingBtn.textContent = 'Update Booking';
                     if(cancelEditBookingBtn) cancelEditBookingBtn.style.display = 'inline-block';
                     const addBookingSection = document.getElementById('add-booking-section');
@@ -311,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Delete Booking
             if (target.classList.contains('delete-booking-btn')) {
-                const bookingIdToDelete = target.dataset.id; // System ID of the booking
+                const bookingIdToDelete = target.dataset.id;
                 if (!bookingIdToDelete) {
                     showMessage(bookingActionMessageDiv, "Error: Booking ID not found for deletion.", "error");
                     return;
@@ -326,11 +306,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         const result = await response.json();
                         if (response.ok) {
                             showMessage(bookingActionMessageDiv, result.message || 'Booking deleted successfully!', 'success');
-                            fetchAndDisplayBookings(); 
+                            fetchAndDisplayBookings();
                         } else {
                             showMessage(bookingActionMessageDiv, result.message || 'Error deleting booking.', 'error');
                         }
-                    } catch (error) { 
+                    } catch (error) {
                         console.error("Error deleting booking:", error);
                         showMessage(bookingActionMessageDiv, 'Client-side error: ' + error.message, 'error');
                     } finally {
@@ -341,29 +321,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     // --- Reset Booking Form ---
     function resetBookingForm(){
         if(bookingForm) bookingForm.reset();
         if(bookingIdFormInput) bookingIdFormInput.value = '';
         if(submitBookingBtn) submitBookingBtn.textContent = 'Add Booking';
         if(cancelEditBookingBtn) cancelEditBookingBtn.style.display = 'none';
-        // Reset selects to default or first option
         if(carSelectBooking) carSelectBooking.value = "";
         if(paymentMethodSelect) paymentMethodSelect.value = "Cash";
         if(bookingStatusSelectAdmin) bookingStatusSelectAdmin.value = "Pending";
         if(customerNameInputBooking) customerNameInputBooking.focus();
     }
-    
+
     if(cancelEditBookingBtn) {
         cancelEditBookingBtn.addEventListener('click', resetBookingForm);
     }
 
     // --- Initial Data Load ---
     async function initializePage() {
-        console.log("Initializing Admin Bookings Page..."); // DEBUG
-        await loadCarsIntoBookingSelect(); // Load cars first
-        await fetchAndDisplayBookings();   // Then load bookings
+        console.log("Initializing Admin Bookings Page...");
+        await loadCarsIntoBookingSelect();
+        await fetchAndDisplayBookings();
     }
 
     initializePage();

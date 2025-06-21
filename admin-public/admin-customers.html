@@ -4,68 +4,105 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Customer Management - Admin Portal</title>
-    <link rel="icon" type="image/png" href="/public/assets/logo/favicon.png" />
+    <link rel="icon" type="image/png" href="assets/logo/favicon.png" />
     <link rel="stylesheet" href="admin-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 </head>
 <body>
-    <header>
-        <h1>Customer Management</h1>
-        <nav>
-            <a href="admin-cars.html" style="color: white; margin-right: 15px;">Car Management</a>
-            <a href="admin-bookings.html" style="color: white; margin-right: 15px;">Booking Management</a>
-            <a href="admin-customers.html" style="color: #3498db; font-weight: bold;">Customer Management</a>
-        </nav>
-    </header>
-    <main>
-        <section id="add-customer-section">
-            <h2>Add New Customer / Update Customer</h2>
-            <form id="customer-form">
-                <input type="hidden" id="customer-id-form" name="customerIdForm"> <div>
-                    <label for="customer-name">Name:</label>
-                    <input type="text" id="customer-name" name="name" required>
-                </div>
-                <div>
-                    <label for="customer-phone">Phone:</label>
-                    <input type="tel" id="customer-phone" name="phone" required>
-                </div>
-                <div>
-                    <label for="customer-email">Email:</label>
-                    <input type="email" id="customer-email" name="email" required>
-                </div>
-                <div>
-                    <label for="customer-password">Password (leave blank to keep current):</label>
-                    <input type="password" id="customer-password" name="password">
-                </div>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <a href="/public/index.html">
+                    <img src="assets/logo/logo.png" alt="Vshare Logo">
+                </a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                    <li><a href="admin-cars.html"><i class="fas fa-car"></i> <span>Car</span></a></li>
+                    <li><a href="admin-bookings.html"><i class="fas fa-calendar-check"></i> <span>Booking</span></a></li>
+                    <li><a href="admin-customers.html" class="active"><i class="fas fa-users"></i> <span>Customer</span></a></li>
+                    <li><a href="#"><i class="fas fa-file-alt"></i> <span>Report</span></a></li>
+                    <li><a href="#"><i class="fas fa-cog"></i> <span>Setting</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                Vshare Backend v.1.0
+            </div>
+        </aside>
 
-                <button type="submit" id="submit-customer-button">Add Customer</button>
-                <button type="button" id="cancel-edit-customer-button" style="display:none;">Cancel Update</button>
-            </form>
-            <div id="form-message" class="form-message-placeholder"></div>
-        </section>
+        <div class="main-content">
+            <header class="top-header">
+                <h1>Customer Management</h1>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="user-profile">
+                        <img src="assets/images/placeholder-user.jpg" alt="User Avatar">
+                        <span>Admin User</span>
+                    </div>
+                </div>
+            </header>
 
-        <section id="customers-list-section">
-            <h2>Current Customer List</h2>
-            <div id="action-message" class="action-message-placeholder"></div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Phone</th>
-                        <th>Email</th>
-                        <th>Registered At</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="customers-table-body">
-                    </tbody>
-            </table>
-        </section>
-    </main>
+            <main class="page-content">
+                <section id="add-customer-section">
+                    <h2>Add New Customer / Update Customer</h2>
+                    <form id="customer-form">
+                        <input type="hidden" id="customer-id-form" name="customerIdForm">
+                        <div class="form-group">
+                            <label for="customer-name">Name:</label>
+                            <input type="text" id="customer-name" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-phone">Phone:</label>
+                            <input type="tel" id="customer-phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-email">Email:</label>
+                            <input type="email" id="customer-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-password">Password (leave blank to keep current):</label>
+                            <input type="password" id="customer-password" name="password">
+                        </div>
 
-    <footer><p>&copy; 2025 Vshare Admin Portal</p></footer>
+                        <div class="form-buttons">
+                            <button type="submit" id="submit-customer-button">Add Customer</button>
+                            <button type="button" id="cancel-edit-customer-button" style="display:none;">Cancel Update</button>
+                        </div>
+                    </form>
+                    <div id="form-message" class="form-message-placeholder"></div>
+                </section>
 
+                <section id="customers-list-section">
+                    <h2>Current Customer List</h2>
+                    <div class="action-buttons-group">
+                        <button class="button add"><i class="fas fa-plus"></i> Add</button>
+                        <button class="button export"><i class="fas fa-file-export"></i> Export</button>
+                        <button class="button filter"><i class="fas fa-filter"></i> Filter</button>
+                    </div>
+                    <div id="action-message" class="action-message-placeholder"></div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Registered At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="customers-table-body">
+                            </tbody>
+                    </table>
+                </section>
+            </main>
+        </div>
+    </div>
     <script src="admin-customers-script.js"></script>
 </body>
 </html>

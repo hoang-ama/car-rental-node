@@ -1,183 +1,718 @@
 /* admin-public/admin-style.css */
 
 :root {
-    --primary: #3498db;
-    --primary-hover: #2980b9;
-    --danger: #e74c3c;
-    --danger-hover: #c0392b;
-  }
-  
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f0f2f5;
-    color: #333;
+    --primary-color-vshare: #e67e22; /* Màu cam chính của Vshare */
+    --primary-hover-vshare: #d35400; /* Màu cam hover của Vshare */
+    --text-dark: #2c3e50; /* Màu chữ chính */
+    --sidebar-bg: #212529; /* Màu nền của sidebar */
+    --sidebar-text: #adb5bd; /* Màu chữ trong sidebar */
+    --sidebar-active-bg: #343a40; /* Màu nền cho item active trong sidebar */
+    --header-bg: #ffffff; /* Màu nền header */
+    --header-border: #e9ecef; /* Màu border dưới header */
+    --main-bg: #f8f9fa; /* Màu nền của khu vực nội dung chính */
+    --section-bg: #ffffff; /* Màu nền của các section con */
+    --border-light: #dee2e6; /* Màu border nhẹ */
+
+    /* Buttons colors */
+    --button-add: #28a745; /* Màu nút Add */
+    --button-add-hover: #218838;
+    --button-export: #17a2b8; /* Màu nút Export */
+    --button-export-hover: #138496;
+    --button-filter: #6c757d; /* Màu nút Filter / Cancel Update / Go Back */
+    --button-filter-hover: #5a6268;
+    --button-edit: #ffc107; /* Màu nút Edit */
+    --button-edit-hover: #e0a800;
+    --button-delete: #dc3545; /* Màu nút Delete */
+    --button-delete-hover: #c82333;
+
+    /* Status Badges colors (inspired by client-side, adjusted for admin theme) */
+    --status-pending: #ffc107; /* Yellow */
+    --status-confirmed: #28a745; /* Green */
+    --status-rented-out: #007bff; /* Blue */
+    --status-completed: #6c757d; /* Gray */
+    --status-cancelled: #dc3545; /* Red (for all cancelled types) */
+    --status-available: #28a745; /* Green */
+    --status-unavailable: #dc3545; /* Red */
+    --status-maintained: #ffc107; /* Yellow */
+    --status-active: #28a745; /* Green */
+    --status-deactive: #6c757d; /* Gray */
 }
 
-header {
-    background-color: #212529;
-    color: #fff;
-    padding: 1rem 0;
+/* Base styles */
+body {
+    font-family: 'Montserrat', sans-serif; /* Sử dụng font Montserrat */
+    margin: 0;
+    padding: 0;
+    background-color: var(--main-bg);
+    color: var(--text-dark);
+    display: flex; /* Quan trọng để tạo layout sidebar + content */
+    min-height: 100vh; /* Đảm bảo body chiếm toàn bộ chiều cao */
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Admin layout container */
+.admin-container {
+    display: flex;
+    width: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px; /* Chiều rộng sidebar */
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 20px 0;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    position: sticky; /* Giữ sidebar cố định khi cuộn */
+    top: 0;
+    height: 100vh; /* Chiếm toàn bộ chiều cao viewport */
+    z-index: 1000;
+}
+
+.sidebar .logo {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.sidebar .logo img {
+    max-height: 40px;
+    width: auto;
+    display: inline-block; /* Để căn giữa ảnh */
+}
+
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar nav ul li {
+    margin-bottom: 5px;
+}
+
+.sidebar nav ul li a {
+    display: flex; /* Dùng flex để căn chỉnh icon và text */
+    align-items: center;
+    padding: 12px 20px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: 0.95em;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.sidebar nav ul li a i {
+    margin-right: 15px;
+    font-size: 1.2em;
+    width: 20px; /* Đảm bảo icon có chiều rộng cố định */
     text-align: center;
 }
 
-header h1 {
-    padding-bottom: 5px;
+.sidebar nav ul li a.active,
+.sidebar nav ul li a:hover {
+    background-color: var(--sidebar-active-bg);
+    color: var(--primary-color-vshare); /* Màu chữ active/hover */
+    border-left: 4px solid var(--primary-color-vshare); /* Đường highlight bên trái */
+    padding-left: 16px; /* Bù lại padding đã mất do border */
 }
 
-main {
+/* Sidebar Footer */
+.sidebar-footer {
+    margin-top: auto; /* Đẩy footer xuống dưới cùng của sidebar */
     padding: 20px;
-    max-width: 1000px;
-    margin: 20px auto;
-    background-color: #fff;
-    box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    border-radius: 8px;
+    text-align: center;
+    font-size: 0.8em;
+    color: #6c757d;
+    border-top: 1px solid #343a40; /* Đường viền nhẹ */
 }
 
-section {
-    margin-bottom: 30px;
-    padding: 20px;
-    border: 1px solid #e0e0e0;
+/* Main Content Area */
+.main-content {
+    flex-grow: 1; /* Cho phép khu vực này chiếm hết không gian còn lại */
+    padding: 0; /* Loại bỏ padding mặc định, header và section sẽ tự quản lý */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Top Header */
+.top-header {
+    background-color: var(--header-bg);
+    padding: 15px 30px;
+    border-bottom: 1px solid var(--header-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    position: sticky; /* Giữ header cố định khi cuộn */
+    top: 0;
+    z-index: 999;
+}
+
+.top-header h1 {
+    font-size: 1.8em;
+    color: var(--text-dark);
+    margin: 0;
+    font-weight: 700;
+}
+
+.top-header .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.top-header .header-actions .search-bar {
+    position: relative;
+}
+
+.top-header .header-actions .search-bar input {
+    padding: 8px 12px 8px 35px; /* Thêm padding cho icon */
+    border: 1px solid var(--border-light);
     border-radius: 5px;
+    font-size: 0.9em;
+    width: 200px;
+    transition: width 0.3s ease;
 }
 
-h2 {
-    color: #2c3e50;
-    border-bottom: 2px solid #3498db;
-    padding-bottom: 10px;
+.top-header .header-actions .search-bar input:focus {
+    width: 250px;
+    border-color: var(--primary-color-vshare);
+    outline: none;
+}
+
+.top-header .header-actions .search-bar i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+
+.top-header .header-actions .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.top-header .header-actions .user-profile img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-light);
+}
+
+.top-header .header-actions .user-profile span {
+    font-weight: 500;
+    color: var(--text-dark);
+}
+
+/* Page content area */
+.page-content {
+    padding: 30px;
+    flex-grow: 1; /* Cho phép nội dung chiếm hết không gian còn lại */
+}
+
+/* Sections within page content */
+section {
+    background-color: var(--section-bg);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 25px; /* Khoảng cách giữa các section */
+    border: 1px solid var(--border-light);
+}
+
+section h2 {
+    font-size: 1.5em;
+    color: var(--text-dark);
     margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--primary-color-vshare);
+    padding-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
-form div {
-    margin-bottom: 15px;
+/* Action buttons above table (e.g., Add, Export, Filter) */
+.action-buttons-group {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px; /* Khoảng cách giữa các nút */
+    align-items: center;
+}
+
+.action-buttons-group .button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.action-buttons-group .button i {
+    font-size: 1.1em;
+}
+
+.button.add {
+    background-color: var(--button-add);
+    color: white;
+}
+.button.add:hover {
+    background-color: var(--button-add-hover);
+}
+
+.button.export {
+    background-color: var(--button-export);
+    color: white;
+}
+.button.export:hover {
+    background-color: var(--button-export-hover);
+}
+
+.button.filter {
+    background-color: var(--button-filter);
+    color: white;
+    margin-left: auto; /* Đẩy nút filter sang phải */
+}
+.button.filter:hover {
+    background-color: var(--button-filter-hover);
+}
+
+/* Table styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0; /* Đã có margin từ action-buttons-group */
+    font-size: 0.9em;
+}
+
+th, td {
+    border: 1px solid var(--border-light);
+    padding: 12px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+th {
+    background-color: #f2f2f2;
+    color: var(--text-dark);
+    font-weight: 600;
+    white-space: nowrap; /* Ngăn không cho header xuống dòng */
+}
+
+/* Status Badges in tables */
+.status-badge {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 20px; /* Hình bầu dục */
+    font-size: 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: white;
+    white-space: nowrap;
+}
+
+.status-badge.status-available,
+.status-badge.status-active,
+.status-badge.status-confirmed {
+    background-color: var(--status-confirmed);
+}
+
+.status-badge.status-unavailable,
+.status-badge.status-deactive,
+.status-badge.status-cancelled-by-customer,
+.status-badge.status-cancelled-by-admin {
+    background-color: var(--status-cancelled);
+}
+
+.status-badge.status-pending,
+.status-badge.status-maintained {
+    background-color: var(--status-pending);
+    color: var(--text-dark); /* Màu chữ tối cho nền vàng */
+}
+
+.status-badge.status-rented-out {
+    background-color: var(--status-rented-out);
+}
+
+.status-badge.status-completed {
+    background-color: var(--status-completed);
+}
+
+/* Table action buttons */
+td button {
+    padding: 8px 12px;
+    margin-right: 5px;
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.85em;
+    transition: background-color 0.2s ease;
+}
+
+.edit-btn { background-color: var(--button-edit); }
+.edit-btn:hover { background-color: var(--button-edit-hover); }
+.delete-btn { background-color: var(--button-delete); }
+.delete-btn:hover { background-color: var(--button-delete-hover); }
+
+/* Form styles */
+form {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Chia 2 cột */
+    gap: 20px; /* Khoảng cách giữa các cột và hàng */
+}
+
+form .form-group {
+    margin-bottom: 0; /* Reset margin-bottom mặc định của div */
 }
 
 form label {
     display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-dark);
+    font-size: 0.9em;
 }
 
 form input[type="text"],
 form input[type="number"],
 form input[type="url"],
-form select {
-    width: calc(100% - 22px); /* Adjust for padding and border */
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-form button {
-    background-color: #3498db;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 1em;
-    margin-right: 10px;
-}
-
-form button:hover {
-    background-color: #2980b9;
-}
-
-#cancel-edit-button {
-    background-color: #e74c3c;
-}
-#cancel-edit-button:hover {
-    background-color: #c0392b;
-}
-
-#form-message {
-    margin-top: 10px;
-    padding: 10px;
-    border-radius: 4px;
-}
-#form-message.success { background-color: #d4edda; color: #155724; }
-#form-message.error { background-color: #f8d7da; color: #721c24; }
-
-
-table {
+form input[type="tel"],
+form input[type="email"],
+form input[type="password"],
+form input[type="datetime-local"],
+form select,
+form textarea {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
+    padding: 10px 12px;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    font-size: 0.9em;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+    box-sizing: border-box; /* Đảm bảo padding và border không làm tăng width */
 }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
+form input:focus,
+form select:focus,
+form textarea:focus {
+    border-color: var(--primary-color-vshare);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(230, 126, 34, 0.25);
 }
 
-th {
-    background-color: #ecf0f1;
-    color: #2c3e50;
+form textarea {
+    min-height: 80px;
+    resize: vertical;
 }
 
-td img {
-    max-width: 100px;
-    height: auto;
-    border-radius: 4px;
+/* Fieldset for Specifications and Features */
+fieldset {
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    grid-column: span 2; /* Chiếm cả 2 cột */
 }
 
-td button {
-    padding: 5px 10px;
-    margin-right: 5px;
-    cursor: pointer;
-    border: none;
-    border-radius: 3px;
-    color: white;
+fieldset legend {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--text-dark);
+    padding: 0 10px;
+    margin-bottom: 10px;
 }
 
-.edit-btn { background-color: #f39c12; }
-.edit-btn:hover { background-color: #e67e22; }
-.delete-btn { background-color: #e74c3c; }
-.delete-btn:hover { background-color: #c0392b; }
+fieldset > div { /* Cho các div con trực tiếp trong fieldset */
+    margin-bottom: 15px;
+}
+fieldset > div:last-child {
+    margin-bottom: 0; /* Loại bỏ margin-bottom cho div cuối cùng */
+}
+
 
 .features-checkbox-group {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 10px;
-    margin-top: 5px;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); /* 2-3 cột trên desktop */
+    gap: 8px;
     padding: 10px;
-    border: 1px solid #eee;
-    border-radius: 4px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #e9ecef;
 }
+
 .features-checkbox-group label {
-    display: flex; /* Changed from block for better alignment */
+    display: flex;
     align-items: center;
-    font-weight: normal; /* Normal weight for checkbox labels */
-    margin-bottom: 0; /* Remove default margin from form label */
+    font-weight: normal;
+    margin-bottom: 0;
+    font-size: 0.9em;
+    cursor: pointer;
 }
+
 .features-checkbox-group input[type="checkbox"] {
     margin-right: 8px;
-    width: auto; /* Allow checkbox to size naturally */
+    width: auto;
+    transform: scale(1.1); /* To hơn một chút */
+    accent-color: var(--primary-color-vshare);
+    cursor: pointer;
 }
 
-footer{
-    background-color: #212529;
-    color: #adb5bd;
-    padding: 20px;
+/* Form action buttons (Add/Update/Cancel) */
+.form-buttons {
+    grid-column: span 2; /* Đảm bảo các nút chiếm toàn bộ chiều rộng */
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#submit-car-button,
+#submit-booking-button,
+#submit-customer-button,
+#cancel-edit-button,
+#cancel-edit-booking-button,
+#cancel-edit-customer-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
+#submit-car-button,
+#submit-booking-button,
+#submit-customer-button {
+    background-color: var(--button-add);
+    color: white;
+}
+#submit-car-button:hover,
+#submit-booking-button:hover,
+#submit-customer-button:hover {
+    background-color: var(--button-add-hover);
+}
+
+#cancel-edit-button,
+#cancel-edit-booking-button,
+#cancel-edit-customer-button {
+    background-color: var(--button-filter);
+    color: white;
+}
+#cancel-edit-button:hover,
+#cancel-edit-booking-button:hover,
+#cancel-edit-customer-button:hover {
+    background-color: var(--button-filter-hover);
+}
+
+/* Messages */
+.form-message-placeholder,
+.action-message-placeholder {
+    grid-column: span 2; /* Chiếm cả 2 cột */
+    padding: 10px;
+    border-radius: 4px;
+    margin-top: 15px; /* Khoảng cách với form/table */
+    font-size: 0.9em;
     text-align: center;
-    font-size: 1em;
-    border-top: 1px solid #e9ecef;
-  }
+}
+
+.form-message-placeholder.success,
+.action-message-placeholder.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.form-message-placeholder.error,
+.action-message-placeholder.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
 
 
-@media (max-width: 768px) {
-    main {
-      padding: 10px;
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .sidebar {
+        width: 200px; /* Giảm chiều rộng sidebar */
     }
-    table {
-      font-size: 0.9em;
+    .sidebar nav ul li a {
+        padding: 10px 15px;
+        font-size: 0.9em;
     }
-    th, td {
-      padding: 8px;
+    .sidebar nav ul li a i {
+        margin-right: 10px;
+    }
+    .top-header {
+        padding: 10px 20px;
+    }
+    .top-header h1 {
+        font-size: 1.5em;
+    }
+    .top-header .header-actions .search-bar input {
+        width: 150px;
+    }
+    .top-header .header-actions .search-bar input:focus {
+        width: 200px;
+    }
+    .page-content {
+        padding: 20px;
+    }
+    section {
+        padding: 20px;
+    }
+    section h2 {
+        font-size: 1.3em;
+    }
+    form {
+        grid-template-columns: 1fr; /* Chuyển sang 1 cột trên tablet */
+    }
+    form fieldset {
+        grid-column: span 1; /* Fieldset cũng chỉ chiếm 1 cột */
+    }
+    .form-buttons,
+    .form-message-placeholder,
+    .action-message-placeholder {
+        grid-column: span 1; /* Các nút và message cũng chỉ chiếm 1 cột */
     }
     .features-checkbox-group {
-      grid-template-columns: 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     }
-  }
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 70px; /* Thu nhỏ sidebar thành chỉ icon */
+        padding: 15px 0;
+    }
+    .sidebar .logo {
+        margin-bottom: 20px;
+        background-image: url('assets/logo/logo_icon.png'); /* New logo for mobile */
+        background-size: contain;
+        background-repeat: no-repeat;
+        height: 40px; /* Adjust height for mobile */
+        background-position: center;
+    }
+    .sidebar .logo img {
+        display:none /* Ko hiện logo */
+    }
+
+    .sidebar nav ul li a {
+        padding: 12px 0;
+        justify-content: center; /* Căn giữa icon */
+    }
+    .sidebar nav ul li a i {
+        margin-right: 0;
+        font-size: 1.4em;
+    }
+    .sidebar nav ul li a span {
+        display: none; /* Ẩn text trong sidebar */
+    }
+    .sidebar nav ul li a.active,
+    .sidebar nav ul li a:hover {
+        border-left: none; /* Bỏ border trái */
+        border-bottom: 3px solid var(--primary-color-vshare); /* Thêm border dưới khi active/hover */
+        padding-left: 0;
+    }
+    .sidebar-footer {
+        display: none; /* Ẩn footer trên mobile */
+    }
+
+    .top-header {
+        flex-direction: column; /* Xếp dọc các phần tử header */
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 15px;
+    }
+    .top-header h1 {
+        font-size: 1.2em;
+    }
+    .top-header .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    .top-header .header-actions .search-bar input {
+        width: 100%;
+        max-width: none;
+    }
+    .top-header .header-actions .search-bar input:focus {
+        width: 100%;
+    }
+    .page-content {
+        padding: 15px;
+    }
+    section {
+        padding: 15px;
+    }
+    section h2 {
+        font-size: 1.1em;
+        flex-direction: column; /* Xếp dọc tiêu đề và nút hành động */
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .action-buttons-group {
+        width: 100%;
+        flex-wrap: wrap; /* Cho phép các nút xuống dòng */
+        justify-content: flex-start;
+    }
+    .action-buttons-group .button {
+        flex-grow: 1; /* Cho phép nút giãn ra */
+        justify-content: center;
+    }
+    table {
+        font-size: 0.85em;
+    }
+    th, td {
+        padding: 8px;
+    }
+    /* Make table responsive by stacking cells */
+    table, thead, tbody, th, td, tr {
+        display: block;
+    }
+    thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    tr {
+        border: 1px solid var(--border-light);
+        margin-bottom: 15px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+    }
+    td:last-child {
+        border-bottom: none;
+    }
+    td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: #555;
+    }
+    .status-badge {
+        font-size: 0.7em;
+        padding: 4px 8px;
+    }
+}
