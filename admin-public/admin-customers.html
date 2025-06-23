@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,58 +48,61 @@
             </header>
 
             <main class="page-content">
-                <section id="add-customer-section">
-                    <h2>Add New Customer / Update Customer</h2>
-                    <form id="customer-form">
-                        <input type="hidden" id="customer-id-form" name="customerIdForm">
-                        <div class="form-group">
-                            <label for="customer-name">Name:</label>
-                            <input type="text" id="customer-name" name="name" required>
+                <div id="list-view-wrapper">
+                    <section id="customers-list-section">
+                        <h2>Current Customer List</h2>
+                        <div class="action-buttons-group">
+                            <button class="button add" id="show-add-form-btn"><i class="fas fa-plus"></i> Add</button>
+                            <button class="button export"><i class="fas fa-file-export"></i> Export</button>
+                            <button class="button filter"><i class="fas fa-filter"></i> Filter</button>
                         </div>
-                        <div class="form-group">
-                            <label for="customer-phone">Phone:</label>
-                            <input type="tel" id="customer-phone" name="phone" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="customer-email">Email:</label>
-                            <input type="email" id="customer-email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="customer-password">Password (leave blank to keep current):</label>
-                            <input type="password" id="customer-password" name="password">
-                        </div>
+                        <div id="action-message" class="action-message-placeholder"></div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Registered At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customers-table-body">
+                                </tbody>
+                        </table>
+                    </section>
+                </div>   
+                <div id="form-view-wrapper" class="hidden">
+                    <section id="add-customer-section">
+                        <h2>Add New Customer / Update Customer</h2>
+                        <form id="customer-form">
+                            <input type="hidden" id="customer-id-form" name="customerIdForm">
+                            <div class="form-group">
+                                <label for="customer-name">Name:</label>
+                                <input type="text" id="customer-name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-phone">Phone:</label>
+                                <input type="tel" id="customer-phone" name="phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-email">Email:</label>
+                                <input type="email" id="customer-email" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-password">Password:</label>
+                                <input type="password" id="customer-password" name="password" placeholder="leave blank to keep curren">
+                            </div>
 
-                        <div class="form-buttons">
-                            <button type="submit" id="submit-customer-button">Add Customer</button>
-                            <button type="button" id="cancel-edit-customer-button" style="display:none;">Cancel Update</button>
-                        </div>
-                    </form>
-                    <div id="form-message" class="form-message-placeholder"></div>
-                </section>
-
-                <section id="customers-list-section">
-                    <h2>Current Customer List</h2>
-                    <div class="action-buttons-group">
-                        <button class="button add"><i class="fas fa-plus"></i> Add</button>
-                        <button class="button export"><i class="fas fa-file-export"></i> Export</button>
-                        <button class="button filter"><i class="fas fa-filter"></i> Filter</button>
-                    </div>
-                    <div id="action-message" class="action-message-placeholder"></div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Phone</th>
-                                <th>Email</th>
-                                <th>Registered At</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="customers-table-body">
-                            </tbody>
-                    </table>
-                </section>
+                            <div class="form-buttons">
+                                <button type="submit" id="submit-customer-button">Add Customer</button>
+                                <button type="button" id="cancel-edit-customer-button">Cancel</button>
+                            </div>
+                        </form>
+                        <div id="form-message" class="form-message-placeholder"></div>
+                    </section>
+                </div>
             </main>
         </div>
     </div>

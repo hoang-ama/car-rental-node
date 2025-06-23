@@ -24,13 +24,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const notesInputBooking = document.getElementById('notes-booking');
 
     const submitBookingBtn = document.getElementById('submit-booking-button');
-    const cancelEditBookingBtn = document.getElementById('cancel-edit-booking-button');
+    const cancelEditBookingBtn = document.getElementById('cancel-edit-booking-button'); // Renamed from cancelEditBookingBtn for consistency
     const bookingFormMessage = document.getElementById('booking-form-message'); // Message for form actions
+
+    // NEW DOM Elements for view switching
+    const listViewWrapper = document.getElementById('list-view-wrapper');
+    const formViewWrapper = document.getElementById('form-view-wrapper');
+    const showAddFormButton = document.getElementById('show-add-form-btn'); // The "Add" button in the list view
 
     const ADMIN_BOOKINGS_API_URL = '/admin/bookings';
     const PUBLIC_CARS_API_URL = '/api/cars'; // To populate car selection dropdown
 
     // --- Utility Functions ---
+    /**
+     * Displays a message in a designated message div.
+     * @param {HTMLElement} element The DOM element to display the message in.
+     * @param {string} message The message text.
+     * @param {string} type The type of message ('success' or 'error').
+     */
     function showMessage(element, message, type = 'success') {
         if (!element) {
             console.warn("Attempted to show message on a null element:", message);
@@ -38,12 +49,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         element.textContent = message;
         element.className = 'form-message-placeholder'; // Reset base class
-        element.classList.add(type); // 'success' hoặc 'error'
+        element.classList.add(type); // 'success' or 'error'
 
         setTimeout(() => {
             element.textContent = '';
             element.className = '';
         }, 5000); // Message visible for 5 seconds
+    }
+
+    // --- Function to switch between list view and form view ---
+    function showView(viewId) {
+        if (viewId === 'list') {
+            listViewWrapper.classList.remove('hidden');
+            formViewWrapper.classList.add('hidden');
+            // Clear messages when switching back to list view
+            if(bookingFormMessage) {
+                bookingFormMessage.textContent = '';
+                bookingFormMessage.className = '';
+            }
+            if(bookingActionMessageDiv) {
+                bookingActionMessageDiv.textContent = '';
+                bookingActionMessageDiv.className = '';
+            }
+            // Khi về list view, nút Cancel trong form phải ẩn đi
+            if(cancelEditBookingBtn) cancelEditBookingBtn.style.display = 'none';
+        } else if (viewId === 'form') {
+            listViewWrapper.classList.add('hidden');
+            formViewWrapper.classList.remove('hidden');
+            // Clear messages when switching to form view
+            if(bookingActionMessageDiv) {
+                bookingActionMessageDiv.textContent = '';
+                bookingActionMessageDiv.className = '';
+            }
+            if(bookingFormMessage) {
+                bookingFormMessage.textContent = '';
+                bookingFormMessage.className = '';
+            }
+            // Khi mở form view, nút Cancel phải hiện ra
+            if(cancelEditBookingBtn) cancelEditBookingBtn.style.display = 'inline-block';
+        }
+        window.scrollTo(0, 0); // Scroll to top
     }
 
     // Formats an ISO dateTimeString (like "2025-06-10T07:00:00.000Z")
@@ -130,8 +175,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="status-badge status-${statusClass}">${booking.status || 'N/A'}</span>
                     </td>
                     <td data-label="Actions">
-                        <button class="edit-booking-btn" data-booking='${JSON.stringify(booking)}'>Edit</button>
-                        <button class="delete-booking-btn" data-id="${booking.id}">Delete</button>
+                        <button class="edit-btn" data-booking='${JSON.stringify(booking)}'><i class="fas fa-pencil-alt"></i></button>
+                        <button class="delete-btn" data-id="${booking.id}"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 `;
             });
@@ -223,7 +268,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (response.ok) {
                     showMessage(bookingFormMessage, result.message || (editingBookingId ? 'Booking updated successfully!' : 'Booking added successfully!'), 'success');
                     resetBookingForm();
-                    fetchAndDisplayBookings();
+                    await fetchAndDisplayBookings();
+                    showView('list'); // Switch back to list view after successful operation
                 } else {
                     showMessage(bookingFormMessage, result.message || 'Operation failed. Please try again.', 'error');
                 }
@@ -245,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = event.target;
 
             // Edit Booking
-            if (target.classList.contains('edit-booking-btn')) {
+            if (target.classList.contains('edit-btn')) {
                 const bookingDataString = target.dataset.booking;
                 if (!bookingDataString) {
                     console.error("Booking data not found on edit button.");
@@ -256,15 +302,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     const bookingToEdit = JSON.parse(bookingDataString);
                     console.log("Editing booking:", bookingToEdit);
 
+                    // 1. Switch to form view first
+                    showView('form'); // Show the form view
+
+                    // 2. Populate form fields
                     bookingIdFormInput.value = bookingToEdit.id;
                     customerNameInputBooking.value = bookingToEdit.customerName || '';
                     customerPhoneInput.value = bookingToEdit.customerPhone || '';
                     customerEmailInput.value = bookingToEdit.customerEmail || '';
 
-                    if (carSelectBooking.options.length <= 1) {
-                        await loadCarsIntoBookingSelect();
+                    // Ensure car selection dropdown is populated before setting value
+                    if (carSelectBooking.options.length <= 1) { // Only default option present
+                        await loadCarsIntoBookingSelect(); // Wait for cars to load
                     }
-                    carSelectBooking.value = bookingToEdit.carId || '';
+                    carSelectBooking.value = bookingToEdit.carId || ''; // carId is the unique ID like "VF8-29A12345"
 
                     pickupLocationInput.value = bookingToEdit.pickupLocation || '';
                     startDateInputBooking.value = formatDateTimeForInput(bookingToEdit.startDate);
@@ -278,10 +329,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     bookingStatusSelectAdmin.value = bookingToEdit.status || 'Pending';
                     notesInputBooking.value = bookingToEdit.notes || '';
 
+                    // 3. Update submit button text
                     if(submitBookingBtn) submitBookingBtn.textContent = 'Update Booking';
-                    if(cancelEditBookingBtn) cancelEditBookingBtn.style.display = 'inline-block';
-                    const addBookingSection = document.getElementById('add-booking-section');
-                    if(addBookingSection) addBookingSection.scrollIntoView({ behavior: 'smooth' });
+                    // The cancel button display is handled by showView('form')
 
                 } catch (e) {
                     console.error("Error parsing booking data for edit:", e);
@@ -290,7 +340,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Delete Booking
-            if (target.classList.contains('delete-booking-btn')) {
+            if (target.classList.contains('delete-btn')) {
                 const bookingIdToDelete = target.dataset.id;
                 if (!bookingIdToDelete) {
                     showMessage(bookingActionMessageDiv, "Error: Booking ID not found for deletion.", "error");
@@ -327,22 +377,41 @@ document.addEventListener('DOMContentLoaded', () => {
         if(bookingForm) bookingForm.reset();
         if(bookingIdFormInput) bookingIdFormInput.value = '';
         if(submitBookingBtn) submitBookingBtn.textContent = 'Add Booking';
-        if(cancelEditBookingBtn) cancelEditBookingBtn.style.display = 'none';
+        // The display of the cancel button is handled by showView()
+        
+        // Reset select dropdowns to their default/first option
         if(carSelectBooking) carSelectBooking.value = "";
         if(paymentMethodSelect) paymentMethodSelect.value = "Cash";
         if(bookingStatusSelectAdmin) bookingStatusSelectAdmin.value = "Pending";
         if(customerNameInputBooking) customerNameInputBooking.focus();
     }
 
-    if(cancelEditBookingBtn) {
-        cancelEditBookingBtn.addEventListener('click', resetBookingForm);
+
+    // --- Event Listeners for view switching ---
+    if (showAddFormButton) {
+        showAddFormButton.addEventListener('click', async () => { // Make async to await loadCarsIntoBookingSelect
+            resetBookingForm(); // Clear form before opening
+            await loadCarsIntoBookingSelect(); // Ensure cars are loaded
+            showView('form'); // Show the form view
+            // The submit button text is already set to 'Add Booking' by resetBookingForm()
+            // The cancel button display is handled by showView('form')
+        });
     }
+
+    if(cancelEditBookingBtn) {
+        cancelEditBookingBtn.addEventListener('click', () => {
+            resetBookingForm();
+            showView('list');
+        });
+    }
+
 
     // --- Initial Data Load ---
     async function initializePage() {
         console.log("Initializing Admin Bookings Page...");
-        await loadCarsIntoBookingSelect();
-        await fetchAndDisplayBookings();
+        await loadCarsIntoBookingSelect(); // Load cars first for the dropdown
+        await fetchAndDisplayBookings();   // Then load bookings for the table
+        showView('list'); // Default to showing the list view on page load
     }
 
     initializePage();

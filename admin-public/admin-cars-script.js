@@ -1,9 +1,11 @@
 // admin-public/admin-cars-script.js
 document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Elements ---
     const carsTableBody = document.getElementById('cars-table-body');
-    const carForm = document.getElementById('car-form');
+    const actionMessageDiv = document.getElementById('action-message'); // Message for table actions
 
-    const carRecordIdInput = document.getElementById('car-id-form');
+    const carForm = document.getElementById('car-form');
+    const carRecordIdInput = document.getElementById('car-id-form'); // Hidden input to store car ID for update
     const carUniqueIdInput = document.getElementById('car-unique-id');
     const makeInput = document.getElementById('make');
     const modelInput = document.getElementById('model');
@@ -21,45 +23,104 @@ document.addEventListener('DOMContentLoaded', () => {
     const featuresCheckboxes = document.querySelectorAll('input[name="features"]');
 
     const submitButton = document.getElementById('submit-car-button');
-    const cancelEditButton = document.getElementById('cancel-edit-button');
+    const cancelButton = document.getElementById('cancel-edit-button');
     const formMessageDiv = document.getElementById('form-message'); // For messages related to the form (add/update)
+
+    // NEW DOM Elements for view switching (assuming these IDs are in your HTML)
+    const listViewWrapper = document.getElementById('list-view-wrapper');
+    const formViewWrapper = document.getElementById('form-view-wrapper');
+    const showAddFormButton = document.getElementById('show-add-form-btn'); // The "Add" button in the list view
 
     const ADMIN_API_URL = '/admin/cars';
     const PUBLIC_CARS_API_URL = '/api/cars'; // Used to fetch cars for display
 
     // --- Utility Function to display messages ---
+    /**
+     * Displays a message in a designated message div.
+     * @param {string} message The message text.
+     * @param {string} type The type of message ('success' or 'error').
+     * @param {HTMLElement} targetElement The DOM element to display the message in (defaults to formMessageDiv).
+     */
     function showMessage(message, type = 'success', targetElement = formMessageDiv) {
-        if (!targetElement) return;
+        if (!targetElement) {
+            console.warn("Attempted to show message on a null element:", message);
+            return;
+        }
         targetElement.textContent = message;
         targetElement.className = 'form-message-placeholder'; // Reset base class
         targetElement.classList.add(type); // Add success or error class
 
+        // Clear message after 4 seconds
         setTimeout(() => {
             targetElement.textContent = '';
             targetElement.className = '';
-        }, 4000); // Message visible for 4 seconds
+        }, 4000);
     }
 
-    // --- Fetch and Display Cars List ---
+    // --- Function to switch between list view and form view ---
+    /**
+     * Switches the display between the list view and the form view.
+     * @param {string} viewId 'list' to show the table, 'form' to show the add/edit form.
+     */
+    function showView(viewId) {
+        if (viewId === 'list') {
+            listViewWrapper.classList.remove('hidden');
+            formViewWrapper.classList.add('hidden');
+            // Clear all messages when switching back to list view
+            if(formMessageDiv) {
+                formMessageDiv.textContent = '';
+                formMessageDiv.className = '';
+            }
+            if(actionMessageDiv) {
+                actionMessageDiv.textContent = '';
+                actionMessageDiv.className = '';
+            }
+            // Khi về list view, nút Cancel trong form phải ẩn đi
+            if(cancelButton) cancelButton.style.display = 'none';
+        } else if (viewId === 'form') {
+            listViewWrapper.classList.add('hidden');
+            formViewWrapper.classList.remove('hidden');
+            // Clear all messages when switching to form view
+            if(actionMessageDiv) {
+                actionMessageDiv.textContent = '';
+                actionMessageDiv.className = '';
+            }
+            if(formMessageDiv) {
+                formMessageDiv.textContent = '';
+                formMessageDiv.className = '';
+            }
+            // Khi mở form view, nút Cancel phải hiện ra
+            if(cancelButton) cancelButton.style.display = 'inline-block';
+        }
+        window.scrollTo(0, 0); // Always scroll to top of the page when changing views
+    }
+
+    // --- Fetch and Display Cars List in the Table ---
     async function fetchAndDisplayCars() {
-        if (!carsTableBody) return;
+        if (!carsTableBody) return; // Exit if the table body element is not found
         try {
             const response = await fetch(PUBLIC_CARS_API_URL);
-            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-            const cars = await response.json();
-            carsTableBody.innerHTML = ''; // Clear existing rows
+            if (!response.ok) {
+                // If response is not OK, throw an error with status
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const cars = await response.json(); // Parse the JSON response
+            carsTableBody.innerHTML = ''; // Clear existing rows in the table
 
             if (cars.length === 0) {
+                // Display a message if no cars are found
                 carsTableBody.innerHTML = '<tr><td colspan="9">No cars found.</td></tr>';
                 return;
             }
 
+            // Iterate over each car and create a table row
             cars.forEach(car => {
-                const row = carsTableBody.insertRow();
-                // Determine availability status for styling
+                const row = carsTableBody.insertRow(); // Create a new table row
+                // Determine the text and CSS class for car availability status
                 const availabilityStatusText = car.available ? 'Available' : 'Unavailable';
                 const availabilityStatusClass = car.available ? 'status-available' : 'status-unavailable';
 
+                // Populate the row with car data. `data-label` is for responsive table styling.
                 row.innerHTML = `
                     <td data-label="ID">${car.id || 'N/A'}</td>
                     <td data-label="Make">${car.make || 'N/A'}</td>
@@ -72,27 +133,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="status-badge ${availabilityStatusClass}">${availabilityStatusText}</span>
                     </td>
                     <td data-label="Actions">
-                        <button class="edit-btn" data-car='${JSON.stringify(car)}'>Edit</button>
-                        <button class="delete-btn" data-id="${car.id}">Delete</button>
+                        <button class="edit-btn" data-car='${JSON.stringify(car)}'><i class="fas fa-pencil-alt"></i></button>
+                        <button class="delete-btn" data-id="${car.id}"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 `;
             });
         } catch (error) {
             console.error("Error fetching cars for admin table:", error);
             carsTableBody.innerHTML = '<tr><td colspan="9">Error loading cars. Please try again.</td></tr>';
-            showMessage('Error loading cars: ' + error.message, 'error'); // Display error to user
+            // Display error message in the action message area of the table
+            showMessage('Error loading cars: ' + error.message, 'error', actionMessageDiv);
         }
     }
 
-    // --- Handle Form Submission (Add/Update Car) ---
+    // --- Handle Car Form Submission (Add or Update) ---
     if (carForm) {
         carForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
+            event.preventDefault(); // Prevent default form submission behavior
+
+            // Clear previous form messages
             if(formMessageDiv) {
                 formMessageDiv.textContent = '';
                 formMessageDiv.className = '';
             }
 
+            // Collect selected features from checkboxes
             const selectedFeatures = [];
             featuresCheckboxes.forEach(checkbox => {
                 if (checkbox.checked) {
@@ -100,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
 
+            // Create a car data object from form inputs
             const carData = {
                 id: carUniqueIdInput.value.trim(),
                 make: makeInput.value.trim(),
@@ -118,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 features: selectedFeatures
             };
 
-            // Basic validation
+            // Perform basic frontend validation
             if (!carData.id || !carData.make || !carData.model || isNaN(carData.year) || isNaN(carData.pricePerDay) || !carData.location) {
                 showMessage('Please fill in all required fields (ID, Make, Model, Year, Price, Location).', 'error');
                 return;
@@ -128,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
+            // Determine if it's an 'Add' or 'Update' operation based on carRecordIdInput
             const editingRecordId = carRecordIdInput.value;
             let method = editingRecordId ? 'PUT' : 'POST';
             let url = editingRecordId ? `${ADMIN_API_URL}/${encodeURIComponent(editingRecordId)}` : ADMIN_API_URL;
@@ -135,30 +202,36 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log("Submitting car data:", carData, "Method:", method, "URL:", url, "Editing Record ID:", editingRecordId);
 
             try {
+                // Disable submit button and change text while processing
                 if(submitButton) {
                     submitButton.disabled = true;
                     submitButton.textContent = editingRecordId ? 'Updating...' : 'Adding...';
                 }
 
+                // Send the data to the server
                 const response = await fetch(url, {
                     method: method,
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(carData),
                 });
 
-                const result = await response.json();
+                const result = await response.json(); // Parse the server response
 
                 if (response.ok) {
+                    // Show success message, reset form, refresh list, and switch to list view
                     showMessage(result.message || (editingRecordId ? 'Car updated successfully!' : 'Car added successfully!'), 'success');
                     resetForm();
-                    fetchAndDisplayCars();
+                    await fetchAndDisplayCars(); // Await refresh to ensure updated data
+                    showView('list'); // Switch back to list view after successful operation
                 } else {
+                    // Show error message from server
                     showMessage(result.message || 'Operation failed. Please try again.', 'error');
                 }
             } catch (error) {
                 console.error('Error submitting car form:', error);
                 showMessage('Client-side error: ' + error.message, 'error');
             } finally {
+                // Re-enable submit button and revert text
                 if(submitButton) {
                     submitButton.disabled = false;
                     submitButton.textContent = carRecordIdInput.value ? 'Update Car' : 'Add Car';
@@ -167,87 +240,102 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Handle Edit and Delete Button Clicks in Table ---
+    // --- Handle Edit and Delete Button Clicks in the Table ---
     if (carsTableBody) {
         carsTableBody.addEventListener('click', async (event) => {
-            const target = event.target;
+            const target = event.target; // The element that was clicked
 
-            // Edit Car
+            // Logic for Edit Car button
             if (target.classList.contains('edit-btn')) {
-                const carDataString = target.dataset.car;
+                const carDataString = target.dataset.car; // Get the JSON string of car data from data-car attribute
                 if (!carDataString) {
                     console.error("Car data not found on edit button's data-car attribute.");
-                    showMessage("Error: Could not retrieve car data for editing.", "error");
+                    showMessage("Error: Could not retrieve car data for editing.", "error", actionMessageDiv);
                     return;
                 }
                 try {
-                    const carToEdit = JSON.parse(carDataString);
+                    const carToEdit = JSON.parse(carDataString); // Parse the car data object
                     console.log("Editing car:", carToEdit);
 
-                    carRecordIdInput.value = carToEdit.id; // Set hidden ID field for PUT request
+                    // 1. Switch to form view first (this hides the list and shows the form)
+                    showView('form');
 
+                    // 2. Populate the hidden car ID input (used to determine 'Update' operation)
+                    carRecordIdInput.value = carToEdit.id;
+
+                    // 3. Populate all form fields with the car's data
                     if(carUniqueIdInput) carUniqueIdInput.value = carToEdit.id || '';
                     if(makeInput) makeInput.value = carToEdit.make || '';
                     if(modelInput) modelInput.value = carToEdit.model || '';
                     if(yearInput) yearInput.value = carToEdit.year || '';
                     if(pricePerDayInput) pricePerDayInput.value = carToEdit.pricePerDay !== undefined ? carToEdit.pricePerDay : '';
                     if(imageUrlInput) imageUrlInput.value = carToEdit.imageUrl || '';
-                    if(availableSelect) availableSelect.value = String(carToEdit.available); // Convert boolean to string for select
+                    // Convert boolean `available` to string "true" or "false" for select element
+                    if(availableSelect) availableSelect.value = String(carToEdit.available);
                     if(locationSelectCarForm) locationSelectCarForm.value = carToEdit.location || 'Hanoi';
 
+                    // Populate specifications fields
                     if (carToEdit.specifications) {
                         if(bodyTypeSelect) bodyTypeSelect.value = carToEdit.specifications.bodyType || 'SUV';
                         if(transmissionSelect) transmissionSelect.value = carToEdit.specifications.transmission || 'AT';
                         if(fuelTypeSelect) fuelTypeSelect.value = carToEdit.specifications.fuelType || 'Petrol';
                         if(seatsInput) seatsInput.value = carToEdit.specifications.seats || 5;
                     } else {
-                        // Set default values if specifications are missing
+                        // Set default values if specifications object is missing
                         if(bodyTypeSelect) bodyTypeSelect.value = 'SUV';
                         if(transmissionSelect) transmissionSelect.value = 'AT';
                         if(fuelTypeSelect) fuelTypeSelect.value = 'Petrol';
                         if(seatsInput) seatsInput.value = 5;
                     }
 
+                    // Populate features checkboxes
                     featuresCheckboxes.forEach(checkbox => {
+                        // Check the box if its value is present in the carToEdit.features array
                         checkbox.checked = carToEdit.features ? carToEdit.features.includes(checkbox.value) : false;
                     });
 
+                    // 4. Update submit button text and show cancel button
                     if(submitButton) submitButton.textContent = 'Update Car';
-                    if(cancelEditButton) cancelEditButton.style.display = 'inline-block';
-                    const addCarSection = document.getElementById('add-car-section');
-                    if (addCarSection) addCarSection.scrollIntoView({ behavior: 'smooth' });
-
+                    // The display of the cancel button is handled by showView('form')
+                    // No need to explicitly set cancelButton.style.display = 'inline-block'; here anymore
                 } catch (e) {
                     console.error("Error parsing car data for edit:", e);
-                    showMessage("Error: Could not load car data for editing.", "error");
+                    showMessage("Error: Could not load car data for editing.", "error", actionMessageDiv);
                 }
             }
 
-            // Delete Car
+            // Logic for Delete Car button
             if (target.classList.contains('delete-btn')) {
-                const carIdToDelete = target.dataset.id;
+                const carIdToDelete = target.dataset.id; // Get the car ID to delete
                 if (!carIdToDelete) {
-                     showMessage("Error: Car ID not found for deletion.", "error");
+                     showMessage("Error: Car ID not found for deletion.", "error", actionMessageDiv);
                      return;
                 }
+                // Confirm deletion with the user
                 if (confirm(`Are you sure you want to delete car with ID: ${carIdToDelete}?`)) {
                     try {
-                        target.disabled = true;
-                        target.textContent = "Deleting...";
+                        target.disabled = true; // Disable button during deletion
+                        target.textContent = "Deleting..."; // Change button text
+
+                        // Send DELETE request to the server
                         const response = await fetch(`${ADMIN_API_URL}/${encodeURIComponent(carIdToDelete)}`, {
                             method: 'DELETE',
                         });
-                        const result = await response.json();
+                        const result = await response.json(); // Parse server response
+
                         if (response.ok) {
-                            showMessage(result.message || 'Car deleted successfully!', 'success');
+                            // Show success message and refresh the car list
+                            showMessage(result.message || 'Car deleted successfully!', 'success', actionMessageDiv);
                             fetchAndDisplayCars();
                         } else {
-                            showMessage(result.message || 'Error deleting car.', 'error');
+                            // Show error message from server
+                            showMessage(result.message || 'Error deleting car.', 'error', actionMessageDiv);
                         }
                     } catch (error) {
                         console.error("Error deleting car:", error);
-                        showMessage('Client-side error: ' + error.message, 'error');
+                        showMessage('Client-side error: ' + error.message, 'error', actionMessageDiv);
                     } finally {
+                        // Re-enable button and revert text regardless of success/failure
                         target.disabled = false;
                         target.textContent = "Delete";
                     }
@@ -256,26 +344,48 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Reset Form ---
+    // --- Reset Form Function (used for both Add and Cancel) ---
     function resetForm() {
-        if(carForm) carForm.reset();
-        if(carRecordIdInput) carRecordIdInput.value = '';
-        if(submitButton) submitButton.textContent = 'Add Car';
-        if(cancelEditButton) cancelEditButton.style.display = 'none';
+        if(carForm) carForm.reset(); // Resets all form fields
+        if(carRecordIdInput) carRecordIdInput.value = ''; // Clear hidden ID
+        if(submitButton) submitButton.textContent = 'Add Car'; // Reset submit button text
+        // REMOVED: if(cancelButton) cancelButton.style.display = 'none'; // This line is removed, display is managed by showView()
+        
+        // Reset select dropdowns to their default/first options
         if(availableSelect) availableSelect.value = 'true';
         if(locationSelectCarForm) locationSelectCarForm.value = 'Hanoi';
         if(bodyTypeSelect) bodyTypeSelect.value = 'SUV';
         if(transmissionSelect) transmissionSelect.value = 'AT';
         if(fuelTypeSelect) fuelTypeSelect.value = 'Petrol';
         if(seatsInput) seatsInput.value = 5;
+        // Uncheck all feature checkboxes
         featuresCheckboxes.forEach(checkbox => checkbox.checked = false);
+        // Set focus to the first input field
         if(carUniqueIdInput) carUniqueIdInput.focus();
     }
 
-    if(cancelEditButton) {
-        cancelEditButton.addEventListener('click', resetForm);
+    // --- Event Listeners for view switching buttons ---
+    // Event listener for the "Add" button in the list view
+    if (showAddFormButton) {
+        showAddFormButton.addEventListener('click', () => {
+            resetForm(); // Clear form fields before showing for a new entry
+            showView('form'); // Switch to the form view
+            // The submit button text is already set to 'Add Car' by resetForm()
+            // The cancel button display is handled by showView('form')
+        });
     }
 
-    // --- Initial Data Load ---
+    // Event listener for the "Cancel" button in the form view
+    if(cancelButton) {
+        cancelButton.addEventListener('click', () => {
+            resetForm(); // Clear form fields on cancel
+            showView('list'); // Switch back to the list view
+        });
+    }
+
+    // --- Initial Load Logic ---
+    // Fetch and display cars when the page first loads
     fetchAndDisplayCars();
+    // Default to showing the list view on page load
+    showView('list');
 });

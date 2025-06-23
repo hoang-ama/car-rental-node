@@ -14,8 +14,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const customerPasswordInput = document.getElementById('customer-password'); // Password input
 
     const submitCustomerBtn = document.getElementById('submit-customer-button');
-    const cancelEditCustomerBtn = document.getElementById('cancel-edit-customer-button');
+    const cancelEditCustomerBtn = document.getElementById('cancel-edit-customer-button'); // Renamed for consistency
     const formMessageDiv = document.getElementById('form-message'); // Message for form actions
+
+    // NEW DOM Elements for view switching
+    const listViewWrapper = document.getElementById('list-view-wrapper');
+    const formViewWrapper = document.getElementById('form-view-wrapper');
+    const showAddFormButton = document.getElementById('show-add-form-btn'); // The "Add" button in the list view
 
     const ADMIN_CUSTOMERS_API_URL = '/admin/customers';
 
@@ -41,6 +46,40 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 5000); // Message visible for 5 seconds
     }
 
+    // --- Function to switch between list view and form view ---
+    function showView(viewId) {
+        if (viewId === 'list') {
+            listViewWrapper.classList.remove('hidden');
+            formViewWrapper.classList.add('hidden');
+            // Clear messages when switching back to list view
+            if(formMessageDiv) {
+                formMessageDiv.textContent = '';
+                formMessageDiv.className = '';
+            }
+            if(actionMessageDiv) {
+                actionMessageDiv.textContent = '';
+                actionMessageDiv.className = '';
+            }
+            // Khi về list view, nút Cancel trong form phải ẩn đi
+            if(cancelEditCustomerBtn) cancelEditCustomerBtn.style.display = 'none';
+        } else if (viewId === 'form') {
+            listViewWrapper.classList.add('hidden');
+            formViewWrapper.classList.remove('hidden');
+            // Clear messages when switching to form view
+            if(actionMessageDiv) {
+                actionMessageDiv.textContent = '';
+                actionMessageDiv.className = '';
+            }
+            if(formMessageDiv) {
+                formMessageDiv.textContent = '';
+                formMessageDiv.className = '';
+            }
+            // Khi mở form view, nút Cancel phải hiện ra
+            if(cancelEditCustomerBtn) cancelEditCustomerBtn.style.display = 'inline-block';
+        }
+        window.scrollTo(0, 0); // Scroll to top
+    }
+
     // --- Fetch and Display Customers ---
     async function fetchAndDisplayCustomers() {
         if (!customersTableBody) return;
@@ -64,8 +103,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td data-label="Email">${customer.email || 'N/A'}</td>
                     <td data-label="Registered At">${customer.registeredAt ? new Date(customer.registeredAt).toLocaleString() : 'N/A'}</td>
                     <td data-label="Actions">
-                        <button class="edit-btn" data-customer='${JSON.stringify(customer)}'>Edit</button>
-                        <button class="delete-btn" data-id="${customer.id}">Delete</button>
+                        <button class="edit-btn" data-customer='${JSON.stringify(customer)}'><i class="fas fa-pencil-alt"></i></button>
+                        <button class="delete-btn" data-id="${customer.id}"><i class="fas fa-trash-alt"></i></button>
                     </td>
                 `;
             });
@@ -133,6 +172,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showMessage(formMessageDiv, result.message || (editingCustomerId ? 'Customer updated successfully!' : 'Customer added successfully!'), 'success');
                     resetCustomerForm();
                     fetchAndDisplayCustomers();
+                    showView('list'); // Switch back to list view after successful operation
                 } else {
                     showMessage(formMessageDiv, result.message || 'Operation failed. Please try again.', 'error');
                 }
@@ -165,16 +205,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     const customerToEdit = JSON.parse(customerDataString);
                     console.log("Editing customer:", customerToEdit);
 
+                    // 1. Switch to form view first
+                    showView('form');
+
+                    // 2. Populate form fields
                     customerIdFormInput.value = customerToEdit.id;
                     customerNameInput.value = customerToEdit.name || '';
                     customerPhoneInput.value = customerToEdit.phone || '';
                     customerEmailInput.value = customerToEdit.email || '';
                     customerPasswordInput.value = ''; // Always clear password field for security (never pre-fill passwords)
 
+                    // 3. Update submit button text
                     if(submitCustomerBtn) submitCustomerBtn.textContent = 'Update Customer';
-                    if(cancelEditCustomerBtn) cancelEditCustomerBtn.style.display = 'inline-block';
-                    const addCustomerSection = document.getElementById('add-customer-section');
-                    if (addCustomerSection) addCustomerSection.scrollIntoView({ behavior: 'smooth' });
+                    // The cancel button display is handled by showView('form')
 
                 } catch (e) {
                     console.error("Error parsing customer data for edit:", e);
@@ -220,7 +263,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if(customerForm) customerForm.reset();
         if(customerIdFormInput) customerIdFormInput.value = '';
         if(submitCustomerBtn) submitCustomerBtn.textContent = 'Add Customer';
-        if(cancelEditCustomerBtn) cancelEditCustomerBtn.style.display = 'none';
+        // The display of the cancel button is handled by showView()
+        
         if(customerNameInput) customerNameInput.focus();
         if(formMessageDiv) {
             formMessageDiv.textContent = '';
@@ -228,10 +272,24 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // --- Event Listeners for view switching ---
+    if (showAddFormButton) {
+        showAddFormButton.addEventListener('click', () => {
+            resetCustomerForm(); // Clear form before opening
+            showView('form'); // Show the form view
+            // The submit button text is already set to 'Add Customer' by resetCustomerForm()
+            // The cancel button display is handled by showView('form')
+        });
+    }
+
     if(cancelEditCustomerBtn) {
-        cancelEditCustomerBtn.addEventListener('click', resetCustomerForm);
+        cancelEditCustomerBtn.addEventListener('click', () => {
+            resetCustomerForm(); // Clear form
+            showView('list'); // Show the list view
+        });
     }
 
     // --- Initial Data Load ---
     fetchAndDisplayCustomers();
+    showView('list'); // Default to showing the list view on page load
 });

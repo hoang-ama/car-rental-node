@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Admin Portal</title>
+    <link rel="icon" type="image/png" href="assets/logo/favicon.png" />
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <a href="admin-dashboard.html">
+                    <img src="assets/logo/logo.png" alt="Vshare Logo">
+                </a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="admin-dashboard.html" class="active"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                    <li><a href="admin-cars.html"><i class="fas fa-car"></i> <span>Car</span></a></li>
+                    <li><a href="admin-bookings.html"><i class="fas fa-calendar-check"></i> <span>Booking</span></a></li>
+                    <li><a href="admin-customers.html"><i class="fas fa-users"></i> <span>Customer</span></a></li>
+                    <li><a href="#"><i class="fas fa-file-alt"></i> <span>Report</span></a></li>
+                    <li><a href="#"><i class="fas fa-cog"></i> <span>Setting</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                Vshare Backend v.1.0
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-header">
+                <h1>Dashboard</h1>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="user-profile">
+                        <img src="assets/images/placeholder-user.jpg" alt="User Avatar">
+                        <span>Admin User</span>
+                    </div>
+                </div>
+            </header>
+
+            <main class="page-content">
+                <section id="car-status-section">
+                    <h2>Car Status</h2>
+                        <div class="status-card">
+                            <h3>Total Cars</h3>
+                            <p id="total-cars">0</p>
+                        </div>
+                        <div class="status-card">
+                            <h3>Available Cars</h3>
+                            <p id="available-cars">0</p>
+                        </div>
+                        <div class="status-card">
+                            <h3>Booked Cars</h3>
+                            <p id="booked-cars">0</p>
+                        </div>
+                </section>
+
+                <section id="bookings-list-section">
+                    <h2>Recent Bookings</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Customer Name</th>
+                                <th>Phone</th>
+                                <th>Email</th>
+                                <th>Car Name</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Total Price</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookings-table-body">
+                            </tbody>
+                    </table>
+                </section>
+            </main>
+        </div>
+    </div>
+    <script src="admin-bookings-script.js"></script>
+</body>
+</html>

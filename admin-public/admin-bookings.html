@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -48,126 +48,130 @@
             </header>
 
             <main class="page-content">
-                <section id="add-booking-section">
-                    <h2>Add New / Update Booking</h2>
-                    <form id="booking-form">
-                        <input type="hidden" id="booking-id-form" name="bookingIdForm">
+                <div id="list-view-wrapper">
+                    <section id="bookings-list-section">
+                        <h2>Current Bookings List</h2>
+                        <div class="action-buttons-group">
+                            <button class="button add" id="show-add-form-btn"><i class="fas fa-plus"></i> Add</button>
+                            <button class="button export"><i class="fas fa-file-export"></i> Export</button>
+                            <button class="button filter"><i class="fas fa-filter"></i> Filter</button>
+                        </div>
+                        <div id="booking-action-message" class="action-message-placeholder"></div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Booking ID</th>
+                                    <th>Customer Name</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Car Name</th>
+                                    <th>Start Date</th>
+                                    <th>End Date</th>
+                                    <th>Total Price</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="bookings-table-body">
+                                </tbody>
+                        </table>
+                    </section>
+                </div>
+                <div id="form-view-wrapper" class="hidden">
+                    <section id="add-booking-section">
+                        <h2>Add New / Update Booking</h2>
+                        <form id="booking-form">
+                            <input type="hidden" id="booking-id-form" name="bookingIdForm">
 
-                        <div class="form-group">
-                            <label for="customer-name">Customer Name:</label>
-                            <input type="text" id="customer-name" name="customerName" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="customer-phone">Customer Phone:</label>
-                            <input type="tel" id="customer-phone" name="customerPhone">
-                        </div>
-                        <div class="form-group">
-                            <label for="customer-email">Customer Email:</label>
-                            <input type="email" id="customer-email" name="customerEmail">
-                        </div>
+                            <div class="form-group">
+                                <label for="customer-name">Customer Name:</label>
+                                <input type="text" id="customer-name" name="customerName" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-phone">Customer Phone:</label>
+                                <input type="tel" id="customer-phone" name="customerPhone">
+                            </div>
+                            <div class="form-group">
+                                <label for="customer-email">Customer Email:</label>
+                                <input type="email" id="customer-email" name="customerEmail">
+                            </div>
 
-                        <div class="form-group">
-                            <label for="car-select-booking">Select Car (ID - Make Model):</label>
-                            <select id="car-select-booking" name="carId" required>
-                                <option value="">-- Please select a car --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="pickup-location-booking">Pickup Location:</label>
-                            <select id="pickup-location-booking">
-                                <option value="Hanoi">Hanoi</option>
-                                <option value="Da Nang">Da Nang</option>
-                                <option value="Ho Chi Minh City">Ho Chi Minh City</option>
-                            </select>
-                        </div>
+                            <div class="form-group">
+                                <label for="car-select-booking">Select Car (ID - Make Model):</label>
+                                <select id="car-select-booking" name="carId" required>
+                                    <option value="">-- Please select a car --</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="pickup-location-booking">Pickup Location:</label>
+                                <select id="pickup-location-booking">
+                                    <option value="Hanoi">Hanoi</option>
+                                    <option value="Da Nang">Da Nang</option>
+                                    <option value="Ho Chi Minh City">Ho Chi Minh City</option>
+                                </select>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="start-date-booking">Start Date & Time:</label>
-                            <input type="datetime-local" id="start-date-booking" name="startDate" required>
-                        </div>
+                            <div class="form-group">
+                                <label for="start-date-booking">Start Date & Time:</label>
+                                <input type="datetime-local" id="start-date-booking" name="startDate" required>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="end-date-booking">End Date & Time:</label>
-                            <input type="datetime-local" id="end-date-booking" name="endDate" required>
-                        </div>
+                            <div class="form-group">
+                                <label for="end-date-booking">End Date & Time:</label>
+                                <input type="datetime-local" id="end-date-booking" name="endDate" required>
+                            </div>
 
-                        <div class="form-group">
-                            <label for="payment-method-booking">Payment Method:</label>
-                            <select id="payment-method-booking" name="paymentMethod">
-                                <option value="Cash">Cash</option>
-                                <option value="Card">Card</option>
-                                <option value="Bank Transfer">Bank Transfer</option>
-                                <option value="Pay Later">Pay Later</option>
-                                <option value="On Contact">On Contact</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="total-price-booking">Total Price ($):</label>
-                            <input type="number" id="total-price-booking" name="totalPrice" step="0.01">
-                        </div>
-                         <div class="form-group">
-                            <label for="base-cost-booking">Base Cost ($) (Optional):</label>
-                            <input type="number" id="base-cost-booking" name="baseCost" step="0.01">
-                        </div>
-                         <div class="form-group">
-                            <label for="services-cost-booking">Services Cost ($) (Optional):</label>
-                            <input type="number" id="services-cost-booking" name="servicesCost" step="0.01">
-                        </div>
-                         <div class="form-group">
-                            <label for="deposit-amount-booking">Deposit Amount ($) (Optional):</label>
-                            <input type="number" id="deposit-amount-booking" name="depositAmount" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label for="booking-status-select">Booking Status:</label>
-                            <select id="booking-status-select" name="bookingStatus">
-                                <option value="Pending">Pending</option>
-                                <option value="Confirmed">Confirmed</option>
-                                <option value="Cancelled by Customer">Cancelled by Customer</option>
-                                <option value="Cancelled by Admin">Cancelled by Admin</option>
-                                <option value="Rented Out">Rented Out</option>
-                                <option value="Completed">Completed</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="notes-booking">Notes:</label>
-                            <textarea id="notes-booking" name="notes" rows="3"></textarea>
-                        </div>
+                            <div class="form-group">
+                                <label for="payment-method-booking">Payment Method:</label>
+                                <select id="payment-method-booking" name="paymentMethod">
+                                    <option value="Cash">Cash</option>
+                                    <option value="Card">Card</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                    <option value="Pay Later">Pay Later</option>
+                                    <option value="On Contact">On Contact</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="total-price-booking">Total Price ($):</label>
+                                <input type="number" id="total-price-booking" name="totalPrice" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="base-cost-booking">Base Cost ($) (Optional):</label>
+                                <input type="number" id="base-cost-booking" name="baseCost" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="services-cost-booking">Services Cost ($) (Optional):</label>
+                                <input type="number" id="services-cost-booking" name="servicesCost" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="deposit-amount-booking">Deposit Amount ($) (Optional):</label>
+                                <input type="number" id="deposit-amount-booking" name="depositAmount" step="0.01">
+                            </div>
+                            <div class="form-group">
+                                <label for="booking-status-select">Booking Status:</label>
+                                <select id="booking-status-select" name="bookingStatus">
+                                    <option value="Pending">Pending</option>
+                                    <option value="Confirmed">Confirmed</option>
+                                    <option value="Cancelled">Cancelled</option>
+                                    <option value="Rented Out">Rented Out</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="notes-booking">Notes:</label>
+                                <textarea id="notes-booking" name="notes" rows="3"></textarea>
+                            </div>
 
-                        <div class="form-buttons">
-                            <button type="submit" id="submit-booking-button">Add Booking</button>
-                            <button type="button" id="cancel-edit-booking-button" style="display:none;">Cancel Update</button>
-                        </div>
-                    </form>
-                    <div id="booking-form-message" class="form-message-placeholder"></div>
-                </section>
+                            <div class="form-buttons">
+                                <button type="submit" id="submit-booking-button">Add Booking</button>
+                                <button type="button" id="cancel-edit-booking-button">Cancel</button>
+                            </div>
+                        </form>
+                        <div id="booking-form-message" class="form-message-placeholder"></div>
+                    </section>
+                </div>
 
-                <section id="bookings-list-section">
-                    <h2>Current Bookings List</h2>
-                    <div class="action-buttons-group">
-                        <button class="button add"><i class="fas fa-plus"></i> Add</button>
-                        <button class="button export"><i class="fas fa-file-export"></i> Export</button>
-                        <button class="button filter"><i class="fas fa-filter"></i> Filter</button>
-                    </div>
-                    <div id="booking-action-message" class="action-message-placeholder"></div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Booking ID</th>
-                                <th>Customer Name</th>
-                                <th>Phone</th>
-                                <th>Email</th>
-                                <th>Car Name</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Total Price</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bookings-table-body">
-                            </tbody>
-                    </table>
-                </section>
+
             </main>
         </div>
     </div>
