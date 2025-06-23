@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Admin Portal</title>
-    <link rel="icon" type="image/png" href="assets/logo/favicon.png" />
-    <link rel="stylesheet" href="admin-style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
-</head>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Dashboard - Admin Portal</title>
+        <link rel="icon" type="image/png" href="assets/logo/favicon.png" />
+        <link rel="stylesheet" href="admin-style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    </head>
 <body>
     <div class="admin-container">
         <aside class="sidebar">
@@ -48,46 +48,101 @@
             </header>
 
             <main class="page-content">
-                <section id="car-status-section">
-                    <h2>Car Status</h2>
-                        <div class="status-card">
-                            <h3>Total Cars</h3>
-                            <p id="total-cars">0</p>
+                <div class="dashboard-grid">
+<!-- Vehicle Status Card -->
+                    <div class="dashboard-card vehicle-status-card">
+                        <div class="dashboard-card-header">
+                            <h3>Vehicle Status</h3>
+                            <i class="fas fa-car-alt icon"></i>
                         </div>
-                        <div class="status-card">
-                            <h3>Available Cars</h3>
-                            <p id="available-cars">0</p>
+                        <div class="dashboard-card-body">
+                            <div class="status-item total">
+                                <i class="fas fa-car"></i> Total Vehicles: <span id="total-cars-count" class="count">0</span>
+                            </div>
+                            <div class="status-item available">
+                                <i class="fas fa-check-circle"></i> Available: <span id="available-cars-count" class="count">0</span>
+                            </div>
+                            <div class="status-item booked">
+                                <i class="fas fa-calendar-alt"></i> Booked: <span id="booked-cars-count" class="count">0</span>
+                            </div>
+                            <div class="status-item rented">
+                                <i class="fas fa-key"></i> Rented Out: <span id="rented-out-cars-count" class="count">0</span>
+                            </div>
                         </div>
-                        <div class="status-card">
-                            <h3>Booked Cars</h3>
-                            <p id="booked-cars">0</p>
+                    </div>
+<!-- Total Booking Card -->
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3>Total Bookings</h3>
+                            <i class="fas fa-clipboard-list icon"></i>
                         </div>
-                </section>
+                        <div class="dashboard-card-body" id="total-bookings-count">0</div>
+                        <div class="dashboard-info-list">
+                            <li>Confirmed: <span id="confirmed-bookings-count" class="value">0</span></li>
+                            <li>Pending: <span id="pending-bookings-count" class="value">0</span></li>
+                            <li>Cancelled: <span id="cancelled-bookings-count" class="value">0</span></li>
+                        </div>
+                    </div>
+<!-- Total Revenue Card -->
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3>Total Revenue</h3>
+                            <i class="fas fa-dollar-sign icon"></i>
+                        </div>
+                        <div class="dashboard-card-body" id="total-revenue-value">$0</div>
+                        <div class="dashboard-info-list">
+                            <li>Completed Bookings: <span id="completed-bookings-count" class="value">0</span></li>
+                            <li>Total Deposits: <span id="total-deposits-value" class="value">$0</span></li>
+                        </div>
+                    </div>
+<!-- Customer Information Card -->
+                    <div class="dashboard-card">
+                        <div class="dashboard-card-header">
+                            <h3>Customer Info</h3>
+                            <i class="fas fa-users icon"></i>
+                        </div>
+                        <div class="dashboard-card-body" id="total-customers-count">0</div>
+                        <div class="dashboard-info-list">
+                            <li>Registered: <span id="registered-customers-count" class="value">0</span></li>
+                            <li>Booked at least once: <span id="booked-customers-count" class="value">0</span></li>
+                            <li>Never booked: <span id="never-booked-customers-count" class="value">0</span></li>
+                        </div>
+                    </div>
 
-                <section id="bookings-list-section">
-                    <h2>Recent Bookings</h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Booking ID</th>
-                                <th>Customer Name</th>
-                                <th>Phone</th>
-                                <th>Email</th>
-                                <th>Car Name</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Total Price</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="bookings-table-body">
-                            </tbody>
-                    </table>
-                </section>
+<!-- Last Bookings table -->
+<div class="dashboard-card latest-bookings-card"> 
+    <div class="dashboard-card-header">
+        <h3>Latest Bookings</h3>
+        <i class="fas fa-history icon" id="refresh-latest-bookings"></i>
+    </div>
+<div class="dashboard-card-body">
+    <div class="table-responsive"> <table id="latest-bookings-table">
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Customer Name</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Car Name</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Total Price</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="latest-bookings-table-body">
+                <tr><td colspan="9" style="text-align: center; color: #777;">Loading latest bookings...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+<!-- End: Last Bookings table -->
+                </div>
             </main>
+
         </div>
     </div>
-    <script src="admin-bookings-script.js"></script>
+    <script src="admin-dashboard-script.js"></script>
 </body>
 </html>

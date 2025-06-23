@@ -581,6 +581,154 @@ fieldset > div:last-child {
 }
 
 
+/* Dashboard Specific Styles */
+
+.dashboard-grid {
+    display: grid;
+    /* Changed: Điều chỉnh minmax để tạo 3-4 cột trên desktop, tùy kích thước card */
+    /* Nếu muốn cố định 4 cột: grid-template-columns: repeat(4, 1fr); */
+    /* auto-fit sẽ tự động tạo đủ cột dựa trên minmax và khoảng trống */
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Adjusted minwidth for 4 cards per row */
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+
+.dashboard-card {
+    background-color: var(--section-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.dashboard-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.dashboard-card-header h3 {
+    font-size: 1.2em;
+    color: var(--text-dark);
+    margin: 0;
+    font-weight: 600;
+}
+
+.dashboard-card-header .icon {
+    font-size: 2em;
+    color: var(--primary-color-vshare);
+}
+
+.dashboard-card-body {
+    font-size: 1.2em;
+    font-weight: 500;
+    color: var(--text-dark);
+    text-align: center;
+}
+
+.dashboard-card-body.small-text {
+    font-size: 1.2em; /* For smaller text in booking list */
+    font-weight: 500;
+}
+
+.dashboard-info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.dashboard-info-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+    font-size: 0.95em;
+    color: #555;
+}
+
+.dashboard-info-list li:last-child {
+    border-bottom: none;
+}
+
+.dashboard-info-list li .value {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+/* Specific styles for vehicle status cards */
+.vehicle-status-card .status-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Distributes space between elements */
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    color: #555;
+    font-weight: 500;
+}
+
+.vehicle-status-card .status-item i {
+    font-size: 1.5em;
+    margin-right: 15px;
+    width: 30px; /* fixed width for icons */
+    text-align: center;
+}
+
+.vehicle-status-card .status-item .count {
+    font-weight: 700;
+    color: var(--text-dark);
+    font-size: 1.2em;
+    margin-right: 5px;
+    margin-left: auto; /* Pushes the .count element to the right */
+}
+
+.vehicle-status-card .status-item.total i { color: #6c757d; } /* Grey */
+.vehicle-status-card .status-item.available i { color: var(--status-available); } /* Green */
+.vehicle-status-card .status-item.rented i { color: var(--status-rented-out); } /* Blue */
+.vehicle-status-card .status-item.booked i { color: var(--status-pending); } /* Yellow */
+
+
+/* Latest Bookings Card */
+.latest-bookings-card {
+    /* Make this card span all columns (e.g., 3 columns) on desktop */
+    grid-column: 1 / -1; /* This makes it span from the first column line to the last */
+}
+
+.latest-bookings-card .dashboard-card-body {
+    text-align: left;
+    font-size: 1em; /* Override large font size */
+    font-weight: normal;
+}
+
+.latest-bookings-card table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    margin-top: 15px; /* Spacing from header */
+    table-layout: auto; /* Allow column width to adjust based on content */
+}
+
+.latest-bookings-card th,
+.latest-bookings-card td {
+    border: 1px solid var(--border-light);
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap; /* Prevent content from wrapping */
+    overflow: hidden; /* Hide overflowing content */
+    text-overflow: ellipsis; /* Show ellipsis for overflow */
+}
+
+.latest-bookings-card th {
+    background-color: #f2f2f2;
+    color: var(--text-dark);
+    font-weight: 600;
+}
 
 /* Responsive adjustments */
 @media (max-width: 992px) {
@@ -757,6 +905,84 @@ fieldset > div:last-child {
         color: #555;
     }
     .status-badge {
+        font-size: 0.7em;
+        padding: 4px 8px;
+    }
+
+    /* Responsive adjustments for dashboard */
+    .dashboard-grid {
+        grid-template-columns: 1fr; /* Single column on mobile */
+        gap: 15px;
+    }
+    .dashboard-card-header h3 {
+        font-size: 1.1em;
+    }
+    .dashboard-card-header .icon {
+        font-size: 1.8em;
+    }
+    .dashboard-card-body {
+        font-size: 1.5em;
+    }
+    .vehicle-status-card .status-item {
+        font-size: 1em;
+    }
+    .vehicle-status-card .status-item i {
+        font-size: 1.2em;
+    }
+
+    .latest-bookings-card {
+        grid-column: span 1; /* Reset to single column on mobile */
+    }
+    .latest-bookings-card table {
+        font-size: 0.85em; /* Smaller font on mobile */
+    }
+    .latest-bookings-card th,
+    .latest-bookings-card td {
+        padding: 8px; /* Smaller padding on mobile */
+    }
+    /* Make table responsive by stacking cells on very small screens, similar to other admin tables */
+    /* If you want to keep it as a scrolling table on mobile, you can skip this block */
+    .latest-bookings-card table,
+    .latest-bookings-card thead,
+    .latest-bookings-card tbody,
+    .latest-bookings-card th,
+    .latest-bookings-card td,
+    .latest-bookings-card tr {
+        display: block;
+    }
+    .latest-bookings-card thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    .latest-bookings-card tr {
+        border: 1px solid var(--border-light);
+        margin-bottom: 10px;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .latest-bookings-card td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 50%;
+        text-align: right;
+    }
+    .latest-bookings-card td:last-child {
+        border-bottom: none;
+    }
+    .latest-bookings-card td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 45%;
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: #555;
+    }
+    .latest-bookings-card .status-badge {
         font-size: 0.7em;
         padding: 4px 8px;
     }
