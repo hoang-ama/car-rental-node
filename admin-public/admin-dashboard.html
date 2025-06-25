@@ -8,6 +8,7 @@
         <link rel="stylesheet" href="admin-style.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+        <script src="admin-auth-guard.js"></script>
     </head>
 <body>
     <div class="admin-container">
@@ -40,9 +41,16 @@
                         <input type="text" placeholder="Search...">
                         <i class="fas fa-search"></i>
                     </div>
-                    <div class="user-profile">
+                    <div class="user-profile" id="admin-user-profile">
                         <img src="assets/images/placeholder-user.jpg" alt="User Avatar">
                         <span>Admin User</span>
+                        <div class="user-profile-dropdown" id="user-profile-dropdown">
+                            <ul>
+                                <li><a href="#" id="view-profile-link"><i class="fas fa-user-circle"></i> View Profile</a></li>
+                                <li><a href="#" id="settings-link"><i class="fas fa-cog"></i> Settings</a></li>
+                                <li><a href="#" id="logout-button" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </header>

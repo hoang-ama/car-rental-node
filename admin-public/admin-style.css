@@ -231,7 +231,11 @@ form textarea {
     display: flex;
     align-items: center;
     gap: 10px;
+    position: relative; /* Để dropdown menu định vị tuyệt đối so với nó */
+    cursor: pointer;
 }
+
+
 
 .top-header .header-actions .user-profile img {
     width: 35px;
@@ -245,6 +249,60 @@ form textarea {
     font-weight: 500;
     color: var(--text-dark);
 }
+
+/* Header User Profile Dropdown */
+
+.top-header .header-actions .user-profile-dropdown {
+    position: absolute;
+    top: 100%; /* Đặt ngay dưới user-profile */
+    right: 0;
+    background-color: #fff;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    min-width: 150px;
+    z-index: 1001; /* Đảm bảo nằm trên các phần tử khác */
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px); /* Hiệu ứng trượt xuống */
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    padding: 8px 0;
+}
+.top-header .header-actions .user-profile-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.top-header .header-actions .user-profile-dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.top-header .header-actions .user-profile-dropdown ul li a {
+    display: block;
+    padding: 10px 15px;
+    color: var(--text-dark);
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.top-header .header-actions .user-profile-dropdown ul li a:hover {
+    background-color: #f8f9fa;
+    color: var(--primary-color-vshare);
+}
+
+.top-header .header-actions .user-profile-dropdown ul li a.logout-link {
+    color: var(--button-delete); /* Màu đỏ cho Logout */
+    font-weight: 600;
+}
+
+.top-header .header-actions .user-profile-dropdown ul li a.logout-link:hover {
+    background-color: #f8d7da; /* Nền đỏ nhạt khi hover */
+}
+
 
 /* Page content area */
 .page-content {
@@ -730,6 +788,152 @@ fieldset > div:last-child {
     font-weight: 600;
 }
 
+/* Admin Login Page Specific Styles */
+.admin-login-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background-color: var(--main-bg); /* Use background color from theme */
+}
+
+.admin-login-left {
+    flex: 0 0 400px; /* Fixed width for the left panel */
+    background-color: var(--sidebar-bg); /* Màu nền của sidebar --sidebar-bg #212529 */
+    box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    position: relative;
+    z-index: 10;
+}
+
+.admin-login-logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+.admin-login-logo img {
+    max-height: 40px;
+}
+
+.admin-login-form-wrapper {
+    width: 100%;
+    max-width: 300px;
+    text-align: left;
+}
+
+.admin-login-form-wrapper h2 {
+    font-size: 2em;
+    color: var(--sidebar-text); /* Màu chữ trong sidebar --sidebar-text #adb5bd */
+    margin-bottom: 25px;
+    text-align: left;
+    border-bottom: none; /* Override default h2 border */
+    padding-bottom: 0;
+}
+
+.admin-login-form {
+    display: flex; /* Enable Flexbox */
+    flex-direction: column; /* Arrange children in a single column */
+    gap: 15px; /* Add spacing between form elements */
+    align-items: stretch; /* Ensure all elements stretch to the same width */
+}  
+
+.admin-login-form .form-group {
+    width: 100%; /* Ensure elements take full width */
+}
+
+.admin-login-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--sidebar-text);
+    font-size: 0.9em;
+}
+
+.admin-login-form input[type="email"],
+.admin-login-form input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    font-size: 1em;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+.admin-login-form input:focus {
+    border-color: var(--primary-color-vshare);
+    outline: none;
+    box-shadow: 0 0 0 0.2rem rgba(230, 126, 34, 0.25);
+}
+
+.admin-login-form .login-button {
+    width: 100%;
+    padding: 12px;
+    background-color: var(--primary-color-vshare);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.admin-login-form .login-button:hover {
+    background-color: var(--primary-hover-vshare);
+}
+
+.admin-login-form .link-group {
+    text-align: left;
+    margin-top: 5px;
+    font-size: 0.9em;
+    font-style: italic;
+}
+
+.admin-login-form .link-group a {
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.admin-login-form .link-group a:hover {
+    color: var(--primary-color-vshare);
+}
+
+.admin-login-right {
+    flex-grow: 1;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    padding: 30px;
+    color: white;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+.admin-login-right .brand-info {
+    text-align: right;
+}
+
+.admin-login-right .brand-info h3 {
+    margin: 0 0 10px 0;
+    font-size: 2em;
+    font-weight: 700;
+}
+
+.admin-login-right .brand-info p {
+    margin: 0;
+    font-size: 1.2em;
+    line-height: 0;
+}
+
+
 /* Responsive adjustments */
 @media (max-width: 992px) {
     .sidebar {
@@ -986,4 +1190,26 @@ fieldset > div:last-child {
         font-size: 0.7em;
         padding: 4px 8px;
     }
+/* Responsive for Admin Login */
+    .admin-login-container {
+        flex-direction: column;
+    }
+    .admin-login-left {
+        flex: 1 1 auto; /* Allow it to grow */
+        width: 100%;
+        padding: 40px 20px;
+        box-shadow: none; /* Remove shadow on top */
+    }
+    .admin-login-logo {
+        position: static; /* Position normally */
+        margin-bottom: 20px;
+    }
+    .admin-login-form-wrapper {
+        max-width: 350px;
+        width: 100%;
+    }
+    .admin-login-right {
+        display: none; /* Hide image on smaller screens */
+    }
+
 }

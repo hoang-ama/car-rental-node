@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - Vshare</title>
+    <link rel="icon" type="image/png" href="assets/logo/favicon.png"/>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+</head>
+<body>
+    <div class="admin-login-container">
+        <div class="admin-login-left">
+            <div class="admin-login-logo">
+                <img src="assets/logo/logo.png" alt="Vshare Logo">
+            </div>
+            <div class="admin-login-form-wrapper">
+                <h2>Login</h2>
+                <form id="admin-login-form" class="admin-login-form">
+                    <div class="form-group">
+                        <label for="admin-email">Email</label>
+                        <input type="email" id="admin-email" placeholder="Enter your email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">Password</label>
+                        <input type="password" id="admin-password" placeholder="Enter your password" required>
+                    </div>
+                    <div class="form-message-placeholder" id="login-message"></div>
+                    <button type="submit" class="login-button">Login</button>
+                    <div class="link-group">
+                       <a href="mailto:contact@vshare.asia"> Don't have an account? Contact us!</a>
+                        </div>
+                </form>
+            </div>
+        </div>
+        <div class="admin-login-right" style="background-image: url('assets/images/carslide.jpg');">
+            <div class="brand-info">
+                <h3>Vshare</h3>
+                <p>Car-sharing Platform</p>
+            </div>
+        </div>
+    </div>
+    <script src="admin-login-script.js"></script>
+</body>
+</html>

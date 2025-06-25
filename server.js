@@ -13,6 +13,13 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin', express.static(path.join(__dirname, 'admin-public')));
 
+// NEW: Redirect /admin to admin-login.html
+app.get('/admin', (req, res) => {
+    // In a real app, you would check authentication here.
+    // For this setup, we'll redirect to the login page.
+    res.redirect('/admin/admin-login.html'); // Redirect to login page
+});
+
 // File paths
 
 const CARS_FILE_PATH = path.join(__dirname, 'cars.json');
