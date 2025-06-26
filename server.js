@@ -324,8 +324,17 @@ app.delete('/admin/cars/:carIdToDelete', async (req, res) => {
 
 // Admin Bookings API Endpoints
 
+// GET all bookings (for admin list)
+// Lọc bookings dựa trên email khách hàng (ko dùng customerID được vì trong booking (json) không có trường customerID)
+
 app.get('/admin/bookings', (req, res) => {
-    res.json(bookings);
+    const customerEmail = req.query.email;
+    if (customerEmail) {
+        const filteredBookings = bookings.filter(b => b.customerEmail === customerEmail);
+        res.json(filteredBookings);
+    } else {
+        res.json(bookings);
+    }
 });
 
 app.post('/admin/bookings', async (req, res) => {
@@ -481,6 +490,20 @@ app.get('/admin/customers', (req, res) => {
     const customersWithoutPasswords = customers.map(({ password, ...rest }) => rest);
     res.json(customersWithoutPasswords);
 });
+
+// NEW: GET a single customer by ID
+app.get('/admin/customers/:customerId', (req, res) => {
+    const customerIdParam = req.params.customerId;
+    const customer = customers.find(c => c.id === customerIdParam);
+    if (customer) {
+        // In real app: do not send password.
+        const { password, ...customerWithoutPassword } = customer;
+        res.json(customerWithoutPassword);
+    } else {
+        res.status(404).json({ message: 'Customer not found' });
+    }
+});
+
 
 // POST a new customer (Admin creates user)
 app.post('/admin/customers', async (req, res) => {

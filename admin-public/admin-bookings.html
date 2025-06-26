@@ -65,29 +65,32 @@
                             <button class="button filter"><i class="fas fa-filter"></i> Filter</button>
                         </div>
                         <div id="booking-action-message" class="action-message-placeholder"></div>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Booking ID</th>
-                                    <th>Customer Name</th>
-                                    <th>Phone</th>
-                                    <th>Email</th>
-                                    <th>Car Name</th>
-                                    <th>Start Date</th>
-                                    <th>End Date</th>
-                                    <th>Total Price</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="bookings-table-body">
-                                </tbody>
-                        </table>
+                        <div class="table-responsive">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Booking ID</th>
+                                        <th>Customer Name</th>
+                                        <th>Phone</th>
+                                        <th>Email</th>
+                                        <th>Car Name</th>
+                                        <th>Start Date</th>
+                                        <th>End Date</th>
+                                        <th>Total Price</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="bookings-table-body">
+                                    </tbody>
+                            </table>
+                        </div>
                     </section>
                 </div>
                 <div id="form-view-wrapper" class="hidden">
                     <section id="add-booking-section">
-                        <h2>Add New / Update Booking</h2>
+                        <!-- <h2>Add New / Update Booking</h2> -->
+                        <h2 id="booking-form-title">Add New Booking</h2>
                         <form id="booking-form">
                             <input type="hidden" id="booking-id-form" name="bookingIdForm">
 

@@ -7,7 +7,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'admin-dashboard.html',
         'admin-cars.html',
         'admin-bookings.html',
-        'admin-customers.html'
+        'admin-customers.html',
+        'admin-customer-detail.html'
     ];
 
     const isProtectedPage = protectedAdminPages.some(page => currentPage.includes(page));

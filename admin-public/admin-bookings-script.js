@@ -331,8 +331,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // 3. Update submit button text
                     if(submitBookingBtn) submitBookingBtn.textContent = 'Update Booking';
-                    // The cancel button display is handled by showView('form')
 
+                    // 4. Update the <h2> title for editing a booking
+                    const bookingFormTitle = document.getElementById('booking-form-title');
+                    if (bookingFormTitle) bookingFormTitle.textContent = 'Update Booking';
                 } catch (e) {
                     console.error("Error parsing booking data for edit:", e);
                     showMessage(bookingActionMessageDiv, "Error: Could not load booking data for editing.", "error");
@@ -377,7 +379,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if(bookingForm) bookingForm.reset();
         if(bookingIdFormInput) bookingIdFormInput.value = '';
         if(submitBookingBtn) submitBookingBtn.textContent = 'Add Booking';
-        // The display of the cancel button is handled by showView()
+
+        // Update the <h2> title for adding a new booking
+    const bookingFormTitle = document.getElementById('booking-form-title');
+    if (bookingFormTitle) bookingFormTitle.textContent = 'Add New Booking';
         
         // Reset select dropdowns to their default/first option
         if(carSelectBooking) carSelectBooking.value = "";

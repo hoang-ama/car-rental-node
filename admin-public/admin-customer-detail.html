@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Profile - Admin Portal</title>
+    <link rel="icon" type="image/png" href="assets/logo/favicon.png" />
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <script src="admin-auth-guard.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <a href="/public/index.html">
+                    <img src="assets/logo/logo.png" alt="Vshare Logo">
+                </a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                    <li><a href="admin-cars.html"><i class="fas fa-car"></i> <span>Car</span></a></li>
+                    <li><a href="admin-bookings.html"><i class="fas fa-calendar-check"></i> <span>Booking</span></a></li>
+                    <li><a href="admin-customers.html" class="active"><i class="fas fa-users"></i> <span>Customer</span></a></li>
+                    <li><a href="#"><i class="fas fa-file-alt"></i> <span>Report</span></a></li>
+                    <li><a href="#"><i class="fas fa-cog"></i> <span>Setting</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                Vshare Backend v.1.0
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-header">
+                <h1>Customer Details</h1>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="user-profile" id="admin-user-profile">
+                        <img src="assets/images/placeholder-user.jpg" alt="User Avatar">
+                        <span>Admin User</span>
+                        <div class="user-profile-dropdown" id="user-profile-dropdown">
+                            <ul>
+                                <li><a href="#" id="view-profile-link"><i class="fas fa-user-circle"></i> View Profile</a></li>
+                                <li><a href="#" id="settings-link"><i class="fas fa-cog"></i> Settings</a></li>
+                                <li><a href="#" id="logout-button" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="page-content">
+                <div class="customer-detail-header">
+                    <h2 id="customer-full-name-header">Customer Information</h2>
+                    <div class="action-buttons-group">
+                        <button class="button export"><i class="fas fa-file-export"></i> Export</button>
+                        <button class="button add" id="add-new-booking-for-customer"><i class="fas fa-plus"></i> Add booking</button>
+                        <button class="button" id="customer-referral-code"><i class="fas fa-share-alt"></i>Referral code</button>
+                    </div>
+                </div>
+
+                <div class="customer-detail-content">
+                    <div class="customer-detail-left-column">
+                        <div class="info-grid-card">
+                            <h3>Customer Documents</h3>
+                            <div class="grid-content">
+                                <div class="info-grid-item">
+                                    <span class="label">ID/Passport:</span>
+                                    <span id="customer-cccd">N/A</span>
+                                    <i class="fas fa-check-circle status-icon verified"></i>
+                                </div>
+                                <div class="info-grid-item">
+                                    <span class="label">Driving License:</span>
+                                    <span id="customer-driving-license">N/A</span>
+                                    <i class="fas fa-check-circle status-icon verified"></i>
+                                </div>
+                                <div class="info-grid-item">
+                                    <span class="label">Other:</span>
+                                    <span id="customer-other-doc">N/A</span>
+                                    <i class="fas fa-times-circle status-icon unverified"></i>
+                                </div>
+                                <div class="info-grid-item" style="grid-column: span 2;">
+                                    <span class="label">Completion status:</span>
+                                    <div style="flex-grow: 1; height: 10px; background-color: #e0e0e0; border-radius: 5px;">
+                                        <div id="verification-progress" style="width: 80%; height: 100%; background-color: var(--primary-color-vshare); border-radius: 5px;"></div>
+                                    </div>
+                                    <span>2/3</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="info-grid-card">
+                            <h3>Secutiry Deposit</h3>
+                            <div class="grid-content">
+                                <div class="info-grid-item">
+                                    <span class="label">Motobike:</span>
+                                    <span id="customer-motorbike-status">N/A</span>
+                                    <i class="fas fa-check-circle status-icon verified"></i>
+                                </div>
+                                <div class="info-grid-item">
+                                    <span class="label">Make - Plate number:</span>
+                                    <span id="customer-motorbike-plate">N/A</span>
+                                    <i class="fas fa-times-circle status-icon unverified"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="customer-booking-list-section">
+                            <h2 id="customer-bookings-list-title">Booking list</h2>
+                            <div class="table-responsive">
+                                <table id="customer-detail-bookings-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Booking ID</th>
+                                            <th>Location</th>
+                                            <th>Rent Date</th>
+                                            <th>Car Name</th>
+                                            <th>Days</th>
+                                            <th>Total Price</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="customer-detail-bookings-table-body">
+                                        <tr><td colspan="9" style="text-align: center; color: #777;">Loading bookings...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="pagination">
+                                <p id="customer-booking-pagination-info"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="customer-detail-right-column">
+                        <div class="customer-profile-card">
+                            <h3>Customer Profile</h3>
+                            <div class="customer-profile-info">
+                                <p><strong>Name:</strong> <span id="profile-customer-name">N/A</span></p>
+                                <p><strong>Phome:</strong> <span id="profile-customer-phone">N/A</span></p>
+                                <p><strong>Email:</strong> <span id="profile-customer-email">N/A</span></p>
+                                <p><strong>Address:</strong> <span id="profile-customer-address">N/A</span></p>
+                                <p><strong>DoB:</strong> <span id="profile-customer-dob">N/A</span></p>
+                                <p><strong>Notes:</strong> <span id="profile-customer-notes">N/A</span></p>
+                            </div>
+                            <div class="customer-profile-status">
+                                <p>Status: <strong><span id="profile-customer-status">N/A</span></strong></p>
+                                <p>Credit Score: <strong><span id="profile-customer-loyalty">N/A</span></strong></p>
+                            </div>
+                        </div>
+
+                        <div class="customer-profile-card">
+                            <h3>Successful Bookings / Total Bookings</h3>
+                            <div class="customer-profile-info">
+                                <p><strong><span id="profile-successful-bookings">0</span> / <span id="profile-total-bookings">0</span></strong></p>
+                                <p>Total Revenue: <strong><span id="profile-total-revenue">$0</span></strong></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+        </div>
+    </div>
+    <script src="admin-customer-detail-script.js"></script>
+</body>
+</html>

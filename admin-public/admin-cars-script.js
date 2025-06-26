@@ -31,8 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const formViewWrapper = document.getElementById('form-view-wrapper');
     const showAddFormButton = document.getElementById('show-add-form-btn'); // The "Add" button in the list view
 
+
     const ADMIN_API_URL = '/admin/cars';
-    const PUBLIC_CARS_API_URL = '/api/cars'; // Used to fetch cars for display
+    const ALL_CARS_API_URL = '/admin/cars'; // Use this API to fetch all cars, including unavailable ones
 
     // --- Utility Function to display messages ---
     /**
@@ -97,38 +98,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Fetch and Display Cars List in the Table ---
     async function fetchAndDisplayCars() {
-        if (!carsTableBody) return; // Exit if the table body element is not found
+        if (!carsTableBody) return;
         try {
-            const response = await fetch(PUBLIC_CARS_API_URL);
+            // Change API endpoint to fetch all cars from /admin/cars
+            const response = await fetch(ALL_CARS_API_URL); //
             if (!response.ok) {
-                // If response is not OK, throw an error with status
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
-            const cars = await response.json(); // Parse the JSON response
-            carsTableBody.innerHTML = ''; // Clear existing rows in the table
+            const cars = await response.json();
+            carsTableBody.innerHTML = '';
 
             if (cars.length === 0) {
-                // Display a message if no cars are found
-                carsTableBody.innerHTML = '<tr><td colspan="9">No cars found.</td></tr>';
+                carsTableBody.innerHTML = '<tr><td colspan="10">No cars found.</td></tr>'; // Changed colspan to 10 for new Image column
                 return;
             }
 
-            // Iterate over each car and create a table row
             cars.forEach(car => {
-                const row = carsTableBody.insertRow(); // Create a new table row
-                // Determine the text and CSS class for car availability status
-                const availabilityStatusText = car.available ? 'Available' : 'Unavailable';
+                const row = carsTableBody.insertRow();
+                // Determine availability status text in Vietnamese
+                const availabilityStatusText = car.available ? 'Available' : 'Unavailable'; //
                 const availabilityStatusClass = car.available ? 'status-available' : 'status-unavailable';
+// Ensure imageUrl starts with a '/' if it doesn't already
+                // Some images in your cars.json might already have this, some might not.
+                // It's safer to prepend '/' here if it's missing,
+                // or ensure all images in cars.json start with 'assets/images/'
+                // and then always add '/' at the beginning here.
 
-                // Populate the row with car data. `data-label` is for responsive table styling.
+                const carImageUrl = car.imageUrl;
+                let finalImageUrl = '';
+
+                // Check if the URL is already absolute or relative to public root
+                if (carImageUrl.startsWith('http://') || carImageUrl.startsWith('https://') || carImageUrl.startsWith('/')) {
+                    finalImageUrl = carImageUrl;
+                } else {
+                    // Assume it's relative to public, like "assets/images/cars/LuxA.jpg"
+                    finalImageUrl = `/${carImageUrl}`; // Prepend '/'
+                }
+
+                // Fallback to placeholder if imageUrl is empty or invalid
+                if (!finalImageUrl || finalImageUrl === '/') {
+                    finalImageUrl = '/public/assets/images/placeholder-car.png'; // Direct path to a fallback placeholder
+                }
+
                 row.innerHTML = `
                     <td data-label="ID">${car.id || 'N/A'}</td>
                     <td data-label="Make">${car.make || 'N/A'}</td>
                     <td data-label="Model">${car.model || 'N/A'}</td>
-                    <td data-label="Year">${car.year || 'N/A'}</td>
-                    <td data-label="Price/day">$${car.pricePerDay !== undefined ? car.pricePerDay : 'N/A'}</td>
-                    <td data-label="Location">${car.location || 'N/A'}</td>
                     <td data-label="Body Type">${car.specifications?.bodyType || 'N/A'}</td>
+                    <td data-label="Year">${car.year || 'N/A'}</td>
+                    <td data-label="Image">
+                        <img src="${finalImageUrl}" alt="${car.make} ${car.model}" class="car-thumbnail">
+                    </td>
+                    <td data-label="Price/day">$${car.pricePerDay !== undefined ? car.pricePerDay : 'N/A'}</td>
+                    <td data-label="Location">${car.location || 'N/A'}</td>                   
                     <td data-label="Status">
                         <span class="status-badge ${availabilityStatusClass}">${availabilityStatusText}</span>
                     </td>
@@ -140,8 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         } catch (error) {
             console.error("Error fetching cars for admin table:", error);
-            carsTableBody.innerHTML = '<tr><td colspan="9">Error loading cars. Please try again.</td></tr>';
-            // Display error message in the action message area of the table
+            carsTableBody.innerHTML = '<tr><td colspan="10">Error loading cars. Please try again.</td></tr>'; // Changed colspan to 10
             showMessage('Error loading cars: ' + error.message, 'error', actionMessageDiv);
         }
     }
@@ -296,8 +317,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // 4. Update submit button text and show cancel button
                     if(submitButton) submitButton.textContent = 'Update Car';
-                    // The display of the cancel button is handled by showView('form')
-                    // No need to explicitly set cancelButton.style.display = 'inline-block'; here anymore
+                    
+                    // 5. Update the <h2> title for editing a car
+                const carFormTitle = document.getElementById('car-form-title');
+                if (carFormTitle) carFormTitle.textContent = 'Update Car';
+
                 } catch (e) {
                     console.error("Error parsing car data for edit:", e);
                     showMessage("Error: Could not load car data for editing.", "error", actionMessageDiv);
@@ -345,24 +369,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Reset Form Function (used for both Add and Cancel) ---
-    function resetForm() {
-        if(carForm) carForm.reset(); // Resets all form fields
-        if(carRecordIdInput) carRecordIdInput.value = ''; // Clear hidden ID
-        if(submitButton) submitButton.textContent = 'Add Car'; // Reset submit button text
-        // REMOVED: if(cancelButton) cancelButton.style.display = 'none'; // This line is removed, display is managed by showView()
-        
-        // Reset select dropdowns to their default/first options
-        if(availableSelect) availableSelect.value = 'true';
-        if(locationSelectCarForm) locationSelectCarForm.value = 'Hanoi';
-        if(bodyTypeSelect) bodyTypeSelect.value = 'SUV';
-        if(transmissionSelect) transmissionSelect.value = 'AT';
-        if(fuelTypeSelect) fuelTypeSelect.value = 'Petrol';
-        if(seatsInput) seatsInput.value = 5;
-        // Uncheck all feature checkboxes
-        featuresCheckboxes.forEach(checkbox => checkbox.checked = false);
-        // Set focus to the first input field
-        if(carUniqueIdInput) carUniqueIdInput.focus();
-    }
+
+function resetForm() {
+    if (carForm) carForm.reset(); // Resets all form fields
+    if (carRecordIdInput) carRecordIdInput.value = ''; // Clear hidden ID
+    if (submitButton) submitButton.textContent = 'Add Car'; // Reset submit button text
+
+    // Update the <h2> title for adding a new car
+    const carFormTitle = document.getElementById('car-form-title');
+    if (carFormTitle) carFormTitle.textContent = 'Add New Car';
+
+    // Reset select dropdowns to their default/first options
+    if (availableSelect) availableSelect.value = 'true';
+    if (locationSelectCarForm) locationSelectCarForm.value = 'Hanoi';
+    if (bodyTypeSelect) bodyTypeSelect.value = 'SUV';
+    if (transmissionSelect) transmissionSelect.value = 'AT';
+    if (fuelTypeSelect) fuelTypeSelect.value = 'Petrol';
+    if (seatsInput) seatsInput.value = 5;
+
+    // Uncheck all feature checkboxes
+    featuresCheckboxes.forEach(checkbox => (checkbox.checked = false));
+
+    // Set focus to the first input field
+    if (carUniqueIdInput) carUniqueIdInput.focus();
+}
 
     // --- Event Listeners for view switching buttons ---
     // Event listener for the "Add" button in the list view

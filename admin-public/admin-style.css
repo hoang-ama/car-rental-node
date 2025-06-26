@@ -29,6 +29,8 @@
     --button-edit-hover: #e0a800;
     --button-delete: #dc3545; /* Màu nút Delete */
     --button-delete-hover: #c82333;
+    --button-view: #007bff; /* Màu nút View Bookings */
+    --button-view-hover: #0069d9;
 
     /* Status Badges colors (inspired by client-side, adjusted for admin theme) */
     --status-pending: #ffc107; /* Yellow */
@@ -171,6 +173,8 @@ form textarea {
     padding: 0; /* Loại bỏ padding mặc định, header và section sẽ tự quản lý */
     display: flex;
     flex-direction: column;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    min-width: 0; /* CRITICAL: Allow main-content to shrink within admin-container */ 
 }
 
 /* Top Header */
@@ -308,6 +312,8 @@ form textarea {
 .page-content {
     padding: 30px;
     flex-grow: 1; /* Cho phép nội dung chiếm hết không gian còn lại */
+    overflow-x: hidden; /* Ensure page-content itself handles overflow */
+    min-width: 0; /* Allow page-content to shrink */
 }
 
 /* Sections within page content */
@@ -388,7 +394,8 @@ table {
     border-collapse: collapse;
     margin-top: 0; /* Đã có margin từ action-buttons-group */
     font-size: 0.9em;
-    /* table-layout: fixed; /* Rất quan trọng: Buộc các cột có chiều rộng cố định */
+    table-layout: auto; /* Changed: Use auto for most tables to allow natural column width, except when fixed is needed */
+    min-width: max-content; /* CRITICAL: Ensure table content is not squashed but scrolls within wrapper */
 }
 
 th, td {
@@ -396,10 +403,9 @@ th, td {
     padding: 10px;
     text-align: left;
     vertical-align: middle;
-    /* Thêm các thuộc tính này cho td để xử lý overflow nội dung */
-    /*  white-space: nowrap; /* Ngăn không cho nội dung xuống dòng trong td */
-    /* overflow: hidden; /* Ẩn phần nội dung bị tràn */
-    /* text-overflow: ellipsis; /* Hiển thị dấu ... nếu nội dung bị cắt */
+    white-space: nowrap; /* Keep content on one line */
+    overflow: hidden; /* Hide overflow content within cell */
+    text-overflow: ellipsis; /* Show ellipsis for overflow */
 }
 
 th {
@@ -407,6 +413,25 @@ th {
     color: var(--text-dark);
     font-weight: 600;
     white-space: nowrap; /* Ngăn không cho header xuống dòng */
+}
+
+/* Add this to .table-responsive for consistent scroll behavior */
+.table-responsive {
+    overflow-x: auto; /* CRITICAL: Enables horizontal scrolling for the table if content overflows */
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+}
+
+/* NEW: Styles for car thumbnail in table */
+.car-thumbnail {
+    width: 80px; /* Adjust as needed */
+    height: 60px; /* Adjust as needed */
+    object-fit: cover;
+    border-radius: 4px;
+    display: block; /* Remove extra space below image */
+    margin: 0 auto; /* Center image in cell */
 }
 
 /* Status Badges in tables */
@@ -463,6 +488,8 @@ td button {
 .edit-btn:hover { background-color: var(--button-edit-hover); }
 .delete-btn { background-color: var(--button-delete); }
 .delete-btn:hover { background-color: var(--button-delete-hover); }
+.view-bookings-btn { background-color: var(--button-view); }
+.view-bookings-btn:hover { background-color: var(--button-view-hover); }
 
 /* Form styles */
 form {
@@ -538,6 +565,20 @@ fieldset > div:last-child {
     margin-bottom: 0; /* Loại bỏ margin-bottom cho div cuối cùng */
 }
 
+.specifications-container {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping for smaller screens */
+    gap: 20px; /* Add spacing between items */
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+    border: 1px solid #e9ecef;
+}
+
+.specifications-container .form-group {
+    flex: 1 1 calc(50% - 20px); /* Take 50% of the width minus the gap */
+    min-width: 200px; /* Ensure a minimum width */
+}
 
 .features-checkbox-group {
     display: grid;
@@ -643,12 +684,11 @@ fieldset > div:last-child {
 
 .dashboard-grid {
     display: grid;
-    /* Changed: Điều chỉnh minmax để tạo 3-4 cột trên desktop, tùy kích thước card */
-    /* Nếu muốn cố định 4 cột: grid-template-columns: repeat(4, 1fr); */
-    /* auto-fit sẽ tự động tạo đủ cột dựa trên minmax và khoảng trống */
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Adjusted minwidth for 4 cards per row */
     gap: 25px;
     margin-bottom: 25px;
+     /* Add min-width: 0 to flex/grid items to allow them to shrink */
+     min-width: 0;
 }
 
 
@@ -661,6 +701,7 @@ fieldset > div:last-child {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    min-width: 0; /* CRITICAL: Allow dashboard cards to shrink */
 }
 
 .dashboard-card-header {
@@ -934,6 +975,225 @@ fieldset > div:last-child {
 }
 
 
+/* Customer Detail Page Specific Styles */
+.customer-detail-header {
+    background-color: var(--section-bg);
+    padding: 20px 25px;
+    border-bottom: 1px solid var(--border-light);
+    margin-bottom: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 15px;
+}
+
+.customer-detail-header h2 {
+    font-size: 1.8em;
+    color: var(--text-dark);
+    margin: 0;
+    border-bottom: none; /* Override section h2 border */
+    padding-bottom: 0;
+    flex-grow: 1; /* Allow title to take space */
+}
+
+.customer-detail-header .action-buttons-group {
+    margin-bottom: 0; /* Override default margin */
+}
+
+.customer-detail-content {
+    display: flex; /* Enable Flexbox for layout */
+    gap: 20px; /* Add spacing between columns */
+    min-width: 0; /* Prevent overflow */
+}
+
+.customer-detail-left-column,
+.customer-detail-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    min-width: 0; /* CRITICAL: Allow columns to shrink */
+    flex-basis: auto; /* Reset flex-basis */
+}
+
+.customer-detail-left-column {
+    flex: 3; /* Take up the remaining 3/4 of the container */
+}
+
+.customer-detail-right-column {
+    flex: 1; /* Take up 1/4 of the container */
+}
+
+/* Document/Info Grid Card */
+/* Ensure individual cards within detail columns also shrink */
+.info-grid-card,
+.customer-profile-card,
+.customer-booking-list-section {
+    min-width: 0; /* CRITICAL: Allow these cards to shrink */
+}
+
+.info-grid-card {
+    background-color: var(--section-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-light);
+}
+
+.info-grid-card h3 {
+    font-size: 1.4em;
+    color: var(--text-dark);
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-color-vshare);
+}
+
+.grid-content {
+    display: flex; /* Use Flexbox for layout */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 20px; /* Add spacing between items */
+    justify-content: space-between; /* Distribute items evenly */
+}
+
+.grid-content > * {
+    flex: 1 1 calc(50% - 20px); /* Default: 2 items per row */
+    min-width: 200px; /* Ensure a minimum width */
+    box-sizing: border-box; /* Include padding and border in width */
+}
+
+.info-grid-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.95em;
+    color: #555;
+}
+
+.info-grid-item .label {
+    font-weight: 600;
+    color: var(--text-dark);
+    min-width: 100px; /* Align labels */
+}
+
+.info-grid-item .value {
+    flex-grow: 1;
+}
+
+.info-grid-item .status-icon {
+    font-size: 1.2em;
+    width: 20px;
+    text-align: center;
+}
+.info-grid-item .status-icon.verified { color: var(--status-confirmed); } /* Green check */
+.info-grid-item .status-icon.unverified { color: var(--status-cancelled); } /* Red X */
+.info-grid-item .status-icon.pending { color: var(--status-pending); } /* Yellow warning */
+
+
+/* Customer Profile Card (Right Column) */
+.customer-profile-card {
+    background-color: var(--section-bg);
+    padding: 20px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-light);
+}
+
+.customer-profile-card h3 {
+    font-size: 1.2em;
+    color: var(--text-dark);
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-color-vshare);
+}
+
+.customer-profile-info {
+    font-size: 0.9em;
+    line-height: 1.8;
+    white-space: nowrap; /* Prevent line breaks */
+    /* overflow: hidden; /* Hide overflow content */
+    text-overflow: ellipsis; /* Add ellipsis for overflow */
+}
+
+.customer-profile-info p {
+    margin: 0;
+    color: #555;
+}
+.customer-profile-info p strong {
+    color: var(--text-dark);
+    display: inline-block;
+    min-width: 90px; /* Align labels */
+}
+
+.customer-profile-status {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px dashed var(--border-light);
+}
+
+.customer-profile-status p {
+    margin-bottom: 8px;
+    font-size: 1em;
+    color: var(--text-dark);
+}
+.customer-profile-status p strong {
+    font-weight: 500;
+    color: var(--primary-color-vshare);
+}
+
+/* Customer Booking List Table (in detail page) */
+.customer-booking-list-section {
+    background-color: var(--section-bg);
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-light);
+    grid-column: 1 / -1; /* Make it span all columns */
+}
+
+.customer-booking-list-section h2 {
+    font-size: 1.5em;
+    color: var(--text-dark);
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 2px solid var(--primary-color-vshare);
+    padding-bottom: 10px;
+}
+
+.customer-booking-list-section table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+    margin-top: 0;
+    table-layout: auto; /* Allow column width to adjust based on content */
+    min-width: max-content; /* Ensure table content is not squashed but scrolls within wrapper */
+}
+
+#customer-detail-bookings-table {
+    table-layout: auto; /* Allow column width to adjust based on content */
+    min-width: max-content; /* Ensure table content is not squashed but scrolls within wrapper */
+}
+
+.customer-booking-list-section th,
+.customer-booking-list-section td {
+    border: 1px solid var(--border-light);
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap; /* Prevent content from wrapping */
+    overflow: hidden; /* Hide overflowing content */
+    text-overflow: ellipsis; /* Show ellipsis for overflow */
+}
+.customer-booking-list-section th {
+    background-color: #f2f2f2;
+    color: var(--text-dark);
+    font-weight: 600;
+}
+
+
 /* Responsive adjustments */
 @media (max-width: 992px) {
     .sidebar {
@@ -982,6 +1242,27 @@ fieldset > div:last-child {
     }
     .features-checkbox-group {
         grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+
+/* Responsive adjustments for customer detail page */
+    .customer-detail-content {
+        flex-direction: column; /* Stack columns */
+    }
+    .customer-detail-header h2 {
+        font-size: 1.5em;
+    }
+    .customer-detail-left-column,
+    .customer-detail-right-column {
+        flex: 1 1 100%; /* Take full width */
+        max-width: 100%;
+    }
+    
+    .grid-content > * {
+        flex: 1 1 100%; /* Make each item take full width */
+    }
+
+    .customer-detail-right-column {
+        flex-direction: column; /* Ensure vertical stacking */
     }
 }
 
@@ -1091,8 +1372,11 @@ fieldset > div:last-child {
         border: none;
         border-bottom: 1px solid #eee;
         position: relative;
-        padding-left: 50%;
+        padding-left: 55%;
         text-align: right;
+        white-space: normal; /* Allow text to wrap within the 'block' cell on mobile */
+        overflow: visible; /* Don't hide overflow when stacked */
+        text-overflow: clip; /* Don't show ellipsis when stacked */
     }
     td:last-child {
         border-bottom: none;
@@ -1101,16 +1385,44 @@ fieldset > div:last-child {
         content: attr(data-label);
         position: absolute;
         left: 10px;
-        width: 45%;
+        width: 50%;
         padding-right: 10px;
         white-space: nowrap;
         text-align: left;
         font-weight: 600;
         color: #555;
+        white-space: nowrap; /* Keep label on one line */
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
+
+    /* Exceptions for tables that should always scroll horizontally if columns are wide */
+    /* This might be needed if you have very wide columns you *don't* want to stack */
+    .table-responsive table {
+        table-layout: auto;
+        min-width: max-content; /* Keep this to ensure horizontal scroll */
+    }
+    .table-responsive td,
+    .table-responsive th {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .table-responsive.customer-booking-list-section td::before { /* For customer detail table if it behaves like this */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Adjust car thumbnails for mobile */
     .status-badge {
         font-size: 0.7em;
         padding: 4px 8px;
+    }
+
+    .car-thumbnail {
+        width: 60px; /* Smaller thumbnail on mobile */
+        height: 45px;
     }
 
     /* Responsive adjustments for dashboard */
@@ -1211,5 +1523,73 @@ fieldset > div:last-child {
     .admin-login-right {
         display: none; /* Hide image on smaller screens */
     }
-
+    
+/* Responsive adjustments for customer detail page */
+    .customer-detail-header {
+        padding: 15px 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .customer-detail-header h2 {
+        font-size: 1.3em;
+        padding-bottom: 5px;
+        border-bottom: 1px solid var(--border-light);
+        width: 100%;
+    }
+    .customer-detail-header .action-buttons-group {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+    .info-grid-card h3,
+    .customer-profile-card h3 {
+        font-size: 1.1em;
+        padding-bottom: 8px;
+    }
+    .customer-booking-list-section h2 {
+        font-size: 1.3em;
+    }
+    /* Apply responsive table styling for booking list */
+    .customer-booking-list-section table,
+    .customer-booking-list-section thead,
+    .customer-booking-list-section tbody,
+    .customer-booking-list-section th,
+    .customer-booking-list-section td,
+    .customer-booking-list-section tr {
+        display: block;
+    }
+    .customer-booking-list-section thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    .customer-booking-list-section tr {
+        border: 1px solid var(--border-light);
+        margin-bottom: 10px;
+        border-radius: 6px;
+        overflow: hidden;
+    }
+    .customer-booking-list-section td {
+        border: none;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        padding-left: 55%; /* Adjusted for longer labels */
+        text-align: right;
+    }
+    .customer-booking-list-section td:last-child {
+        border-bottom: none;
+    }
+    .customer-booking-list-section td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        width: 50%; /* Adjusted width of label */
+        padding-right: 10px;
+        white-space: nowrap;
+        text-align: left;
+        font-weight: 600;
+        color: #555;
+    }
+    
 }

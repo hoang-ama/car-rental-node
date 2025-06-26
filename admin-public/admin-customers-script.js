@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const showAddFormButton = document.getElementById('show-add-form-btn'); // The "Add" button in the list view
 
     const ADMIN_CUSTOMERS_API_URL = '/admin/customers';
+    const ADMIN_BOOKINGS_API_URL = '/admin/bookings';
 
     // --- Utility Functions ---
     /**
@@ -84,33 +85,51 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchAndDisplayCustomers() {
         if (!customersTableBody) return;
         try {
-            const response = await fetch(ADMIN_CUSTOMERS_API_URL);
-            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-            const customers = await response.json(); // Server will send customers without passwords
-            customersTableBody.innerHTML = ''; // Clear existing rows
+            const [customersResponse, bookingsResponse] = await Promise.all([
+                fetch(ADMIN_CUSTOMERS_API_URL),
+                fetch(ADMIN_BOOKINGS_API_URL)
+            ]);
+
+            if (!customersResponse.ok) throw new Error(`HTTP error! Status: ${customersResponse.status} for customers.`);
+            if (!bookingsResponse.ok) throw new Error(`HTTP error! Status: ${bookingsResponse.status} for bookings.`);
+
+            const customers = await customersResponse.json();
+            const allBookings = await bookingsResponse.json();
+
+            customersTableBody.innerHTML = '';
 
             if (customers.length === 0) {
-                customersTableBody.innerHTML = '<tr><td colspan="6">No customers found.</td></tr>';
+                customersTableBody.innerHTML = '<tr><td colspan="7">No customers found.</td></tr>';
                 return;
             }
 
+            const customersWithBookings = new Set(allBookings.map(b => b.customerEmail));
+
             customers.forEach(customer => {
                 const row = customersTableBody.insertRow();
+                const hasBookings = customersWithBookings.has(customer.email);
+                const bookingStatusText = hasBookings ? 'Already' : 'Not yet';
+                const bookingStatusClass = hasBookings ? 'status-confirmed' : 'status-deactive';
+
                 row.innerHTML = `
                     <td data-label="ID">${customer.id}</td>
                     <td data-label="Name">${customer.name || 'N/A'}</td>
                     <td data-label="Phone">${customer.phone || 'N/A'}</td>
                     <td data-label="Email">${customer.email || 'N/A'}</td>
                     <td data-label="Registered At">${customer.registeredAt ? new Date(customer.registeredAt).toLocaleString() : 'N/A'}</td>
+                    <td data-label="Booking Status">
+                        <span class="status-badge ${bookingStatusClass}">${bookingStatusText}</span>
+                    </td>
                     <td data-label="Actions">
                         <button class="edit-btn" data-customer='${JSON.stringify(customer)}'><i class="fas fa-pencil-alt"></i></button>
                         <button class="delete-btn" data-id="${customer.id}"><i class="fas fa-trash-alt"></i></button>
+                        <button class="view-bookings-btn" data-customer-id="${customer.id}" data-customer-email="${customer.email}"><i class="fas fa-list-alt"></i></button>
                     </td>
                 `;
             });
         } catch (error) {
             console.error("Error fetching customers:", error);
-            customersTableBody.innerHTML = '<tr><td colspan="6">Error loading customers. Please try again.</td></tr>';
+            customersTableBody.innerHTML = '<tr><td colspan="7">Error loading customers. Please try again.</td></tr>';
             showMessage(actionMessageDiv, 'Error loading customers: ' + error.message, 'error');
         }
     }
@@ -188,10 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Handle Edit and Delete Button Clicks in Table ---
+    // --- Handle Edit, Delete, and View Bookings Button Clicks in Table ---
     if (customersTableBody) {
         customersTableBody.addEventListener('click', async (event) => {
-            const target = event.target;
+            const target = event.target.closest('button');
+
+            if (!target) return;
 
             // Edit Customer
             if (target.classList.contains('edit-btn')) {
@@ -203,22 +224,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 try {
                     const customerToEdit = JSON.parse(customerDataString);
-                    console.log("Editing customer:", customerToEdit);
 
-                    // 1. Switch to form view first
                     showView('form');
 
-                    // 2. Populate form fields
                     customerIdFormInput.value = customerToEdit.id;
                     customerNameInput.value = customerToEdit.name || '';
                     customerPhoneInput.value = customerToEdit.phone || '';
                     customerEmailInput.value = customerToEdit.email || '';
-                    customerPasswordInput.value = ''; // Always clear password field for security (never pre-fill passwords)
+                    customerPasswordInput.value = '';
 
-                    // 3. Update submit button text
                     if(submitCustomerBtn) submitCustomerBtn.textContent = 'Update Customer';
-                    // The cancel button display is handled by showView('form')
-
+                      // Update the <h2> title for editing a customer
+                    const customerFormTitle = document.getElementById('customer-form-title');
+                    if (customerFormTitle) customerFormTitle.textContent = 'Update Customer';
                 } catch (e) {
                     console.error("Error parsing customer data for edit:", e);
                     showMessage(actionMessageDiv, "Error: Could not load customer data for editing.", "error");
@@ -226,7 +244,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             // Delete Customer
-            if (target.classList.contains('delete-btn')) {
+            else if (target.classList.contains('delete-btn')) {
                 const customerIdToDelete = target.dataset.id;
                 if (!customerIdToDelete) {
                      showMessage(actionMessageDiv, "Error: Customer ID not found for deletion.", "error");
@@ -235,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (confirm(`Are you sure you want to delete customer ID: ${customerIdToDelete}?`)) {
                     try {
                         target.disabled = true;
-                        target.textContent = "Deleting...";
+                        target.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
                         const response = await fetch(`${ADMIN_CUSTOMERS_API_URL}/${encodeURIComponent(customerIdToDelete)}`, {
                             method: 'DELETE',
                         });
@@ -251,8 +269,20 @@ document.addEventListener('DOMContentLoaded', () => {
                         showMessage(actionMessageDiv, 'Client-side error: ' + error.message, 'error');
                     } finally {
                         target.disabled = false;
-                        target.textContent = "Delete";
+                        target.innerHTML = '<i class="fas fa-trash-alt"></i>';
                     }
+                }
+            }
+
+            // NEW: View Bookings for Customer - REDIRECT TO DETAIL PAGE
+            else if (target.classList.contains('view-bookings-btn')) {
+                const customerId = target.dataset.customerId; // Get the customer ID (e.g., "customer_1")
+                const customerEmail = target.dataset.customerEmail; // Get the customer email
+                if (customerId && customerEmail) {
+                    // Redirect to the new customer detail page, passing ID and Email
+                    window.location.href = `admin-customer-detail.html?id=${customerId}&email=${encodeURIComponent(customerEmail)}`;
+                } else {
+                    showMessage(actionMessageDiv, "Error: Customer ID or email not found for viewing details.", "error");
                 }
             }
         });
@@ -263,7 +293,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if(customerForm) customerForm.reset();
         if(customerIdFormInput) customerIdFormInput.value = '';
         if(submitCustomerBtn) submitCustomerBtn.textContent = 'Add Customer';
-        // The display of the cancel button is handled by showView()
+
+        // Update the <h2> title for adding a new customer
+        const customerFormTitle = document.getElementById('customer-form-title');
+        if (customerFormTitle) customerFormTitle.textContent = 'Add New Customer';
         
         if(customerNameInput) customerNameInput.focus();
         if(formMessageDiv) {
