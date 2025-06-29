@@ -96,7 +96,7 @@
     "year": 2023,
     "pricePerDay": 45,
     "available": false,
-    "imageUrl": "https://cdnphoto.dantri.com.vn/ciGmUZaqUYeXvq6Ac8HOlyJbwiE=/thumb_w/1020/2024/03/07/0703toyota-vios-2023-79-copy-1709796616626.jpg",
+    "imageUrl": "https://i1-vnexpress.vnecdn.net/2023/05/10/Vios-2023-10_1683690128.jpg?w=2400&h=0&q=100&dpr=1&fit=crop&s=LPsTjgivZ2T5xKJYQiVjHg&t=image",
     "location": "Hanoi",
     "specifications": {
       "bodyType": "Sedan",
@@ -188,7 +188,7 @@
     "model": "VF 3",
     "year": 2025,
     "pricePerDay": 30,
-    "available": true,
+    "available": false,
     "imageUrl": "https://greenfuture.tech/_next/image?url=https%3A%2F%2Fupload-static.fgf.vn%2Fcar%2Fvf305.jpg&w=1080&q=75",
     "location": "Hanoi",
     "specifications": {

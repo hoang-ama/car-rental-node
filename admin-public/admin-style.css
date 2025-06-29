@@ -1193,6 +1193,149 @@ fieldset > div:last-child {
     font-weight: 600;
 }
 
+/* Header Notification Icon */
+.top-header .header-actions .notification-icon-wrapper {
+    position: relative;
+    margin-right: 15px; /* Space between search bar and user profile */
+}
+
+.top-header .header-actions .notification-icon-wrapper .fas.fa-bell {
+    font-size: 1.5em; /* Kích thước chuông */
+    color: #6c757d; /* Màu chuông */
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.top-header .header-actions .notification-icon-wrapper .fas.fa-bell:hover {
+    color: var(--primary-color-vshare);
+}
+
+.top-header .header-actions .notification-badge {
+    position: absolute;
+    top: -5px; /* Vị trí chấm đỏ */
+    right: -5px;
+    background-color: var(--button-delete); /* Màu đỏ */
+    color: white;
+    border-radius: 50%;
+    width: 18px; /* Kích thước chấm đỏ */
+    height: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.7em;
+    font-weight: bold;
+    border: 1px solid white; /* Viền trắng để nổi bật */
+    animation: pulse 1.5s infinite; /* Hiệu ứng nhấp nháy */
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+/* Notification Dropdown Content */
+.notification-dropdown {
+    position: absolute;
+    top: 100%; /* Đặt ngay dưới icon chuông */
+    right: 0;
+    width: 320px; /* Chiều rộng của popup thông báo */
+    max-height: 400px; /* Giới hạn chiều cao */
+    overflow-y: auto; /* Cuộn nếu nội dung dài */
+    background-color: #fff;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease;
+    padding: 0; /* Remove padding here, add inside .notification-content */
+}
+
+.notification-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.notification-header {
+    padding: 10px 15px;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--text-dark);
+    border-bottom: 1px solid var(--border-light);
+}
+
+.notification-content {
+    padding: 10px 15px;
+}
+
+.notification-item {
+    padding: 10px 0;
+    border-bottom: 1px dashed #eee;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item strong {
+    color: var(--text-dark);
+}
+
+.notification-item .time {
+    font-size: 0.8em;
+    color: #999;
+    display: block;
+    margin-top: 3px;
+}
+
+.notification-footer {
+    padding: 10px 15px;
+    border-top: 1px solid var(--border-light);
+    text-align: center;
+}
+
+.notification-footer a {
+    color: var(--primary-color-vshare);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.notification-footer a:hover {
+    text-decoration: underline;
+}
+
+.notification-empty {
+    padding: 20px 15px;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    font-size: 0.9em;
+}
+
+/* Close button for dropdowns */
+.notification-dropdown .close-button {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    font-size: 1.2em;
+    color: #aaa;
+    cursor: pointer;
+}
+.notification-dropdown .close-button:hover {
+    color: #333;
+}
 
 /* Responsive adjustments */
 @media (max-width: 992px) {

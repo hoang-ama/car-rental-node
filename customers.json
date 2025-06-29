@@ -46,5 +46,21 @@
     "email": "lelinh@hotmail.com",
     "password": "vshare@123",
     "registeredAt": "2025-06-19T07:42:38.947Z"
+  },
+  {
+    "id": "customer_7",
+    "name": "Donal Trump",
+    "phone": "+1905458368",
+    "email": "donaltrump@trump.com",
+    "password": "vshare@123",
+    "registeredAt": "2025-06-27T15:23:12.704Z"
+  },
+  {
+    "id": "customer_8",
+    "name": "Elon Musk",
+    "phone": "+1678321456",
+    "email": "elon.musk@spacex.com",
+    "password": "vshare@123",
+    "registeredAt": "2025-06-28T13:44:19.036Z"
   }
 ]

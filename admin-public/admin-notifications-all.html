@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>All Notifications - Admin Portal</title>
+        <link rel="icon" type="image/png" href="assets/logo/favicon.png" />
+        <link rel="stylesheet" href="admin-style.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+        <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+        <script src="admin-auth-guard.js"></script>
+    </head>
+    <body>
+        <div class="admin-container">
+            <aside class="sidebar">
+                <div class="logo">
+                    <a href="/public/index.html">
+                        <img src="assets/logo/logo.png" alt="Vshare Logo">
+                    </a>
+                </div>
+                <nav>
+                    <ul>
+                        <li><a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                        <li><a href="admin-cars.html"><i class="fas fa-car"></i> <span>Car</span></a></li>
+                        <li><a href="admin-bookings.html"><i class="fas fa-calendar-check"></i> <span>Booking</span></a></li>
+                        <li><a href="admin-customers.html"><i class="fas fa-users"></i> <span>Customer</span></a></li>
+                        <li><a href="admin-notifications-all.html"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
+                        <li><a href="#"><i class="fas fa-file-alt"></i> <span>Report</span></a></li>
+                        <li><a href="#"><i class="fas fa-cog"></i> <span>Setting</span></a></li>
+                    </ul>
+                </nav>
+                <div class="sidebar-footer">
+                    Vshare Backend v.1.0
+                </div>
+            </aside>
+    
+            <div class="main-content">
+                <header class="top-header">
+                    <h1>All Notifications</h1>
+                    <div class="header-actions">
+                        <div class="search-bar">
+                            <input type="text" placeholder="Search...">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="user-profile" id="admin-user-profile">
+                            <img src="assets/images/placeholder-user.jpg" alt="User Avatar">
+                            <span>Admin User</span>
+                            <div class="user-profile-dropdown" id="user-profile-dropdown">
+                                <ul>
+                                    <li><a href="#" id="view-profile-link"><i class="fas fa-user-circle"></i> View Profile</a></li>
+                                    <li><a href="#" id="settings-link"><i class="fas fa-cog"></i> Settings</a></li>
+                                    <li><a href="#" id="logout-button" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+    
+                <main class="page-content">
+                    <section id="all-notifications-section">
+                        <h2>All Notifications List</h2>
+                        <div id="notifications-action-message" class="form-message-placeholder"></div>
+                        <div class="table-responsive">
+                            <table id="all-notifications-table">
+                                <thead>
+                                    <tr>
+                                        <th>Type</th>
+                                        <th>ID</th>
+                                        <th>Message</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="all-notifications-table-body">
+                                    <tr><td colspan="4" style="text-align: center; color: #777;">Loading notifications...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="pagination">
+                            <p id="notifications-pagination-info"></p>
+                        </div>
+                    </section>
+                </main>
+                
+            </div>
+        </div>
+        <script src="admin-notifications-all-script.js"></script>
+    </body>
+    </html>
+    

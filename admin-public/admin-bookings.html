@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
     <script src="admin-auth-guard.js"></script>
+    <script src="admin-notifications.js"></script>
 </head>
 <body>
     <div class="admin-container">
@@ -24,6 +25,7 @@
                     <li><a href="admin-cars.html"><i class="fas fa-car"></i> <span>Car</span></a></li>
                     <li><a href="admin-bookings.html" class="active"><i class="fas fa-calendar-check"></i> <span>Booking</span></a></li>
                     <li><a href="admin-customers.html"><i class="fas fa-users"></i> <span>Customer</span></a></li>
+                    <li><a href="admin-notifications-all.html"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
                     <li><a href="#"><i class="fas fa-file-alt"></i> <span>Report</span></a></li>
                     <li><a href="#"><i class="fas fa-cog"></i> <span>Setting</span></a></li>
                 </ul>
@@ -40,6 +42,23 @@
                     <div class="search-bar">
                         <input type="text" placeholder="Search...">
                         <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notification-icon-wrapper" id="notification-bell-wrapper">
+                        <i class="fas fa-bell" id="notification-bell-icon"></i>
+                        <span class="notification-badge hidden" id="notification-badge-count"></span>
+
+                        <div class="notification-dropdown hidden" id="notification-dropdown">
+                            <div class="notification-header">
+                                Notifications
+                                <span class="close-button" id="close-notification-dropdown">&times;</span>
+                            </div>
+                            <div class="notification-content" id="notification-content">
+                                <div class="notification-empty">No new notifications.</div>
+                            </div>
+                            <div class="notification-footer">
+                                <a href="#">View all notifications</a>
+                            </div>
+                        </div>
                     </div>
                     <div class="user-profile" id="admin-user-profile">
                         <img src="assets/images/placeholder-user.jpg" alt="User Avatar">
