@@ -1123,7 +1123,7 @@ if (currentUser) { // Kiểm tra nếu có người dùng đang đăng nhập
             confCustomerDetails.innerHTML = `<h4>Customer Details</h4><p><strong>Name:</strong> ${booking.customerName}</p><p><strong>Email:</strong> ${currentBookingDetails.customerInfo.email}</p><p><strong>Phone:</strong> ${currentBookingDetails.customerInfo.phone}</p>`;
         }
         if(confVehicleDetails) {
-             confVehicleDetails.innerHTML = `<h4>Vehicle Details</h4><p><strong>Car:</strong> ${booking.carMake} ${booking.carModel} (ID: ${booking.carId})</p>`;
+             confVehicleDetails.innerHTML = `<h4>Vehicle Details</h4><p><strong>Car:</strong> ${booking.carMake} ${booking.carModel}</p>`;
         }
         if(confRentalPeriod) {
             confRentalPeriod.innerHTML = `<h4>Rental Period</h4><p><strong>Pick-up:</strong> ${formatDateTimeForDisplay(booking.startDate)}</p><p><strong>Return:</strong> ${formatDateTimeForDisplay(booking.endDate)}</p>`;
