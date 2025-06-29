@@ -4,6 +4,77 @@ const fs = require('fs').promises;
 const path = require('path');
 const cors = require('cors');
 
+require('dotenv').config(); // THÊM DÒNG NÀY ĐỂ TẢI BIẾN MÔI TRƯỜNG
+const nodemailer = require('nodemailer'); // THÊM DÒNG NÀY ĐỂ SỬ DỤNG NODEMAILER
+
+// Cấu hình Nodemailer transporter
+const transporter = nodemailer.createTransport({
+    service: 'gmail', // Hoặc 'Outlook', hoặc 'smtp.yourdomain.com'
+    auth: {
+        user: process.env.EMAIL_USER, // Lấy từ biến môi trường
+        pass: process.env.EMAIL_PASS  // Lấy từ biến môi trường
+    }
+});
+
+// Hàm gửi email xác nhận booking
+async function sendBookingConfirmationEmail(booking) {
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: booking.customerEmail,
+        subject: `[Vshare] Confirm Booking #${booking.id}`,
+        html: `
+        <div style="font-family: Montserrat, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 8px; overflow: hidden;">
+
+        <div style="background-color: #f8f9fa; padding: 20px; text-align: center; border-bottom: 1px solid #eee;">
+            <img src="https://vshare.asia/assets/logo/logo.png" alt="Vshare Logo" style="max-height: 45px; display: block; margin: 0 auto;">
+        </div>
+        
+        <div style="padding: 25px; background-color: #ffffff;">
+                <h2 style="color: #e67e22; margin-top: 0;">Dear <span class="math-inline">${booking.customerName},</h2\>
+
+    <p>Thank you for choosing Vshare! Your booking has been confirmed with the following details:</p>  
+    <h3 style="color: #2c3e50;">Booking Information:</h3>
+
+    <ul style="list-style: none; padding: 0; margin: 0 0 15px 0;">
+<li style="margin-bottom: 8px;"><strong>Booking ID:</strong> #${booking.id}</li>
+<li style="margin-bottom: 8px;"><strong>Customer Name:</strong> ${booking.customerName}</li>
+<li style="margin-bottom: 8px;"><strong>Email:</strong> ${booking.customerEmail}</li>
+<li style="margin-bottom: 8px;"><strong>Phone:</strong> ${booking.customerPhone}</li>
+<li style="margin-bottom: 8px;"><strong>Vehicle Rented:</strong> ${booking.carMake} ${booking.carModel} </li>
+<li style="margin-bottom: 8px;"><strong>Pickup Location:</strong> ${booking.pickupLocation}</li>
+<li style="margin-bottom: 8px;"><strong>Rental Period:</strong> From ${new Date(booking.startDate).toLocaleString('en-US')} to ${new Date(booking.endDate).toLocaleString('en-US')}</li>
+<li style="margin-bottom: 8px;"><strong>Total Price:</strong> $${Number(booking.totalPrice).toLocaleString('en-US')}</li>
+<li style="margin-bottom: 8px;"><strong>Payment Method:</strong> ${booking.paymentMethod}</li>
+
+${booking.depositAmount > 0 ? `<li style="margin-bottom: 8px;"><strong>Deposit Amount:</strong> $${Number(booking.depositAmount).toLocaleString('en-US')}</strong></li>` : ''}
+<li style="margin-bottom: 8px;"><strong>Status:</strong> ${booking.status}</li>
+</ul>
+
+    <p>We will contact you soon to finalize the vehicle pickup arrangements.</p>
+    <p>Should you have any questions, please contact our hotline: <strong>0903.229.906</strong></p>
+    <p>Sincerely,<br/>Vshare Team</p>
+        </div>
+
+    <div style="background-color: #212529; color: #adb5bd; padding: 20px 25px; font-size: 0.85em; text-align: center;">
+                    <p style="margin-top: 0; margin-bottom: 10px; font-weight: bold; color: #fff;">Vshare, Car Rental at Vinhomes</p>
+                    <p style="margin-bottom: 5px;"><a href="mailto:contact@vshare.asia" style="color: #adb5bd; text-decoration: none;">contact@vshare.asia</a></p>
+                    <p style="margin-bottom: 15px;">Phone: <a href="tel:0903229906" style="color: #adb5bd; text-decoration: none;">0903.229.906</a> (8:00 AM - 9:00 PM)</p>
+                    <p style="margin-bottom: 0; color: #6c757d;">Copyright &copy; 2025 by Vshare. All rights reserved.</p>
+    </div>
+                
+    <p style="font-size: 0.8em; color: #777;"><i>This is an automated email, please do not reply directly.</i></p>
+</div>
+        `
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Confirmation email of booking #${booking.id} sent successfully to ${booking.customerEmail}`);
+    } catch (error) {
+        console.error(`Error sending confirmation email to booking #${booking.id}:`, error);
+    }
+}
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
@@ -194,6 +265,15 @@ app.post('/api/bookings', async (req, res) => {
     bookings.push(newBooking);
     await saveData();
     console.log('New Booking by client:', newBooking);
+
+// GỬI EMAIL XÁC NHẬN BOOKING (THÊM DÒNG NÀY)
+    // Đảm bảo newBooking có customerEmail trước khi gọi hàm
+    if (newBooking.customerEmail) {
+        await sendBookingConfirmationEmail(newBooking);
+    } else {
+        console.warn(`Không thể gửi email xác nhận cho booking #${newBooking.id}: Thiếu email khách hàng.`);
+    }
+
     // ✅ Cập nhật trạng thái xe nếu booking mới có trạng thái làm xe không khả dụng
     if (newBookingStatus === 'Confirmed' || newBookingStatus === 'Rented Out') {
     await updateCarAvailability(carId, false);  
