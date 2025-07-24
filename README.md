@@ -1,4 +1,4 @@
-Simple Car Rental
+Car Rental Platform
 
 1. Backend (Node.js with Express.js):
 
@@ -16,28 +16,37 @@ public/index.html: The main page to display cars and booking forms.
 public/script.js: JavaScript to fetch data from the backend and handle user interactions.
 public/style.css: Basic styling.
 
-3. Project Structure:
-
+3. Admin Portal
+- Login: admin-login.html/.js
+- Dashboard: admin-dashboard.html/.js 
+- Car management: admin-cars.htnl/.js 
+- Booking management: admin-bookings.html/.js
+- Customer management/ Customer Detail: admin-customers.html/.js
+- Promotion: admin-promotions.html/.js/
+- Report: admin-reports.html//.js
+- Setting: admin-settings.html/.js
+  
+4. Project Structure:
+- public: index.html/scrip.js/style.css
+- admin-public: login/dashboard/bookings/cars/customers/promotion/setting/report
+- server.js
+  
 car-rental-node/
 ├── public/
 │   ├── index.html
-│   ├── script.js
-│   └── style.css
+│   ├── assets
+|        |--- js/script.js
+|        |--- css/style.css
+|        |--- images
+|        |--- logo
+├── admin-public/
+│   ├── login (html/js)
+│   ├── dashboard  (html/js)
+│   └── cars/bookings/customers  (html/js)
+|   └── promotion/setting/report (html/js)
+│   ├── admin-style.css
+│   ├── assets
+|        |--- images
+|        |--- logo
 ├── server.js
 └── package.json
-
-Bước 2: Giao diện Admin - Quản lý Xe
-
-Tạo cấu trúc thư mục và file:
-
-Trong thư mục gốc của dự án car-rental-node (ngang hàng với public/, server.js), tạo một thư mục mới tên là admin-public.
-Bên trong admin-public, tạo các file sau:
-
-Admin cars: Quản lý xe 
-    admin-cars.html (để quản lý xe)
-    admin-cars-script.js (JavaScript cho trang quản lý xe)
-    admin-style.css (để trang trí cho các trang admin)
-
-Admin Bookings: thêm trang chức năng quản lý bookings
-    admin-bookings.html (quản lý booking)
-    admin-bookings-script.js khi làm
