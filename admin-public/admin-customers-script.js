@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const showAddFormButton = document.getElementById('show-add-form-btn'); // The "Add" button in the list view
 
     const ADMIN_CUSTOMERS_API_URL = '/admin/customers';
-    const ADMIN_BOOKINGS_API_URL = '/admin/bookings';
+    const ADMIN_BOOKINGS_API_URL = '/api/bookings'; // Assuming this is the correct endpoint for bookings
 
     // --- Utility Functions ---
     /**

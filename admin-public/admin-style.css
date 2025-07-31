@@ -59,26 +59,6 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* Form styles */
-form input[type="text"],
-form input[type="number"],
-form input[type="url"],
-form input[type="tel"],
-form input[type="email"],
-form input[type="password"],
-form input[type="datetime-local"],
-form select,
-form textarea {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--border-light);
-    border-radius: 5px;
-    font-size: 0.9em;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
-    box-sizing: border-box;
-    font-family: 'Montserrat', sans-serif; /* THÊM DÒNG NÀY HOẶC ĐẢM BẢO NÓ CÓ */
-}
-
 /* Hide and show properties */
 .hidden {
     display: none !important; /* Buộc ẩn */
@@ -510,6 +490,8 @@ form label {
     font-size: 0.9em;
 }
 
+
+/* Form styles */
 form input[type="text"],
 form input[type="number"],
 form input[type="url"],
@@ -517,6 +499,8 @@ form input[type="tel"],
 form input[type="email"],
 form input[type="password"],
 form input[type="datetime-local"],
+form input[type="date"],
+form input[type="time"],
 form select,
 form textarea {
     width: 100%;
@@ -526,7 +510,9 @@ form textarea {
     font-size: 0.9em;
     box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
     box-sizing: border-box; /* Đảm bảo padding và border không làm tăng width */
+    font-family: 'Montserrat', sans-serif; /* THÊM DÒNG NÀY HOẶC ĐẢM BẢO NÓ CÓ */
 }
+
 
 form input:focus,
 form select:focus,
@@ -616,9 +602,20 @@ fieldset > div:last-child {
     justify-content: flex-start; /* Căn trái các nút Add/Cancel trong form */
 }
 
+.form-buttons .button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+}
+
 #submit-car-button,
 #submit-booking-button,
 #submit-customer-button,
+#submit-promotion-button,
 #cancel-edit-button,
 #cancel-edit-booking-button,
 #cancel-edit-customer-button {
@@ -633,13 +630,15 @@ fieldset > div:last-child {
 
 #submit-car-button,
 #submit-booking-button,
-#submit-customer-button {
+#submit-customer-button,
+#submit-promotion-button {
     background-color: var(--button-add);
     color: white;
 }
 #submit-car-button:hover,
 #submit-booking-button:hover,
-#submit-customer-button:hover {
+#submit-customer-button:hover,
+#submit-promotion-button:hover {
     background-color: var(--button-add-hover);
 }
 

@@ -26,8 +26,8 @@
         <h2 class="modal-title">Log in</h2>
         <form id="login-form" class="auth-form">
           <div class="form-group">
-            <label for="login-email-phone">Email/Phone number</label>
-            <input type="text" id="login-email-phone" placeholder="Enter email/phone number..." required>
+            <label for="login-email">Email *</label>
+            <input type="email" id="login-email" placeholder="Enter your email" required>
           </div>
           <div class="form-group">
             <label for="login-password">Password</label>
@@ -768,10 +768,20 @@
                             </p>
                         </div>
 
-                        <div class="form-group promotion-code-group">
-                            <label for="promotion-code">Promotion code</label>
-                            <input type="text" id="promotion-code" name="promotionCode" placeholder="Enter Promotion code">
-                        </div>
+                        <div class="form-group promotion-input-group">
+                          <label for="promotion-code">Promotion code:</label>
+                          <div class="input-and-button">
+                              <input type="text" id="promotion-code" name="promotionCode" placeholder="Enter Promotion code">
+                              <button type="button" id="applyPromotionBtn" class="button small">Apply</button>
+                          </div>
+                          <div id="promotionMessage" class="message-area"></div>
+                      </div>
+
+                      <div class="price-summary-updated">
+                        <p>Total (before discount): <span id="baseTotalPriceDisplay" class="price-value">$0.00</span></p>
+                        <p id="discountDisplayGroup" class="discount-line" style="display: none;">Discount: <span id="discountAmountDisplay" class="price-value green-text">-$0.00</span></p>
+                        <p class="final-total-line">Total (after discount): <span id="finalTotalPriceDisplay" class="price-value large-text">$0.00</span></p>
+                    </div>
 
                         <button
                             type="submit"

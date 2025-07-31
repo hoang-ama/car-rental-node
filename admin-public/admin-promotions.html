@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Promotion Management - Admin Portal</title>
+    <link rel="icon" type="image/png" href="assets/logo/favicon.png" />
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <script src="admin-auth-guard.js"></script>
+    <script src="admin-notifications.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <a href="admin-dashboard.html">
+                    <img src="assets/logo/logo.png" alt="Vshare Logo">
+                </a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                    <li><a href="admin-cars.html"><i class="fas fa-car"></i> <span>Car</span></a></li>
+                    <li><a href="admin-bookings.html"><i class="fas fa-calendar-check"></i> <span>Booking</span></a></li>
+                    <li><a href="admin-customers.html"><i class="fas fa-users"></i> <span>Customer</span></a></li>
+                    <li><a href="admin-promotions.html" class="active"><i class="fas fa-tags"></i> <span>Promotion</span></a></li> <li><a href="admin-notifications-all.html"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
+                    <li><a href="admin-reports.html"><i class="fas fa-chart-line"></i> <span>Report</span></a></li>
+                    <li><a href="admin-settings.html"><i class="fas fa-cog"></i> <span>Setting</span></a></li>
+                </ul>
+            </nav>
+            <div class="sidebar-footer">
+                Vshare Backend v.1.0
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-header">
+                <h1>Promotion Management</h1>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notification-icon-wrapper" id="notification-bell-wrapper">
+                        <i class="fas fa-bell" id="notification-bell-icon"></i>
+                        <span class="notification-badge hidden" id="notification-badge-count"></span>
+
+                        <div class="notification-dropdown hidden" id="notification-dropdown">
+                            <div class="notification-header">
+                                Notifications
+                                <span class="close-button" id="close-notification-dropdown">&times;</span>
+                            </div>
+                            <div class="notification-content" id="notification-content">
+                                <div class="notification-empty">No new notifications.</div>
+                            </div>
+                            <div class="notification-footer">
+                                <a href="#">View all notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-profile" id="admin-user-profile">
+                        <img src="assets/images/placeholder-user.jpg" alt="User Avatar">
+                        <span>Admin User</span>
+                        <div class="user-profile-dropdown" id="user-profile-dropdown">
+                            <ul>
+                                <li><a href="#" id="view-profile-link"><i class="fas fa-user-circle"></i> View Profile</a></li>
+                                <li><a href="#" id="settings-link"><i class="fas fa-cog"></i> Settings</a></li>
+                                <li><a href="#" id="logout-button" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="page-content">
+
+                <div id="list-view-wrapper">
+                    <section id="promotions-list-section">
+                        <h2>Current Promotions</h2>
+                            <div class="action-buttons-group">
+                                <button class="button add" id="show-add-form-btn"><i class="fas fa-plus"></i> Add</button> 
+                                <button class="button export"><i class="fas fa-file-export"></i> Export</button>
+                                <button class="button filter"><i class="fas fa-filter"></i> Filter</button>
+                            </div>
+                    <div id="action-message" class="form-message-placeholder"></div> 
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Description</th>
+                                    <th>Discount</th>
+                                    <th>Applies To</th>
+                                    <th>Min Days</th>
+                                    <th>Min Total</th>
+                                    <th>Start Date</th>                             
+                                    <th>End Date</th>
+                                    <th>Active</th>
+                                    <th>Used</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="promotions-table-body">
+                                </tbody>
+                        </table>
+                    </div>   
+                    </section>
+                </div>
+
+                <div id="form-view-wrapper" class="hidden">
+                    <section id="add-promotion-section">
+                        <h2 id="promotion-form-title">Add New Promotion</h2>
+                        <form id="promotion-form">
+                            <input type="hidden" id="promotion-code-form-hidden" name="promoCodeFormHidden">
+                            <div class="form-group">
+                                <label for="promo-code">Promotion Code:</label>
+                                <input type="text" id="promo-code" name="code" placeholder="E.g: SPRING2025" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="promo-description">Description:</label>
+                                <input type="text" id="promo-description" name="description" placeholder="E.g: 10% off for VinFast cars">
+                            </div>
+                            <div class="form-group">
+                                <label for="discount-type">Discount Type:</label>
+                                <select id="discount-type" name="discountType" required>
+                                    <option value="percentage">Percentage (%)</option>
+                                    <option value="fixed">Fixed Amount ($)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="discount-value">Discount Value:</label>
+                                <input type="number" id="discount-value" name="discountValue" step="0.01" min="0" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="min-rental-days">Minimum Rental Days:</label>
+                                <input type="number" id="min-rental-days" name="minRentalDays" min="1" value="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="max-rental-days">Maximum Rental Days (Optional):</label>
+                                <input type="number" id="max-rental-days" name="maxRentalDays" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="min-total-price">Minimum Total Price ($):</label>
+                                <input type="number" id="min-total-price" name="minTotalPrice" step="0.01" min="0" value="0">
+                            </div>
+                             <div class="form-group">
+                                <label for="usage-limit">Usage Limit (Total uses, optional):</label>
+                                <input type="number" id="usage-limit" name="usageLimit" min="1">
+                            </div>
+                            <div class="form-group">
+                                <label for="start-date">Start Date:</label>
+                                <input type="date" id="start-date" name="startDate" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="end-date">End Date:</label>
+                                <input type="date" id="end-date" name="endDate" required>
+                            </div>
+
+                            <fieldset>
+                                <legend>Applicable Car Makes (Select multiple, optional)</legend>
+                                <div class="features-checkbox-group" id="applicable-makes-checkboxes">
+                                    </div>
+                            </fieldset>
+
+                            <fieldset>
+                                <legend>Applicable Locations (Select multiple, optional)</legend>
+                                <div class="features-checkbox-group" id="applicable-locations-checkboxes">
+                                    <label><input type="checkbox" name="applicableLocations" value="Hanoi"> Hanoi</label>
+                                    <label><input type="checkbox" name="applicableLocations" value="Ho Chi Minh City"> Ho Chi Minh City</label>
+                                    <label><input type="checkbox" name="applicableLocations" value="Da Nang"> Da Nang</label>
+                                </div>
+                            </fieldset>
+                            
+                            <div class="form-group" style="grid-column: span 2;">
+                                <label for="is-active">Status:</label>
+                                <select id="is-active" name="isActive">
+                                    <option value="true">Active</option>
+                                    <option value="false">Inactive</option>
+                                </select>
+                            </div>
+                           
+                            <div class="form-buttons">
+                                <button type="submit" id="submit-promotion-button">Add Promotion</button>
+                                <button type="button" id="cancel-edit-button">Cancel</button>
+                            </div>
+                        </form>
+                        <div id="form-message" class="form-message-placeholder"></div>
+                    </section>
+                </div>
+
+            </main>
+        </div>
+    </div>
+    <script src="admin-promotions-script.js"></script>
+</body>
+</html>

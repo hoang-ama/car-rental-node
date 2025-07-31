@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get the "View all notifications" link
     const viewAllNotificationsLink = document.querySelector('#notification-dropdown .notification-footer a'); // NEW
 
-    const ADMIN_BOOKINGS_API_URL = '/admin/bookings';
+    const ADMIN_BOOKINGS_API_URL = '/api/bookings';
     const ADMIN_CUSTOMERS_API_URL = '/admin/customers';
 
     const LAST_CHECKED_TIMESTAMP_KEY = 'adminLastCheckedNotifications';

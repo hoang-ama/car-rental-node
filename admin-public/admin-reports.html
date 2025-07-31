@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - Admin Portal</title>
+    <link rel="icon" type="image/png" href="assets/logo/favicon.png" />
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <script src="admin-auth-guard.js"></script>
+    <script src="admin-notifications.js"></script>
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="logo">
+                <a href="admin-dashboard.html">
+                    <img src="assets/logo/logo.png" alt="Vshare Logo">
+                </a>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                    <li><a href="admin-cars.html"><i class="fas fa-car"></i> <span>Car</span></a></li>
+                    <li><a href="admin-bookings.html"><i class="fas fa-calendar-check"></i> <span>Booking</span></a></li>
+                    <li><a href="admin-customers.html"><i class="fas fa-users"></i> <span>Customer</span></a></li>
+                    <li><a href="admin-promotions.html"><i class="fas fa-tags"></i> <span>Promotion</span></a></li>
+                    <li><a href="admin-notifications-all.html"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
+                    <li><a href="admin-reports.html" class="active"><i class="fas fa-chart-line"></i> <span>Report</span></a></li> 
+                    <li><a href="admin-settings.html"><i class="fas fa-cog"></i> <span>Setting</span></a></li> </ul>
+            </nav>
+            <div class="sidebar-footer">
+                Vshare Backend v.1.0
+            </div>
+        </aside>
+
+        <div class="main-content">
+            <header class="top-header">
+                <h1>Reports</h1>
+                <div class="header-actions">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <div class="notification-icon-wrapper" id="notification-bell-wrapper">
+                        <i class="fas fa-bell" id="notification-bell-icon"></i>
+                        <span class="notification-badge hidden" id="notification-badge-count"></span>
+
+                        <div class="notification-dropdown hidden" id="notification-dropdown">
+                            <div class="notification-header">
+                                Notifications
+                                <span class="close-button" id="close-notification-dropdown">&times;</span>
+                            </div>
+                            <div class="notification-content" id="notification-content">
+                                <div class="notification-empty">No new notifications.</div>
+                            </div>
+                            <div class="notification-footer">
+                                <a href="#">View all notifications</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="user-profile" id="admin-user-profile">
+                        <img src="assets/images/placeholder-user.jpg" alt="User Avatar">
+                        <span>Admin User</span>
+                        <div class="user-profile-dropdown" id="user-profile-dropdown">
+                            <ul>
+                                <li><a href="#" id="view-profile-link"><i class="fas fa-user-circle"></i> View Profile</a></li>
+                                <li><a href="#" id="settings-link"><i class="fas fa-cog"></i> Settings</a></li>
+                                <li><a href="#" id="logout-button" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="page-content">
+                <section id="reports-overview">
+                    <h2>Reports Overview</h2>
+                    <div class="action-buttons-group">
+                        <button class="button filter"><i class="fas fa-calendar-alt"></i> Filter by Date</button>
+                        <button class="button export"><i class="fas fa-file-export"></i> Export Report</button>
+                    </div>
+                    <div id="reports-message" class="form-message-placeholder"></div>
+
+                    <div class="action-buttons-group">
+                        <label for="report-period-select">Period:</label>
+                        <select id="report-period-select" class="button">
+                            <option value="all">Overall</option>
+                            <option value="weekly">This Week</option>
+                            <option value="monthly">This Month</option>
+                        </select>
+                    
+                        <label for="report-location-select">Location:</label>
+                        <select id="report-location-select" class="button"></select>
+                    
+                        <label for="report-car-select">Car:</label>
+                        <select id="report-car-select" class="button"></select>
+                    
+                        <button class="button filter" id="apply-report-filter"><i class="fas fa-filter"></i> Apply Filters</button>
+                        <button class="button export"><i class="fas fa-file-export"></i> Export Report</button>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-header">
+                                <h3>Bookings & Revenue</h3>
+                                <i class="fas fa-dollar-sign icon"></i>
+                            </div>
+                            <div class="dashboard-card-body" id="total-revenue-report">$0</div>
+                            <div class="dashboard-info-list">
+                                <li>Total Bookings: <span id="total-bookings-report" class="value">0</span></li>
+                                <li>Confirmed Bookings: <span id="confirmed-bookings-report" class="value">0</span></li>
+                                <li>Cancelled Bookings: <span id="cancelled-bookings-report" class="value">0</span></li>
+                            </div>
+                        </div>
+                        
+                        <div class="dashboard-card">
+                            <div class="dashboard-card-header">
+                                <h3>Car Exploitation</h3>
+
+
+
+                                <i class="fas fa-car-side icon"></i>
+                            </div>
+                            <div class="dashboard-card-body">
+
+                                <div class="dashboard-card-body" id="car-exploitation-card-body">
+                                    <div class="table-responsive">
+                                        <table id="car-exploitation-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Car</th>
+                                                    <th>Period</th>
+                                                    <th>Bookings</th>
+                                                    <th>Exploitation Days</th>
+                                                    <th>Revenue</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="car-exploitation-table-body">
+                                                <tr><td colspan="5">Loading exploitation data...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <canvas id="car-exploitation-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+    <script src="admin-reports-script.js"></script>
+</body>
+</html>

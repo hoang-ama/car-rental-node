@@ -9,7 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'admin-bookings.html',
         'admin-customers.html',
         'admin-customer-detail.html',
-        'admin-notifications-all.html'
+        'admin-notifications-all.html',
+        'admin-promotions.html',
+        'admin-reports.html',
+        'admin-settings.html'
     ];
 
     const isProtectedPage = protectedAdminPages.some(page => currentPage.includes(page));

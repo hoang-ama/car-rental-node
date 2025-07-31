@@ -32,7 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const formViewWrapper = document.getElementById('form-view-wrapper');
     const showAddFormButton = document.getElementById('show-add-form-btn'); // The "Add" button in the list view
 
-    const ADMIN_BOOKINGS_API_URL = '/admin/bookings';
+    const ADMIN_BOOKINGS_API_URL = '/api/bookings'; // API endpoint for admin bookings
     const PUBLIC_CARS_API_URL = '/api/cars'; // To populate car selection dropdown
 
     // --- Utility Functions ---

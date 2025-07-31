@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const refreshLatestBookingsBtn = document.getElementById('refresh-latest-bookings');
 
     const CARS_API_URL = '/admin/cars';
-    const BOOKINGS_API_URL = '/admin/bookings';
+    const BOOKINGS_API_URL = '/api/bookings';// NEW: API URL for bookings
     const CUSTOMERS_API_URL = '/admin/customers'; // NEW: API URL for customers
 
     // Utility to format currency

@@ -1,18 +1,19 @@
 // server.js
 const express = require('express');
-const fs = require('fs').promises;
 const path = require('path');
 const cors = require('cors');
+const mongoose = require('mongoose'); // THÊM: Import Mongoose
+const nodemailer = require('nodemailer');
 
-require('dotenv').config(); // THÊM DÒNG NÀY ĐỂ TẢI BIẾN MÔI TRƯỜNG
-const nodemailer = require('nodemailer'); // THÊM DÒNG NÀY ĐỂ SỬ DỤNG NODEMAILER
+
+require('dotenv').config();
 
 // Cấu hình Nodemailer transporter
 const transporter = nodemailer.createTransport({
-    service: 'gmail', // Hoặc 'Outlook', hoặc 'smtp.yourdomain.com'
+    service: 'gmail',
     auth: {
-        user: process.env.EMAIL_USER, // Lấy từ biến môi trường
-        pass: process.env.EMAIL_PASS  // Lấy từ biến môi trường
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
     }
 });
 
@@ -30,7 +31,7 @@ async function sendBookingConfirmationEmail(booking) {
         </div>
         
         <div style="padding: 25px; background-color: #ffffff;">
-                <h2 style="color: #e67e22; margin-top: 0;">Dear <span class="math-inline">${booking.customerName},</h2\>
+                <h2 style="color: #e67e22; margin-top: 0;">Dear ${booking.customerName},</h2>
 
     <p>Thank you for choosing Vshare! Your booking has been confirmed with the following details:</p>  
     <h3 style="color: #2c3e50;">Booking Information:</h3>
@@ -77,6 +78,7 @@ ${booking.depositAmount > 0 ? `<li style="margin-bottom: 8px;"><strong>Deposit A
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGODB_URI; // THÊM: Lấy chuỗi kết nối từ biến môi trường
 
 // Middleware
 app.use(cors());
@@ -86,336 +88,573 @@ app.use('/admin', express.static(path.join(__dirname, 'admin-public')));
 
 // NEW: Redirect /admin to admin-login.html
 app.get('/admin', (req, res) => {
-    // In a real app, you would check authentication here.
-    // For this setup, we'll redirect to the login page.
-    res.redirect('/admin/admin-login.html'); // Redirect to login page
+    res.redirect('/admin/admin-login.html');
 });
 
-// File paths
 
-const CARS_FILE_PATH = path.join(__dirname, 'cars.json');
-const BOOKINGS_FILE_PATH = path.join(__dirname, 'bookings.json');
-const CUSTOMERS_FILE_PATH = path.join(__dirname, 'customers.json'); // NEW
+// ----------------------------------------------------
+// THÊM: MONGODB CONNECTION VÀ SCHEMAS
+// ----------------------------------------------------
 
-// Initialize empty arrays for cars, bookings, and customers
-let cars = [];
-let bookings = [];
-let customers = []; // NEW
-let nextBookingId = 1;   // ID tự tăng cho bản ghi booking
-let nextCustomerId = 1; // NEW: ID tự tăng cho khách hàng
+// Kết nối đến MongoDB
+mongoose.connect(MONGODB_URI)
+    .then(() => console.log('MongoDB connected successfully!'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
-//  Function to read JSON file
-async function readData(filePath) {
-    try {
-      const data = await fs.readFile(filePath, 'utf8');
-      return JSON.parse(data);
-    } catch (error) {
-      console.error(`Error reading file ${filePath}:`, error);
-      return [];
+// Định nghĩa Car Schema
+const carSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true }, // ID duy nhất của xe (ví dụ: biển số)
+    make: { type: String, required: true },
+    model: { type: String, required: true },
+    year: { type: Number, required: true },
+    pricePerDay: { type: Number, required: true },
+    available: { type: Boolean, default: true },
+    imageUrl: { type: String, default: '' },
+    location: { type: String, required: true },
+    specifications: {
+        bodyType: { type: String, default: 'N/A' },
+        transmission: { type: String, default: 'N/A' },
+        fuelType: { type: String, default: 'N/A' },
+        seats: { type: Number, default: 4 }
+    },
+    features: [{ type: String }],
+    isFeatured: { type: Boolean, default: false } // Mới: Để đánh dấu xe nổi bật
+});
+
+// Định nghĩa Booking Schema
+const bookingSchema = new mongoose.Schema({
+    id: { type: Number, unique: true }, // Sẽ được quản lý auto-increment trong code Node.js
+    carId: { type: String, required: true },
+    carMake: { type: String, required: true },
+    carModel: { type: String, required: true },
+    customerName: { type: String, required: true },
+    customerPhone: { type: String },
+    customerEmail: { type: String },
+    notes: { type: String },
+    pickupLocation: { type: String },
+    startDate: { type: Date, required: true },
+    endDate: { type: Date, required: true },
+    paymentMethod: { type: String },
+    totalPrice: { type: Number, required: true },
+    baseCost: { type: Number },
+    servicesCost: { type: Number },
+    depositAmount: { type: Number },
+    status: { type: String, default: 'Pending' }, // Pending, Confirmed, Cancelled, Rented Out, Completed
+    bookingDate: { type: Date, default: Date.now },
+    appliedPromotionCode: { type: String } // MỚI: Lưu mã khuyến mại đã áp dụng
+
+});
+
+// Định nghĩa Customer Schema
+const customerSchema = new mongoose.Schema({
+    id: { type: String, required: true, unique: true }, // VD: customer_1, customer_2
+    name: { type: String, required: true },
+    phone: { type: String, required: true, unique: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true }, // Trường lưu mật khẩu đã băm
+    registeredAt: { type: Date, default: Date.now },
+    // Các trường bổ sung cho mục đích demo admin dashboard
+    cccd_passport: { type: String, default: 'N/A' },
+    driving_license: { type: String, default: 'N/A' },
+    other_doc: { type: String, default: 'N/A' },
+    motorbike_status: { type: String, default: 'N/A' },
+    motorbike_plate: { type: String, default: 'N/A' },
+    address: { type: String, default: 'N/A' },
+    dob: { type: Date },
+    loyalty: { type: String, default: 'Good (90/100)' },
+    status: { type: String, default: 'Active' }
+});
+
+// Định nghĩa Promotion Schema (MỚI)
+const promotionSchema = new mongoose.Schema({
+    code: { type: String, required: true, unique: true, uppercase: true, trim: true },
+    description: { type: String },
+    discountType: { type: String, required: true, enum: ['percentage', 'fixed'] }, // 'percentage' or 'fixed'
+    discountValue: { type: Number, required: true, min: 0 },
+    applicableCarMakes: [{ type: String }], // e.g., ["VinFast", "Toyota"]
+    applicableLocations: [{ type: String }], // e.g., ["Hanoi", "Da Nang"]
+    minRentalDays: { type: Number, min: 1, default: 1 },
+    maxRentalDays: { type: Number, min: 1 }, // Max rental days, if any
+    minTotalPrice: { type: Number, min: 0, default: 0 }, // Minimum total price for eligibility
+    startDate: { type: Date, required: true },
+    endDate: { type: Date, required: true },
+    isActive: { type: Boolean, default: true },
+    usageLimit: { type: Number, min: 1 }, // Global usage limit
+    usedCount: { type: Number, default: 0 } // How many times this code has been used
+});
+
+// MỚI: Định nghĩa AdditionalService Schema
+const additionalServiceSchema = new mongoose.Schema({
+    name: { type: String, required: true, unique: true, trim: true },
+    pricePerDay: { type: Number, required: true, min: 0 }
+});
+
+// MỚI: Định nghĩa Setting Schema (chứa các cấu hình chung)
+const settingSchema = new mongoose.Schema({
+    // Vì đây là một tài liệu cài đặt toàn cầu duy nhất, chúng ta có thể không cần _id tùy chỉnh
+    // Mongoose sẽ tạo _id mặc định. Hoặc có thể thêm một trường cố định như key: 'global_settings'
+    key: { type: String, required: true, unique: true, default: 'global_settings' },
+    systemName: { type: String, default: 'Vshare Car Rental' },
+    defaultPickupTime: { type: String, default: '07:00' }, // HH:mm
+    defaultReturnTime: { type: String, default: '19:00' }, // HH:mm
+    
+    // Cấu hình xe
+    masterCarMakes: [{ type: String }], // Danh sách các hãng xe duy nhất
+    masterCarFeatures: [{ type: String }], // Danh sách các tính năng xe duy nhất (ADAS, Car Play, etc.)
+
+    // Cấu hình địa điểm thuê xe
+    rentalLocations: [{ type: String }], // Danh sách các địa điểm thuê xe
+
+    // Cấu hình thủ tục thuê xe (có thể là một đối tượng chứa các chuỗi hoặc mảng chuỗi)
+    rentalProcedures: {
+        requiredDocuments: [{ type: String }],
+        securityDepositOptions: [{ type: String }],
+        distanceLimitations: [{ type: String }],
+        otherRegulations: [{ type: String }]
+    },
+    
+    // Default values for new customers/bookings (if needed, or keep in respective schemas)
+    // Example: defaultCustomerLoyalty: { type: String, default: 'Good (90/100)' }
+}, { timestamps: true }); // Thêm timestamps để theo dõi thời gian tạo/cập nhật
+
+
+
+// Tạo Models từ Schemas
+const Car = mongoose.model('Car', carSchema);
+const Booking = mongoose.model('Booking', bookingSchema);
+const Customer = mongoose.model('Customer', customerSchema);
+const Promotion = mongoose.model('Promotion', promotionSchema); 
+
+const AdditionalService = mongoose.model('AdditionalService', additionalServiceSchema); // MỚI
+const Setting = mongoose.model('Setting', settingSchema); // MỚI
+
+
+
+// ----------------------------------------------------
+// THAY ĐỔI: Chuyển logic đọc/ghi từ file JSON sang Mongoose
+// ----------------------------------------------------
+
+
+// Hàm để lấy ID booking tiếp theo (tự tăng)
+async function getNextBookingId() {
+    const lastBooking = await Booking.findOne().sort({ id: -1 });
+    return lastBooking ? lastBooking.id + 1 : 1;
+}
+
+// Hàm để lấy ID khách hàng tiếp theo (tự tăng)
+async function getNextCustomerId() {
+    const lastCustomer = await Customer.findOne().sort({ _id: -1 }); // Sắp xếp theo _id mặc định của MongoDB
+    if (lastCustomer && lastCustomer.id) {
+        const idNum = parseInt(lastCustomer.id.replace('customer_', ''));
+        return `customer_${idNum + 1}`;
     }
-  }
+    return 'customer_1';
+}
 
-  // Function to write JSON file
-async function writeData(filePath, data) {
+// Hàm để cập nhật trạng thái khả dụng của xe (được gọi sau khi booking được tạo/cập nhật/xóa)
+async function updateCarAvailability(carId, isAvailable) {
     try {
-      await fs.writeFile(filePath, JSON.stringify(data, null, 2));
-    } catch (error) {
-      console.error(`Error writing file ${filePath}:`, error);
-    }
-  }
-  // Add updateCarAvailability function to update car availability
-  async function updateCarAvailability(carId, isAvailable) {
-    const carIndex = cars.findIndex(c => c.id === carId);
-    if (carIndex !== -1) {
-        if (cars[carIndex].available !== isAvailable) { // Chỉ cập nhật nếu trạng thái thay đổi
-            cars[carIndex].available = isAvailable;
-            await saveData(); // Lưu lại cars.json
+        const car = await Car.findOne({ id: carId });
+        if (car && car.available !== isAvailable) {
+            car.available = isAvailable;
+            await car.save();
             console.log(`Car ID ${carId} availability updated to: ${isAvailable}`);
         }
-    } else {
-        console.warn(`Attempted to update availability for non-existent car ID: ${carId}`);
-    }
-    }  
-// --- Đọc dữ liệu ---
-async function loadData() {
-    try {
-        const carsData = await fs.readFile(CARS_FILE_PATH, 'utf-8');
-        cars = JSON.parse(carsData);
-        
-        const bookingsData = await fs.readFile(BOOKINGS_FILE_PATH, 'utf-8');
-        bookings = JSON.parse(bookingsData);
-
-        const customersData = await fs.readFile(CUSTOMERS_FILE_PATH, 'utf-8'); // NEW
-        customers = JSON.parse(customersData); // NEW
-
-        if (bookings.length > 0) {
-            const maxBookingId = bookings.reduce((max, b) => b.id > max ? b.id : max, 0);
-            nextBookingId = maxBookingId + 1;
-        } else {
-            nextBookingId = 1;
-        }
-        console.log('Bookings data loaded. Next Booking ID:', nextBookingId);
-
-        if (customers.length > 0) { // NEW: Cập nhật nextCustomerId
-            const maxCustomerId = customers.reduce((max, c) => {
-                const idNum = parseInt(c.id.replace('customer_', '')); // Chuyển "customer_X" thành số
-                return idNum > max ? idNum : max;
-            }, 0);
-            nextCustomerId = maxCustomerId + 1;
-        } else {
-            nextCustomerId = 1;
-        }
-        console.log('Customers data loaded. Next Customer ID:', nextCustomerId); // NEW
-
-
-        } catch (error) {
-        console.warn('Error loading data or files not found, initializing with example data:', error.message);
-        // Khởi tạo dữ liệu mẫu cho car và booking nếu file không tồn tại hoặc rỗng
-        cars = [
-            { "id": "VF8-29A12345", "make": "VinFast", "model": "VF 8 Eco", "year": 2024, "pricePerDay": 80, "available": true, "imageUrl": "assets/images/cars/vinfast_vf8.png", "specifications": { "bodyType": "SUV", "transmission": "AT", "fuelType": "Electric", "seats": 5 }, "features": ["AC", "GPS", "Bluetooth", "Reverse Camera"], "location": "Hanoi", "type": "SUV", "seats": 5 }, // Thêm type, seats ở ngoài cho dễ filter
-            { "id": "CAMRY-30E98765", "make": "Toyota", "model": "Camry", "year": 2022, "pricePerDay": 50, "available": true, "imageUrl": "assets/images/cars/toyota_camry.png", "specifications": { "bodyType": "Sedan", "transmission": "AT", "fuelType": "Petrol", "seats": 5 }, "features": ["AC", "Airbag", "Bluetooth"], "location": "Ho Chi Minh City", "type": "Sedan", "seats": 5 },
-            { "id": "CIVIC-51K54321", "make": "Honda", "model": "Civic", "year": 2023, "pricePerDay": 45, "available": true, "imageUrl": "assets/images/placeholder-car.png", "specifications": { "bodyType": "Sedan", "transmission": "AT", "fuelType": "Petrol", "seats": 5 }, "features": ["AC", "USB Port"], "location": "Da Nang", "type": "Sedan", "seats": 5 }
-        ];
-        bookings = [];
-        nextBookingId = 1;
-        customers = []; // NEW: Khởi tạo rỗng hoặc với dữ liệu mẫu
-        nextCustomerId = 1; // NEW
-        await saveData();
-        }
-}
-
-// --- Lưu dữ liệu ---
-async function saveData() {
-    try {
-        await fs.writeFile(CARS_FILE_PATH, JSON.stringify(cars, null, 2), 'utf-8');
-        await fs.writeFile(BOOKINGS_FILE_PATH, JSON.stringify(bookings, null, 2), 'utf-8');
-        await fs.writeFile(CUSTOMERS_FILE_PATH, JSON.stringify(customers, null, 2), 'utf-8'); // NEW
-        // console.log('Data saved successfully.');
     } catch (error) {
-        console.error('Error saving data:', error);
+        console.error(`Error updating car availability for ${carId}:`, error);
     }
 }
+
+// ----------------------------------------------------
+// THAY ĐỔI: API Endpoints để sử dụng Mongoose Models
+// ----------------------------------------------------
 
 // API endpoint to fetch cars
 app.get('/api/cars', async (req, res) => {
-  try {
-    const cars = await readData(CARS_FILE_PATH);
-    const location = req.query.location;
-    let filteredCars = cars.filter(car => car.available); // Only return available cars
-    if (location && location !== "AnyLocation") {
-      filteredCars = filteredCars.filter(car => car.location === location);
+    try {
+        const location = req.query.location;
+        let query = { available: true }; // Chỉ trả về xe khả dụng
+        if (location && location !== "Any Location") { // Đã sửa từ "AnyLocation" thành "Any Location" để khớp với frontend
+            query.location = location;
+        }
+        const cars = await Car.find(query);
+        res.json(cars);
+    } catch (error) {
+        console.error('Error in /api/cars:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
-    res.json(filteredCars);
-  } catch (error) {
-    console.error('Error in /api/cars:', error);
-    res.status(500).json({ message: 'Internal server error' });
-  }
 });
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
-app.get('/api/cars/:carId', (req, res) => { 
+// GET specific car by ID
+app.get('/api/cars/:carId', async (req, res) => {
     const carIdParam = req.params.carId;
-    const car = cars.find(c => c.id === carIdParam);
-    if (car) {
-        res.json(car);
-    } else {
-        res.status(404).json({ message: 'Car not found' });
+    try {
+        const car = await Car.findOne({ id: carIdParam });
+        if (car) {
+            res.json(car);
+        } else {
+            res.status(404).json({ message: 'Car not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching car details:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 
 app.post('/api/bookings', async (req, res) => {
     const {
-        carId, 
+        carId,
         customerName, customerPhone, customerEmail, notes,
         pickupLocation, startDate, endDate,
-        paymentMethod, totalPrice, baseCost, servicesCost, depositAmount
-        // status field không có trong payload từ client frontend, mặc định là 'Pending'
+        paymentMethod, totalPrice, baseCost, servicesCost, depositAmount, appliedPromotionCode
     } = req.body;
 
     if (!carId || !customerName || !startDate || !endDate || totalPrice === undefined) {
         return res.status(400).json({ message: 'Car ID, Customer Name, Start Date, End Date, and Total Price are required for booking.' });
     }
 
-    const car = cars.find(c => c.id === carId);
-    if (!car) {
-        return res.status(404).json({ message: `Car with ID ${carId} not found for booking.` });
-    }
-    const newBookingStatus = 'Pending'; // Hoặc lấy từ req.body nếu client có thể gửi status ban đầu
+    try {
+        const car = await Car.findOne({ id: carId });
+        if (!car) {
+            return res.status(404).json({ message: `Car with ID ${carId} not found for booking.` });
+        }
 
-    const newBooking = {
-        id: nextBookingId++, 
-        carId: car.id, 
-        carMake: car.make, 
-        carModel: car.model, 
-        customerName,
-        customerPhone,
-        customerEmail,
-        notes,
-        pickupLocation: pickupLocation || car.location, 
-        startDate, 
-        endDate,   
-        paymentMethod,
-        totalPrice: parseFloat(totalPrice),
-        baseCost: baseCost ? parseFloat(baseCost) : null,
-        servicesCost: servicesCost ? parseFloat(servicesCost) : null,
-        depositAmount: depositAmount ? parseFloat(depositAmount) : null,
-        status: newBookingStatus, // Sử dụng trạng thái mặc định
-        bookingDate: new Date().toISOString()
-    };
-    bookings.push(newBooking);
-    await saveData();
-    console.log('New Booking by client:', newBooking);
 
-// GỬI EMAIL XÁC NHẬN BOOKING (THÊM DÒNG NÀY)
-    // Đảm bảo newBooking có customerEmail trước khi gọi hàm
-    if (newBooking.customerEmail) {
-        await sendBookingConfirmationEmail(newBooking);
-    } else {
-        console.warn(`Không thể gửi email xác nhận cho booking #${newBooking.id}: Thiếu email khách hàng.`);
-    }
+        // MỚI: Kiểm tra mã khuyến mại đã áp dụng
+        if (!car.available) {
+            return res.status(400).json({ message: 'Car is not available.' });
+        }
 
-    // ✅ Cập nhật trạng thái xe nếu booking mới có trạng thái làm xe không khả dụng
-    if (newBookingStatus === 'Confirmed' || newBookingStatus === 'Rented Out') {
-    await updateCarAvailability(carId, false);  
+        const sDate = new Date(startDate);
+        const eDate = new Date(endDate);
+        sDate.setHours(0, 0, 0, 0); // Reset hours for consistent day calculation
+        eDate.setHours(0, 0, 0, 0); // Reset hours for consistent day calculation
+
+        if (eDate < sDate) {
+            return res.status(400).json({ message: 'Return date must be on or after pick-up date.' });
+        }
+
+        const timeDiff = Math.abs(eDate.getTime() - sDate.getTime());
+        const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // +1 to include both start and end day
+        let basePrice = car.pricePerDay * diffDays;
+        let finalPrice = basePrice;
+        let discountAmount = 0;
+
+        let appliedPromotion = null;
+        // Server-side re-validation and application of promotion
+        if (appliedPromotionCode) {
+            const promotion = await Promotion.findOne({ code: appliedPromotionCode.toUpperCase(), isActive: true });
+
+            if (promotion) {
+                const now = new Date(); // Current time on server
+                const promoStartDate = new Date(promotion.startDate);
+                const promoEndDate = new Date(promotion.endDate);
+
+                const isPromoValid = (now >= promoStartDate && now <= promoEndDate) && // Check promo active period
+                                     (!promotion.usageLimit || promotion.usedCount < promotion.usageLimit) && // Check usage limit
+                                     (promotion.applicableCarMakes.length === 0 || promotion.applicableCarMakes.includes(car.make)) &&
+                                     (promotion.applicableLocations.length === 0 || promotion.applicableLocations.includes(car.location)) &&
+                                     (diffDays >= promotion.minRentalDays) &&
+                                     (!promotion.maxRentalDays || diffDays <= promotion.maxRentalDays) &&
+                                     (basePrice >= promotion.minTotalPrice);
+
+                if (isPromoValid) {
+                    if (promotion.discountType === 'percentage') {
+                        discountAmount = basePrice * (promotion.discountValue / 100);
+                    } else { // fixed
+                        discountAmount = promotion.discountValue;
+                    }
+                    finalPrice = Math.max(0, basePrice - discountAmount); // Ensure price doesn't go negative
+                    appliedPromotion = promotion; // Store the promotion object if valid
+                } else {
+                    console.warn(`Promotion ${appliedPromotionCode} found but not applicable or invalid for this specific booking criteria.`);
+                }
+            } else {
+                console.warn(`Promotion code ${appliedPromotionCode} not found or inactive in database.`);
+            }
+        }
+
+        // End of promotion logic
+
+        const newBookingId = await getNextBookingId();
+
+        const newBooking = new Booking({
+            id: newBookingId,
+            carId: car.id,
+            carMake: car.make,
+            carModel: car.model,
+            customerName,
+            customerPhone,
+            customerEmail,
+            notes,
+            pickupLocation: pickupLocation || car.location,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+            paymentMethod,
+            totalPrice: finalPrice, // Use finalPrice after discount
+            baseCost: basePrice,
+            servicesCost: 0,
+            depositAmount: 0,
+            status: 'Pending',
+            bookingDate: new Date(),
+            appliedPromotionCode: appliedPromotion ? appliedPromotion.code : null // Store the code if applied
+
+        });
+
+        await newBooking.save();
+        console.log('New Booking by client:', newBooking);
+
+        // Increment usedCount for the applied promotion if it was valid and used
+        if (appliedPromotion) {
+            await Promotion.updateOne({ _id: appliedPromotion._id }, { $inc: { usedCount: 1 } });
+            console.log(`Promotion ${appliedPromotion.code} used. New count for this promo: ${appliedPromotion.usedCount + 1}`);
+        }
+
+          // Send confirmation email
+        // IMPORTANT: Ensure EMAIL_USER and EMAIL_PASS are correctly set in your .env file
+        if (customerEmail && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+            await sendBookingConfirmationEmail(newBooking);
+        } else {
+            console.warn(`Cannot send confirmation email for booking #${newBooking.id}: Missing customer email or email credentials.`);
+        }
+        
+        console.log('New booking created:', newBooking);
+        res.status(201).json({ message: 'Booking successful!', booking: newBooking });
+
+
+
+    } catch (error) {
+        console.error('Error creating booking:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
-    res.status(201).json({ message: 'Booking successful!', booking: newBooking });
 });
-// GET bookings for a specific customer (NEW)
-app.get('/api/my-bookings', (req, res) => {
-    // Trong một ứng dụng thực tế, bạn sẽ lấy customer ID từ session/JWT token
-    // được gửi trong header của request, không phải từ query param như thế này
-    // vì query param rất dễ bị giả mạo.
-    const customerEmail = req.query.email; // Ví dụ đơn giản lấy từ email
-    
+
+// GET bookings for a specific customer
+app.get('/api/my-bookings', async (req, res) => {
+    const customerEmail = req.query.email;
     if (!customerEmail) {
         return res.status(400).json({ message: 'Customer email is required.' });
     }
-
-    const customerBookings = bookings.filter(b => b.customerEmail === customerEmail);
-    
-    res.json(customerBookings);
+    try {
+        const customerBookings = await Booking.find({ customerEmail: customerEmail }).sort({ bookingDate: -1 });
+        res.json(customerBookings);
+    } catch (error) {
+        console.error('Error fetching my bookings:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 });
-app.get('/api/bookings', (req, res) => {
-    res.json(bookings);
+
+// API to apply promotion code (for client-side validation and price calculation before final booking)
+app.post('/api/apply-promotion', async (req, res) => {
+    const { code, carId, startDate, endDate, basePrice, location, carMake } = req.body;
+
+    if (!code || !carId || !startDate || !endDate || basePrice === undefined || !location || !carMake) {
+        return res.status(400).json({ message: 'Missing required fields for promotion application (code, carId, dates, basePrice, location, carMake).' });
+    }
+
+    try {
+        const promotion = await Promotion.findOne({ code: code.toUpperCase(), isActive: true });
+
+        if (!promotion) {
+            return res.status(404).json({ message: 'Promotion code does not exist or is inactive.' });
+        }
+
+        // Check date validity
+        const now = new Date();
+        const promoStartDate = new Date(promotion.startDate);
+        const promoEndDate = new Date(promotion.endDate);
+
+        if (now < promoStartDate || now > promoEndDate) {
+            return res.status(400).json({ message: 'Promotion code has expired or is not yet active.' });
+        }
+
+        // Check usage limit (NOTE: This check is done again in /api/bookings to ensure atomicity for incrementing usedCount)
+        if (promotion.usageLimit && promotion.usedCount >= promotion.usageLimit) {
+            return res.status(400).json({ message: 'Promotion code has reached its usage limit.' });
+        }
+
+        const car = await Car.findOne({ id: carId });
+        if (!car) {
+            return res.status(404).json({ message: 'Car not found for promotion validation.' });
+        }
+
+        const rentalStartDate = new Date(startDate);
+        const rentalEndDate = new Date(endDate);
+        const timeDiff = Math.abs(rentalEndDate.getTime() - rentalStartDate.getTime());
+        const rentalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+
+        // Check applicability criteria
+        if (promotion.applicableCarMakes && promotion.applicableCarMakes.length > 0 && !promotion.applicableCarMakes.includes(car.make)) {
+            return res.status(400).json({ message: `Promotion code does not apply to ${car.make} vehicles.` });
+        }
+        if (promotion.applicableLocations && promotion.applicableLocations.length > 0 && !promotion.applicableLocations.includes(car.location)) {
+            return res.status(400).json({ message: `Promotion code does not apply to ${car.location} location.` });
+        }
+        if (promotion.minRentalDays && rentalDays < promotion.minRentalDays) {
+            return res.status(400).json({ message: `Promotion code requires a minimum rental of ${promotion.minRentalDays} days.` });
+        }
+        if (promotion.maxRentalDays && rentalDays > promotion.maxRentalDays) {
+            return res.status(400).json({ message: `Promotion code applies for a maximum rental of ${promotion.maxRentalDays} days.` });
+        }
+        if (promotion.minTotalPrice && basePrice < promotion.minTotalPrice) {
+            return res.status(400).json({ message: `Promotion code requires a minimum total price of $${promotion.minTotalPrice}.` });
+        }
+
+        let discountAmount = 0;
+        if (promotion.discountType === 'percentage') {
+            discountAmount = basePrice * (promotion.discountValue / 100);
+        } else { // fixed
+            discountAmount = promotion.discountValue;
+        }
+
+        const finalPrice = Math.max(0, basePrice - discountAmount);
+
+        res.json({
+            message: 'Promotion code is valid.',
+            promotion: promotion.toObject(), // Return full promotion object for client-side calculation/display
+            discountAmount: discountAmount,
+            finalPrice: finalPrice
+        });
+
+    } catch (error) {
+        console.error('Error applying promotion:', error);
+        res.status(500).json({ message: 'Server error when applying promotion.', error: error.message });
+    }
+});
+
+
+// --- Admin API Endpoints for listing all bookings/customers (used by admin-dashboard, admin-notifications-all) ---
+
+// GET all bookings (for admin list)
+app.get('/api/bookings', async (req, res) => {
+    const customerEmail = req.query.email;
+    try {
+        if (customerEmail) {
+            const filteredBookings = await Booking.find({ customerEmail: customerEmail });
+            res.json(filteredBookings);
+        } else {
+            const allBookings = await Booking.find({});
+            res.json(allBookings);
+        }
+    } catch (error) {
+        console.error('Error fetching bookings (admin/api):', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 });
 
 
 // --- Admin Car API Endpoints ---
-app.get('/admin/cars', (req, res) => {
-    res.json(cars);
+app.get('/admin/cars', async (req, res) => {
+    try {
+        const cars = await Car.find({});
+        res.json(cars);
+    } catch (error) {
+        console.error('Error fetching admin cars:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 });
 
 app.post('/admin/cars', async (req, res) => {
     const {
-        id, 
+        id,
         make, model, year, pricePerDay, available = true, imageUrl = '',
-        location, specifications, features
+        location, specifications, features, isFeatured = false
     } = req.body;
 
     if (!id || !make || !model || !year || pricePerDay === undefined || !location || !specifications || !features) {
         return res.status(400).json({ message: 'Vehicle ID (unique), make, model, year, price, location, specifications, and features are required.' });
     }
-    if (cars.find(c => c.id === id)) {
-        return res.status(400).json({ message: `Car with Vehicle ID ${id} already exists.` });
-    }
 
-    const newCar = {
-        id: id, 
-        make, model,
-        year: parseInt(year),
-        pricePerDay: parseFloat(pricePerDay),
-        available: Boolean(available),
-        imageUrl, location,
-        specifications: {
-            bodyType: specifications.bodyType || 'N/A',
-            transmission: specifications.transmission || 'N/A',
-            fuelType: specifications.fuelType || 'N/A',
-            seats: specifications.seats ? parseInt(specifications.seats) : 4 
-        },
-        features: Array.isArray(features) ? features : []
-    };
-    cars.push(newCar);
-    await saveData();
-    console.log('Admin added new car:', newCar);
-    res.status(201).json({ message: 'Car added successfully by admin', car: newCar });
+    try {
+        const existingCar = await Car.findOne({ id: id });
+        if (existingCar) {
+            return res.status(400).json({ message: `Car with Vehicle ID ${id} already exists.` });
+        }
+
+        const newCar = new Car({
+            id: id,
+            make, model,
+            year: parseInt(year),
+            pricePerDay: parseFloat(pricePerDay),
+            available: Boolean(available),
+            imageUrl, location,
+            specifications: {
+                bodyType: specifications.bodyType || 'N/A',
+                transmission: specifications.transmission || 'N/A',
+                fuelType: specifications.fuelType || 'N/A',
+                seats: specifications.seats ? parseInt(specifications.seats) : 4
+            },
+            features: Array.isArray(features) ? features : [],
+            isFeatured: Boolean(isFeatured)
+        });
+
+        await newCar.save();
+        console.log('Admin added new car:', newCar);
+        res.status(201).json({ message: 'Car added successfully by admin', car: newCar });
+    } catch (error) {
+        console.error('Error adding new car:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
 });
 
 app.put('/admin/cars/:carIdToUpdate', async (req, res) => {
-    const carIdParam = req.params.carIdToUpdate; // Đây là ID duy nhất (VD: biển số)
-    const carIndex = cars.findIndex(c => c.id === carIdParam);
-
-    if (carIndex === -1) {
-        return res.status(404).json({ message: `Car with ID ${carIdParam} not found` });
-    }
-
+    const carIdParam = req.params.carIdToUpdate;
     const {
         make, model, year, pricePerDay, available, imageUrl,
-        location, specifications, features
+        location, specifications, features, isFeatured
     } = req.body;
 
-    const updatedCar = { ...cars[carIndex] }; 
+    try {
+        const updatedCar = await Car.findOneAndUpdate(
+            { id: carIdParam },
+            {
+                make,
+                model,
+                year: parseInt(year),
+                pricePerDay: parseFloat(pricePerDay),
+                available: Boolean(available),
+                imageUrl,
+                location,
+                specifications, // Mongoose sẽ xử lý việc cập nhật sub-document
+                features: Array.isArray(features) ? features : [],
+                isFeatured: Boolean(isFeatured)
+            },
+            { new: true } // Trả về tài liệu đã cập nhật
+        );
 
-    if (make !== undefined) updatedCar.make = make;
-    if (model !== undefined) updatedCar.model = model;
-    if (year !== undefined) updatedCar.year = parseInt(year);
-    if (pricePerDay !== undefined) updatedCar.pricePerDay = parseFloat(pricePerDay);
-    if (available !== undefined) updatedCar.available = Boolean(available);
-    if (imageUrl !== undefined) updatedCar.imageUrl = imageUrl;
-    if (location !== undefined) updatedCar.location = location;
-// Chỉ cập nhật specifications nếu nó được gửi lên và là một object
-if (specifications && typeof specifications === 'object') {
-    // Đảm bảo rằng updatedCar.specifications tồn tại trước khi gán thuộc tính
-    if (!updatedCar.specifications) {
-        updatedCar.specifications = {};
+        if (!updatedCar) {
+            return res.status(404).json({ message: `Car with ID ${carIdParam} not found` });
+        }
+        console.log('Admin updated car ID:', carIdParam, updatedCar);
+        res.json({ message: 'Car updated successfully by admin', car: updatedCar });
+    } catch (error) {
+        console.error('Error updating car:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
-    if (specifications.bodyType !== undefined) updatedCar.specifications.bodyType = specifications.bodyType;
-    if (specifications.transmission !== undefined) updatedCar.specifications.transmission = specifications.transmission;
-    if (specifications.fuelType !== undefined) updatedCar.specifications.fuelType = specifications.fuelType;
-    if (specifications.seats !== undefined) updatedCar.specifications.seats = parseInt(specifications.seats);
-}
-
-if (features && Array.isArray(features)) { // Cập nhật mảng features
-    updatedCar.features = features;
-}
-    
-    cars[carIndex] = updatedCar;
-    await saveData();
-    console.log('Admin updated car ID:', carIdParam, updatedCar);
-    res.json({ message: 'Car updated successfully by admin', car: updatedCar });
 });
 
 app.delete('/admin/cars/:carIdToDelete', async (req, res) => {
-    const carIdParam = req.params.carIdToDelete; // ID duy nhất của xe
-    const carIndex = cars.findIndex(c => c.id === carIdParam);
+    const carIdParam = req.params.carIdToDelete;
+    try {
+        const hasBookings = await Booking.findOne({ carId: carIdParam });
+        if (hasBookings) {
+            console.warn(`Attempting to delete car ID ${carIdParam} which has bookings. Allowing for now, but consider implications.`);
+        }
 
-    if (carIndex === -1) {
-        return res.status(404).json({ message: `Car with ID ${carIdParam} not found` });
+        const deletedCar = await Car.findOneAndDelete({ id: carIdParam });
+
+        if (!deletedCar) {
+            return res.status(404).json({ message: `Car with ID ${carIdParam} not found` });
+        }
+        console.log('Admin deleted car ID:', carIdParam);
+        res.json({ message: 'Car deleted successfully by admin', car: deletedCar });
+    } catch (error) {
+        console.error('Error deleting car:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
-    const hasBookings = bookings.some(booking => booking.carId === carIdParam);
-    if (hasBookings) {
-        // return res.status(400).json({ message: `Car ID ${carIdParam} has existing bookings. Consider marking it as unavailable.` });
-        console.warn(`Attempting to delete car ID ${carIdParam} which has bookings. Allowed for now.`);
-    }
-    const deletedCar = cars.splice(carIndex, 1);
-    await saveData();
-    console.log('Admin deleted car ID:', carIdParam);
-    res.json({ message: 'Car deleted successfully by admin', car: deletedCar[0] });
 });
 
 // Admin Bookings API Endpoints
-
-// GET all bookings (for admin list)
-// Lọc bookings dựa trên email khách hàng (ko dùng customerID được vì trong booking (json) không có trường customerID)
-
-app.get('/admin/bookings', (req, res) => {
-    const customerEmail = req.query.email;
-    if (customerEmail) {
-        const filteredBookings = bookings.filter(b => b.customerEmail === customerEmail);
-        res.json(filteredBookings);
-    } else {
-        res.json(bookings);
-    }
-});
 
 app.post('/admin/bookings', async (req, res) => {
     const {
@@ -429,158 +668,180 @@ app.post('/admin/bookings', async (req, res) => {
         return res.status(400).json({ message: 'Customer Name, Car ID, Start/End Dates, Total Price, and Status are required.' });
     }
 
-    const car = cars.find(c => c.id === carId);
-    if (!car) {
-        return res.status(404).json({ message: `Car with ID ${carId} not found for booking.` });
-    }
+    try {
+        const car = await Car.findOne({ id: carId });
+        if (!car) {
+            return res.status(404).json({ message: `Car with ID ${carId} not found for booking.` });
+        }
 
-    const newBooking = {
-        id: nextBookingId++,
-        carId: car.id,
-        carMake: car.make,
-        carModel: car.model,
-        customerName, customerPhone, customerEmail, notes,
-        pickupLocation: pickupLocation || car.location,
-        startDate, endDate,
-        paymentMethod,
-        totalPrice: parseFloat(totalPrice),
-        baseCost: baseCost !== undefined && baseCost !== null ? parseFloat(baseCost) : null,
-        servicesCost: servicesCost !== undefined && servicesCost !== null ? parseFloat(servicesCost) : null,
-        depositAmount: depositAmount !== undefined && depositAmount !== null ? parseFloat(depositAmount) : null,
-        status,
-        bookingDate: new Date().toISOString()
-    };
-    bookings.push(newBooking);
-    await saveData();
-    console.log('Admin created new booking:', newBooking);
-    res.status(201).json({ message: 'Booking created successfully by admin', booking: newBooking });
+        const newBookingId = await getNextBookingId();
+
+        const newBooking = new Booking({
+            id: newBookingId,
+            carId: car.id,
+            carMake: car.make,
+            carModel: car.model,
+            customerName, customerPhone, customerEmail, notes,
+            pickupLocation: pickupLocation || car.location,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+            paymentMethod,
+            totalPrice: parseFloat(totalPrice),
+            baseCost: baseCost !== undefined && baseCost !== null ? parseFloat(baseCost) : null,
+            servicesCost: servicesCost !== undefined && servicesCost !== null ? parseFloat(servicesCost) : null,
+            depositAmount: depositAmount !== undefined && depositAmount !== null ? parseFloat(depositAmount) : null,
+            status,
+            bookingDate: new Date()
+        });
+
+        await newBooking.save();
+        console.log('Admin created new booking:', newBooking);
+
+        if (status === 'Confirmed' || status === 'Rented Out') {
+            await updateCarAvailability(carId, false);
+        }
+        res.status(201).json({ message: 'Booking created successfully by admin', booking: newBooking });
+    } catch (error) {
+        console.error('Error creating admin booking:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
 });
 
 app.put('/admin/bookings/:bookingId', async (req, res) => {
-    const bookingIdParam = parseInt(req.params.bookingId); // ID tự tăng của booking
-    const bookingIndex = bookings.findIndex(b => b.id === bookingIdParam);
-
-    if (bookingIndex === -1) {
-        return res.status(404).json({ message: `Booking with ID ${bookingIdParam} not found` });
-    }
-
-    // ✅ ĐỊNH NGHĨA oldStatus TẠI ĐÂY, SAU KHI bookingIndex ĐÃ ĐƯỢC KIỂM TRA
-    const oldStatus = bookings[bookingIndex].status; // Lấy trạng thái cũ từ booking hiện có
-    const currentCarId = bookings[bookingIndex].carId; // Lấy carId của booking hiện tại
-
+    const bookingIdParam = parseInt(req.params.bookingId);
     const {
         customerName, customerPhone, customerEmail, notes,
         carId, // vehicleId của xe
         pickupLocation, startDate, endDate,
         paymentMethod, totalPrice, baseCost, servicesCost, depositAmount, status
     } = req.body;
-    
-    const updatedBooking = { ...bookings[bookingIndex] };
 
-    if (customerName !== undefined) updatedBooking.customerName = customerName;
-    if (customerPhone !== undefined) updatedBooking.customerPhone = customerPhone;
-    if (customerEmail !== undefined) updatedBooking.customerEmail = customerEmail;
-    if (notes !== undefined) updatedBooking.notes = notes;
-    if (pickupLocation !== undefined) updatedBooking.pickupLocation = pickupLocation;
-    if (startDate !== undefined) updatedBooking.startDate = startDate;
-    if (endDate !== undefined) updatedBooking.endDate = endDate;
-    if (paymentMethod !== undefined) updatedBooking.paymentMethod = paymentMethod;
-    if (totalPrice !== undefined) updatedBooking.totalPrice = parseFloat(totalPrice);
-    updatedBooking.baseCost = baseCost !== undefined && baseCost !== null ? parseFloat(baseCost) : updatedBooking.baseCost;
-    updatedBooking.servicesCost = servicesCost !== undefined && servicesCost !== null ? parseFloat(servicesCost) :              updatedBooking.servicesCost;
-    updatedBooking.depositAmount = depositAmount !== undefined && depositAmount !== null ? parseFloat(depositAmount) : updatedBooking.depositAmount;
-    if (status !== undefined) updatedBooking.status = status;
-
-    if (carId !== undefined && carId !== updatedBooking.carId) {
-        const car = cars.find(c => c.id === carId);
-        if (!car) {
-            return res.status(404).json({ message: `Car with Vehicle ID ${carId} not found for booking update.` });
+    try {
+        const existingBooking = await Booking.findOne({ id: bookingIdParam });
+        if (!existingBooking) {
+            return res.status(404).json({ message: `Booking with ID ${bookingIdParam} not found` });
         }
-        updatedBooking.carId = car.id;
-        updatedBooking.carMake = car.make;
-        updatedBooking.carModel = car.model;
-    }
 
-    bookings[bookingIndex] = updatedBooking;
-    await saveData();
-    console.log('Admin updated booking ID:', bookingIdParam, updatedBooking);
+        const oldStatus = existingBooking.status;
+        const currentCarId = existingBooking.carId;
 
-    // ✅ LOGIC MỚI: Cập nhật trạng thái available của xe
-    // Nếu trạng thái thay đổi và liên quan đến tình trạng khả dụng của xe
-    if (oldStatus !== updatedBooking.status) {
-        if (updatedBooking.status === 'Confirmed' || updatedBooking.status === 'Rented Out') {
-            await updateCarAvailability(currentCarId, false); // Xe không còn khả dụng
-        } else if (oldStatus === 'Confirmed' || oldStatus === 'Rented Out') {
-            // Nếu trạng thái cũ là 'Confirmed' hoặc 'Rented Out' và trạng thái mới không phải là vậy
-            // Thì kiểm tra xem còn booking nào khác đang chiếm dụng xe đó không
-            const carStillBooked = bookings.some(b => 
-                b.carId === currentCarId && 
-                (b.status === 'Confirmed' || b.status === 'Rented Out') &&
-                b.id !== updatedBooking.id // Loại trừ booking hiện tại nếu nó đang được cập nhật
-            );
-            if (!carStillBooked) {
-                await updateCarAvailability(currentCarId, true); // Xe trở lại khả dụng nếu không bị chiếm bởi booking khác
+        let updatedFields = {
+            customerName, customerPhone, customerEmail, notes,
+            pickupLocation,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+            paymentMethod,
+            totalPrice: parseFloat(totalPrice),
+            baseCost: baseCost !== undefined && baseCost !== null ? parseFloat(baseCost) : existingBooking.baseCost,
+            servicesCost: servicesCost !== undefined && servicesCost !== null ? parseFloat(servicesCost) : existingBooking.servicesCost,
+            depositAmount: depositAmount !== undefined && depositAmount !== null ? parseFloat(depositAmount) : existingBooking.depositAmount,
+            status
+        };
+
+        if (carId !== undefined && carId !== currentCarId) {
+            const newCar = await Car.findOne({ id: carId });
+            if (!newCar) {
+                return res.status(404).json({ message: `New car with ID ${carId} not found for booking update.` });
             }
-        } else if (updatedBooking.status === 'Cancelled by Customer' || updatedBooking.status === 'Cancelled by Admin' || updatedBooking.status === 'Completed') {
-            // Nếu trạng thái chuyển sang Hủy hoặc Hoàn thành, kiểm tra để set lại available
-            const carStillBooked = bookings.some(b => 
-                b.carId === currentCarId && 
-                (b.status === 'Confirmed' || b.status === 'Rented Out')
-            );
-            if (!carStillBooked) {
-                await updateCarAvailability(currentCarId, true);
+            updatedFields.carId = newCar.id;
+            updatedFields.carMake = newCar.make;
+            updatedFields.carModel = newCar.model;
+        }
+
+        const updatedBooking = await Booking.findOneAndUpdate(
+            { id: bookingIdParam },
+            { $set: updatedFields },
+            { new: true }
+        );
+
+        console.log('Admin updated booking ID:', bookingIdParam, updatedBooking);
+
+        // Logic cập nhật trạng thái available của xe
+        if (oldStatus !== updatedBooking.status || (carId !== undefined && carId !== currentCarId)) {
+            // Nếu xe thay đổi hoặc trạng thái booking thay đổi
+            // Xe cũ có thể trở lại available
+            if (oldStatus === 'Confirmed' || oldStatus === 'Rented Out') {
+                const carStillBookedOld = await Booking.findOne({
+                    carId: currentCarId,
+                    $or: [{ status: 'Confirmed' }, { status: 'Rented Out' }],
+                    id: { $ne: updatedBooking.id } // Loại trừ booking hiện tại
+                });
+                if (!carStillBookedOld) {
+                    await updateCarAvailability(currentCarId, true);
+                }
+            }
+
+            // Xe mới có thể trở thành unavailable
+            if (updatedBooking.status === 'Confirmed' || updatedBooking.status === 'Rented Out') {
+                await updateCarAvailability(updatedBooking.carId, false);
+            } else if (updatedBooking.status === 'Cancelled by Customer' || updatedBooking.status === 'Cancelled by Admin' || updatedBooking.status === 'Completed') {
+                const carStillBookedNew = await Booking.findOne({
+                    carId: updatedBooking.carId,
+                    $or: [{ status: 'Confirmed' }, { status: 'Rented Out' }]
+                });
+                if (!carStillBookedNew) {
+                    await updateCarAvailability(updatedBooking.carId, true);
+                }
             }
         }
+        res.json({ message: 'Booking updated successfully by admin', booking: updatedBooking });
+    } catch (error) {
+        console.error('Error updating booking:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
-    // ✅ KẾT THÚC LOGIC MỚI
-    res.json({ message: 'Booking updated successfully by admin', booking: updatedBooking });
 });
 
 app.delete('/admin/bookings/:bookingId', async (req, res) => {
-    const bookingIdParam = parseInt(req.params.bookingId); // ID tự tăng của booking
-    const bookingIndex = bookings.findIndex(b => b.id === bookingIdParam);
+    const bookingIdParam = parseInt(req.params.bookingId);
+    try {
+        const deletedBooking = await Booking.findOneAndDelete({ id: bookingIdParam });
 
-    if (bookingIndex === -1) {
-        return res.status(404).json({ message: `Booking with ID ${bookingIdParam} not found` });
+        if (!deletedBooking) {
+            return res.status(404).json({ message: `Booking with ID ${bookingIdParam} not found` });
+        }
+        console.log('Admin deleted booking ID:', bookingIdParam);
+
+        const deletedCarId = deletedBooking.carId;
+        const carStillBooked = await Booking.findOne({
+            carId: deletedCarId,
+            $or: [{ status: 'Confirmed' }, { status: 'Rented Out' }]
+        });
+        if (!carStillBooked) {
+            await updateCarAvailability(deletedCarId, true);
+        }
+
+        res.json({ message: 'Booking deleted successfully by admin', booking: deletedBooking });
+    } catch (error) {
+        console.error('Error deleting booking:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
-    const deletedBooking = bookings.splice(bookingIndex, 1);
-    await saveData();
-    console.log('Admin deleted booking ID:', bookingIdParam);
-
-    // ✅ LOGIC MỚI: Cập nhật trạng thái available của xe sau khi xóa booking
-    const deletedCarId = deletedBooking[0].carId;
-    // Kiểm tra xem còn booking nào khác đang chiếm dụng xe này không
-    const carStillBooked = bookings.some(b => 
-        b.carId === deletedCarId && 
-        (b.status === 'Confirmed' || b.status === 'Rented Out')
-    );
-    if (!carStillBooked) {
-        await updateCarAvailability(deletedCarId, true); // Xe trở lại khả dụng
-    }
-    // ✅ KẾT THÚC LOGIC MỚI
-
-    res.json({ message: 'Booking deleted successfully by admin', booking: deletedBooking[0] });
 });
 
-// --- Admin Customer API Endpoints (NEW) ---
-// GET all customers
-app.get('/admin/customers', (req, res) => {
-    // Trong ứng dụng thực tế, không bao giờ gửi mật khẩu (dù đã hash) ra frontend.
-    // Chỉ gửi các trường cần thiết.
-    const customersWithoutPasswords = customers.map(({ password, ...rest }) => rest);
-    res.json(customersWithoutPasswords);
+// --- Admin Customer API Endpoints ---
+app.get('/admin/customers', async (req, res) => {
+    try {
+        // Không gửi mật khẩu ra frontend
+        const customersWithoutPasswords = await Customer.find({}, { password: 0 }); // Chọn tất cả trừ password
+        res.json(customersWithoutPasswords);
+    } catch (error) {
+        console.error('Error fetching admin customers:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 });
 
-// NEW: GET a single customer by ID
-app.get('/admin/customers/:customerId', (req, res) => {
+// GET a single customer by ID
+app.get('/admin/customers/:customerId', async (req, res) => {
     const customerIdParam = req.params.customerId;
-    const customer = customers.find(c => c.id === customerIdParam);
-    if (customer) {
-        // In real app: do not send password.
-        const { password, ...customerWithoutPassword } = customer;
-        res.json(customerWithoutPassword);
-    } else {
-        res.status(404).json({ message: 'Customer not found' });
+    try {
+        const customer = await Customer.findOne({ id: customerIdParam }, { password: 0 }); // Loại trừ password
+        if (customer) {
+            res.json(customer);
+        } else {
+            res.status(404).json({ message: 'Customer not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching single customer:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 });
 
@@ -593,76 +854,466 @@ app.post('/admin/customers', async (req, res) => {
         return res.status(400).json({ message: 'Name, Phone, Email, and Password are required.' });
     }
 
-    // Check for existing customer (by phone or email)
-    const customerExists = customers.some(c => c.phone === phone || c.email === email);
-    if (customerExists) {
-        return res.status(400).json({ message: 'Customer with this phone or email already exists.' });
-    }
+    try {
+        const customerExists = await Customer.findOne({ $or: [{ phone: phone }, { email: email }] });
+        if (customerExists) {
+            return res.status(400).json({ message: 'Customer with this phone or email already exists.' });
+        }
 
-    const newCustomer = {
-        id: `customer_${nextCustomerId++}`, // Generate unique ID
-        name,
-        phone,
-        email,
-        password, // In real app: HASH THIS PASSWORD!
-        registeredAt: new Date().toISOString()
-    };
-    customers.push(newCustomer);
-    await saveData();
-    console.log('Admin added new customer:', newCustomer.id);
-    res.status(201).json({ message: 'Customer added successfully', customer: { id: newCustomer.id, name: newCustomer.name, email: newCustomer.email, phone: newCustomer.phone } });
+        const newCustomerId = await getNextCustomerId();
+
+        const newCustomer = new Customer({
+            id: newCustomerId,
+            name,
+            phone,
+            email,
+            password, // Trong thực tế: HASH THIS PASSWORD!
+            registeredAt: new Date()
+        });
+        await newCustomer.save();
+        console.log('Admin added new customer:', newCustomer.id);
+        // Trả về thông tin khách hàng không có mật khẩu
+        const { password: _, ...customerWithoutPassword } = newCustomer.toObject();
+        res.status(201).json({ message: 'Customer added successfully', customer: customerWithoutPassword });
+    } catch (error) {
+        console.error('Error adding new customer:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
 });
 
 // PUT (Update) an existing customer by ID
 app.put('/admin/customers/:customerId', async (req, res) => {
     const customerIdParam = req.params.customerId;
-    const customerIndex = customers.findIndex(c => c.id === customerIdParam);
-
-    if (customerIndex === -1) {
-        return res.status(404).json({ message: `Customer with ID ${customerIdParam} not found` });
-    }
-
     const { name, phone, email, password } = req.body;
-    const updatedCustomer = { ...customers[customerIndex] };
 
-    if (name !== undefined) updatedCustomer.name = name;
-    if (phone !== undefined) updatedCustomer.phone = phone;
-    if (email !== undefined) updatedCustomer.email = email;
-    if (password !== undefined && password !== '') { // Only update password if provided and not empty
-        updatedCustomer.password = password; // In real app: HASH THIS PASSWORD!
+    try {
+        const updatedFields = {};
+        if (name !== undefined) updatedFields.name = name;
+        if (phone !== undefined) updatedFields.phone = phone;
+        if (email !== undefined) updatedFields.email = email;
+        if (password !== undefined && password !== '') {
+            updatedFields.password = password; // In thực tế: HASH MẬT KHẨU!
+        }
+
+        const updatedCustomer = await Customer.findOneAndUpdate(
+            { id: customerIdParam },
+            { $set: updatedFields },
+            { new: true, projection: { password: 0 } } // Trả về tài liệu đã cập nhật, không bao gồm password
+        );
+
+        if (!updatedCustomer) {
+            return res.status(404).json({ message: `Customer with ID ${customerIdParam} not found` });
+        }
+        console.log('Admin updated customer ID:', customerIdParam);
+        res.json({ message: 'Customer updated successfully', customer: updatedCustomer });
+    } catch (error) {
+        console.error('Error updating customer:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
-
-    customers[customerIndex] = updatedCustomer;
-    await saveData();
-    console.log('Admin updated customer ID:', customerIdParam);
-    res.json({ message: 'Customer updated successfully', customer: { id: updatedCustomer.id, name: updatedCustomer.name, email: updatedCustomer.email, phone: updatedCustomer.phone } });
 });
 
 // DELETE a customer by ID
 app.delete('/admin/customers/:customerId', async (req, res) => {
     const customerIdParam = req.params.customerId;
-    const customerIndex = customers.findIndex(c => c.id === customerIdParam);
+    try {
+        const customerToDelete = await Customer.findOne({ id: customerIdParam });
+        if (!customerToDelete) {
+            return res.status(404).json({ message: `Customer with ID ${customerIdParam} not found` });
+        }
 
-    if (customerIndex === -1) {
-        return res.status(404).json({ message: `Customer with ID ${customerIdParam} not found` });
+        const customerHasBookings = await Booking.findOne({ customerEmail: customerToDelete.email });
+        if (customerHasBookings) {
+            console.warn(`Attempting to delete customer ${customerIdParam} who has bookings. Allowing for now.`);
+        }
+
+        const deletedCustomer = await Customer.findOneAndDelete({ id: customerIdParam });
+        console.log('Admin deleted customer ID:', customerIdParam);
+        res.json({ message: 'Customer deleted successfully', customer: deletedCustomer });
+    } catch (error) {
+        console.error('Error deleting customer:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
     }
-
-    // Optional: Check if customer has active bookings before deleting
-    const customerHasBookings = bookings.some(b => b.customerEmail === customers[customerIndex].email); // Giả sử booking liên kết qua email
-    if (customerHasBookings) {
-        // Trong thực tế, bạn có thể cấm xóa hoặc chuyển trạng thái khách hàng thành 'Inactive'
-        console.warn(`Attempting to delete customer ${customerIdParam} who has bookings.`);
-        // return res.status(400).json({ message: `Customer ${customerIdParam} has existing bookings. Cannot delete.` });
-    }
-
-    const deletedCustomer = customers.splice(customerIndex, 1);
-    await saveData();
-    console.log('Admin deleted customer ID:', customerIdParam);
-    res.json({ message: 'Customer deleted successfully', customer: deletedCustomer[0] });
 });
 
-// NEW: Client-side Login API (if you decide to implement direct user login/signup)
+
+// --- Admin Promotion API Endpoints (MỚI) ---
+
+// GET all promotions
+app.get('/admin/promotions', async (req, res) => {
+    try {
+        const promotions = await Promotion.find({});
+        res.json(promotions);
+    } catch (error) {
+        console.error('Error fetching promotions:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// GET a single promotion by code
+app.get('/admin/promotions/:code', async (req, res) => {
+    const promoCode = req.params.code.toUpperCase();
+    try {
+        const promotion = await Promotion.findOne({ code: promoCode });
+        if (promotion) {
+            res.json(promotion);
+        } else {
+            res.status(404).json({ message: 'Promotion code not found' });
+        }
+    } catch (error) {
+        console.error('Error fetching single promotion:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// POST a new promotion
+app.post('/admin/promotions', async (req, res) => {
+    const {
+        code, description, discountType, discountValue,
+        applicableCarMakes, applicableLocations,
+        minRentalDays, maxRentalDays, minTotalPrice,
+        startDate, endDate, isActive, usageLimit
+    } = req.body;
+
+    // Basic validation
+    if (!code || !discountType || discountValue === undefined || !startDate || !endDate) {
+        return res.status(400).json({ message: 'Code, Discount Type, Discount Value, Start Date, and End Date are required.' });
+    }
+    if (!['percentage', 'fixed'].includes(discountType)) {
+        return res.status(400).json({ message: 'Discount Type must be "percentage" or "fixed".' });
+    }
+    if (discountType === 'percentage' && (discountValue < 0 || discountValue > 100)) {
+        return res.status(400).json({ message: 'Percentage discount value must be between 0 and 100.' });
+    }
+
+    try {
+        const existingPromotion = await Promotion.findOne({ code: code.toUpperCase() });
+        if (existingPromotion) {
+            return res.status(400).json({ message: `Promotion code ${code.toUpperCase()} already exists.` });
+        }
+
+        const newPromotion = new Promotion({
+            code: code.toUpperCase(),
+            description,
+            discountType,
+            discountValue: parseFloat(discountValue),
+            applicableCarMakes: Array.isArray(applicableCarMakes) ? applicableCarMakes : [],
+            applicableLocations: Array.isArray(applicableLocations) ? applicableLocations : [],
+            minRentalDays: minRentalDays ? parseInt(minRentalDays) : undefined,
+            maxRentalDays: maxRentalDays ? parseInt(maxRentalDays) : undefined,
+            minTotalPrice: minTotalPrice ? parseFloat(minTotalPrice) : undefined,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+            isActive: isActive !== undefined ? Boolean(isActive) : true,
+            usageLimit: usageLimit ? parseInt(usageLimit) : undefined,
+            usedCount: 0 // Initialize usedCount
+        });
+
+        await newPromotion.save();
+        console.log('Admin added new promotion:', newPromotion.code);
+        res.status(201).json({ message: 'Promotion added successfully', promotion: newPromotion });
+    } catch (error) {
+        console.error('Error adding new promotion:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// PUT (Update) an existing promotion
+app.put('/admin/promotions/:code', async (req, res) => {
+    const promoCode = req.params.code.toUpperCase();
+    const {
+        description, discountType, discountValue,
+        applicableCarMakes, applicableLocations,
+        minRentalDays, maxRentalDays, minTotalPrice,
+        startDate, endDate, isActive, usageLimit, usedCount // Include usedCount for potential manual adjustment
+    } = req.body;
+
+    try {
+        const updatedFields = {
+            description,
+            discountType,
+            discountValue: parseFloat(discountValue),
+            applicableCarMakes: Array.isArray(applicableCarMakes) ? applicableCarMakes : [],
+            applicableLocations: Array.isArray(applicableLocations) ? applicableLocations : [],
+            minRentalDays: minRentalDays ? parseInt(minRentalDays) : undefined,
+            maxRentalDays: maxRentalDays ? parseInt(maxRentalDays) : undefined,
+            minTotalPrice: minTotalPrice ? parseFloat(minTotalPrice) : undefined,
+            startDate: new Date(startDate),
+            endDate: new Date(endDate),
+            isActive: isActive !== undefined ? Boolean(isActive) : true,
+            usageLimit: usageLimit ? parseInt(usageLimit) : undefined,
+            usedCount: usedCount !== undefined ? parseInt(usedCount) : undefined // Allow updating usedCount
+        };
+
+        const updatedPromotion = await Promotion.findOneAndUpdate(
+            { code: promoCode },
+            { $set: updatedFields },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedPromotion) {
+            return res.status(404).json({ message: `Promotion code ${promoCode} not found` });
+        }
+        console.log('Admin updated promotion code:', promoCode, updatedPromotion);
+        res.json({ message: 'Promotion updated successfully', promotion: updatedPromotion });
+    } catch (error) {
+        console.error('Error updating promotion:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// DELETE a promotion
+app.delete('/admin/promotions/:code', async (req, res) => {
+    const promoCode = req.params.code.toUpperCase();
+    try {
+        const deletedPromotion = await Promotion.findOneAndDelete({ code: promoCode });
+
+        if (!deletedPromotion) {
+            return res.status(404).json({ message: `Promotion code ${promoCode} not found` });
+        }
+        console.log('Admin deleted promotion code:', promoCode);
+        res.json({ message: 'Promotion deleted successfully', promotion: deletedPromotion });
+    } catch (error) {
+        console.error('Error deleting promotion:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// --- Admin Additional Services API Endpoints (MỚI) ---
+
+// GET all additional services
+app.get('/admin/additional-services', async (req, res) => {
+    try {
+        const services = await AdditionalService.find({});
+        res.json(services);
+    } catch (error) {
+        console.error('Error fetching additional services:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// POST a new additional service
+app.post('/admin/additional-services', async (req, res) => {
+    const { name, pricePerDay } = req.body;
+    if (!name || pricePerDay === undefined || pricePerDay < 0) {
+        return res.status(400).json({ message: 'Service Name and Price are required, and price must be non-negative.' });
+    }
+    try {
+        const existingService = await AdditionalService.findOne({ name: name });
+        if (existingService) {
+            return res.status(400).json({ message: `Service "${name}" already exists.` });
+        }
+        const newService = new AdditionalService({ name, pricePerDay: parseFloat(pricePerDay) });
+        await newService.save();
+        console.log('Admin added new service:', newService.name);
+        res.status(201).json({ message: 'Service added successfully', service: newService });
+    } catch (error) {
+        console.error('Error adding new service:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// PUT (Update) an existing additional service
+app.put('/admin/additional-services/:id', async (req, res) => {
+    const serviceId = req.params.id; // Mongoose _id
+    const { name, pricePerDay } = req.body;
+    if (!name || pricePerDay === undefined || pricePerDay < 0) {
+        return res.status(400).json({ message: 'Service Name and Price are required, and price must be non-negative.' });
+    }
+    try {
+        const updatedService = await AdditionalService.findByIdAndUpdate(
+            serviceId,
+            { name, pricePerDay: parseFloat(pricePerDay) },
+            { new: true }
+        );
+        if (!updatedService) {
+            return res.status(404).json({ message: 'Service not found.' });
+        }
+        console.log('Admin updated service:', updatedService.name);
+        res.json({ message: 'Service updated successfully', service: updatedService });
+    } catch (error) {
+        console.error('Error updating service:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// DELETE an additional service
+app.delete('/admin/additional-services/:id', async (req, res) => {
+    const serviceId = req.params.id;
+    try {
+        const deletedService = await AdditionalService.findByIdAndDelete(serviceId);
+        if (!deletedService) {
+            return res.status(404).json({ message: 'Service not found.' });
+        }
+        console.log('Admin deleted service:', deletedService.name);
+        res.json({ message: 'Service deleted successfully', service: deletedService });
+    } catch (error) {
+        console.error('Error deleting service:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// --- Admin Settings API Endpoints (MỚI) ---
+
+// Helper to ensure a single settings document exists
+async function getGlobalSettings() {
+    let settings = await Setting.findOne({ key: 'global_settings' });
+    if (!settings) {
+        settings = new Setting({ key: 'global_settings' });
+        await settings.save();
+        console.log('Initialized global settings document.');
+    }
+    return settings;
+}
+
+// GET global settings
+app.get('/admin/settings', async (req, res) => {
+    try {
+        const settings = await getGlobalSettings();
+        res.json(settings);
+    } catch (error) {
+        console.error('Error fetching settings:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// PUT (Update) global settings
+app.put('/admin/settings', async (req, res) => {
+    const { systemName, defaultPickupTime, defaultReturnTime,
+            masterCarMakes, masterCarFeatures, rentalLocations,
+            rentalProcedures } = req.body;
+    try {
+        // Find and update the single global settings document
+        const updatedSettings = await Setting.findOneAndUpdate(
+            { key: 'global_settings' },
+            {
+                systemName,
+                defaultPickupTime,
+                defaultReturnTime,
+                masterCarMakes: Array.isArray(masterCarMakes) ? masterCarMakes : [],
+                masterCarFeatures: Array.isArray(masterCarFeatures) ? masterCarFeatures : [],
+                rentalLocations: Array.isArray(rentalLocations) ? rentalLocations : [],
+                rentalProcedures: rentalProcedures // This expects an object or undefined
+            },
+            { new: true, upsert: true } // Create if not exists, return new document
+        );
+        console.log('Admin updated settings:', updatedSettings);
+        res.json({ message: 'Settings updated successfully', settings: updatedSettings });
+    } catch (error) {
+        console.error('Error updating settings:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// --- Admin Reports API Endpoints (MỚI) ---
+
+// GET Bookings & Revenue Report
+app.get('/admin/reports/bookings-revenue', async (req, res) => {
+    const { period, location } = req.query; // period: 'weekly', 'monthly', 'all', location: 'Hanoi', etc.
+    try {
+        let matchQuery = {};
+        let groupFormat = {};
+        
+        // Filter by location if provided
+        if (location && location !== 'All') {
+            matchQuery.pickupLocation = location;
+        }
+
+        // Determine aggregation grouping based on period
+        const now = new Date();
+        if (period === 'weekly') {
+            const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay())); // Start of current week (Sunday)
+            matchQuery.bookingDate = { $gte: startOfWeek };
+            groupFormat = {
+                year: { $year: "$bookingDate" },
+                week: { $week: "$bookingDate" }
+            };
+        } else if (period === 'monthly') {
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            matchQuery.bookingDate = { $gte: startOfMonth };
+            groupFormat = {
+                year: { $year: "$bookingDate" },
+                month: { $month: "$bookingDate" }
+            };
+        }
+        // If period is 'all' or not specified, no date filter is applied
+
+        const reportData = await Booking.aggregate([
+            { $match: matchQuery },
+            { $group: {
+                _id: groupFormat.year && groupFormat.month ? groupFormat : null, // Group by period or null for overall
+                totalBookings: { $sum: 1 },
+                totalRevenue: { $sum: "$totalPrice" },
+                confirmedBookings: { $sum: { $cond: [{ $eq: ["$status", "Confirmed"] }, 1, 0] } },
+                cancelledBookings: { $sum: { $cond: [{ $regex: ["$status", "Cancelled", "i"] }, 1, 0] } }
+            }},
+            { $sort: { "_id.year": 1, "_id.month": 1, "_id.week": 1 } } // Sort by period
+        ]);
+
+        res.json(reportData);
+    } catch (error) {
+        console.error('Error fetching bookings/revenue report:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// GET Car Exploitation Report
+app.get('/admin/reports/car-exploitation', async (req, res) => {
+    const { period, carId } = req.query; // period: 'weekly', 'monthly', 'all', carId: 'VF8-...'
+    try {
+        let matchQuery = {};
+        let groupFormat = {};
+
+        // Filter by carId if provided
+        if (carId && carId !== 'All') {
+            matchQuery.carId = carId;
+        }
+
+        const now = new Date();
+        if (period === 'weekly') {
+            const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+            matchQuery.bookingDate = { $gte: startOfWeek };
+            groupFormat = { year: { $year: "$bookingDate" }, week: { $week: "$bookingDate" } };
+        } else if (period === 'monthly') {
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            matchQuery.bookingDate = { $gte: startOfMonth };
+            groupFormat = { year: { $year: "$bookingDate" }, month: { $month: "$bookingDate" } };
+        }
+
+        const reportData = await Booking.aggregate([
+            { $match: matchQuery },
+            { $group: {
+                _id: {
+                    carId: "$carId",
+                    carMake: "$carMake",
+                    carModel: "$carModel",
+                    period: groupFormat.year ? groupFormat : null // Group by period if specified
+                },
+                totalBookings: { $sum: 1 },
+                totalExploitationDays: { 
+                    $sum: { 
+                        $add: [
+                            { $divide: [{ $subtract: ["$endDate", "$startDate"] }, 1000 * 60 * 60 * 24] },
+                            1 // +1 to include both start and end day
+                        ] 
+                    } 
+                },
+                totalRevenue: { $sum: "$totalPrice" }
+            }},
+            { $sort: { "_id.carMake": 1, "_id.carModel": 1, "_id.period.year": 1, "_id.period.month": 1, "_id.period.week": 1 } }
+        ]);
+
+        res.json(reportData);
+    } catch (error) {
+        console.error('Error fetching car exploitation report:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+
+// NEW: Client-side Login API
 // POST /api/signup
+const bcrypt = require('bcrypt'); // dùng bcrypt để hash mật khẩu trong thực tế
+
 app.post('/api/signup', async (req, res) => {
     const { name, phone, email, password } = req.body;
 
@@ -670,43 +1321,83 @@ app.post('/api/signup', async (req, res) => {
         return res.status(400).json({ message: 'Name, Phone, Email, and Password are required.' });
     }
 
-    const customerExists = customers.some(c => c.phone === phone || c.email === email);
-    if (customerExists) {
-        return res.status(400).json({ message: 'User with this phone number or email already exists.' });
-    }
+    try {
+        const customerExists = await Customer.findOne({ $or: [{ phone: phone }, { email: email }] });
+        if (customerExists) {
+            return res.status(400).json({ message: 'User with this phone number or email already exists.' });
+        }
+            // Băm mật khẩu
+        const saltRounds = 10; // Số vòng băm (10 là giá trị khuyến nghị)
+        const hashedPassword = await bcrypt.hash(password, saltRounds);    
 
-    const newCustomer = {
-        id: `customer_${nextCustomerId++}`,
-        name,
-        phone,
-        email,
-        password, // AGAIN: HASH THIS PASSWORD IN REAL APP!
-        registeredAt: new Date().toISOString()
-    };
-    customers.push(newCustomer);
-    await saveData();
-    console.log('Client registered new user:', newCustomer.id);
-    res.status(201).json({ message: 'Registration successful! You can now log in.', user: { id: newCustomer.id, name: newCustomer.name, email: newCustomer.email } });
+        const newCustomerId = await getNextCustomerId();
+
+        const newCustomer = new Customer({
+            id: newCustomerId,
+            name,
+            phone,
+            email,
+            password: hashedPassword, // Lưu mật khẩu đã băm
+            registeredAt: new Date()
+        });
+        await newCustomer.save();
+        console.log('Client registered new user:', newCustomer.id);
+        const { password: _, ...userWithoutPassword } = newCustomer.toObject(); // Xem có cần thay bằng customerWithoutPassword không??
+        res.status(201).json({ message: 'Registration successful! You can now log in.', user: userWithoutPassword });
+    } catch (error) {
+        console.error('Error during client signup:', error);
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
 });
-// POST /api/login
-app.post('/api/login', async (req, res) => {
-    const { identifier, password } = req.body; // identifier can be email or phone
-    const user = customers.find(c => (c.email === identifier || c.phone === identifier));
 
-    if (!user || user.password !== password) { // In real app: compare hashed password
-        return res.status(401).json({ message: 'Invalid credentials' });
+// Cấu hình rate limiter cho /api/login
+const rateLimit = require('express-rate-limit'); // Thêm express-rate-limit
+const loginRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 phút
+    max: 5, // Giới hạn 5 yêu cầu từ một IP
+    message: "Too many login attempts from this IP, please try again after 15 minutes",
+    standardHeaders: true, // Trả về header RateLimit
+    legacyHeaders: false, // Không sử dụng header X-RateLimit
+  });
+
+app.use('/login', loginRateLimiter); // Áp dụng rate limiter cho tất cả các route bắt đầu bằng /login
+  
+// POST /api/login
+app.post('/api/login', loginRateLimiter, async (req, res) => {   // Áp dụng loginRateLimiter làm middleware cho /api/login.
+    const { email, password } = req.body; // identifier can be email/ not phone
+    
+    try {
+         // Kiểm tra dữ liệu đầu vào
+         if (!email || !password) {
+            return res.status(400).json({ error: 'Email and password are required' });
+        }
+
+
+        // Tìm khách hàng theo email
+        const customer = await Customer.findOne({ email });
+        if (!customer) {
+            return res.status(400).json({ error: 'Invalid email' });
+        }
+
+
+         // So sánh mật khẩu
+         const isMatch = await bcrypt.compare(password, customer.password);
+         if (!isMatch) {
+             return res.status(400).json({ error: 'Invalid password' });
+         }
+
+       // Loại bỏ mật khẩu khỏi phản hồi
+       const { password: _, ...customerWithoutPassword } = customer.toObject();
+       res.json({ message: 'Login successful', customer: customerWithoutPassword });
+
+    } catch (error) {
+        console.error('Error during client login:', error);
+        res.status(500).json({ error: 'Internal server error' });
     }
-    // In real app: create and return a JWT token or session
-    res.json({ message: 'Login successful', user: { id: user.id, name: user.name, email: user.email, phone: user.phone } });
 });
 
 
 // --- Start the server ---
-async function startServer() {
-    await loadData();
-    app.listen(PORT, () => {
-        console.log(`Server is running on http://localhost:${PORT}`);
-    });
-}
-
-startServer();
+app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+});

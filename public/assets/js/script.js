@@ -83,7 +83,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const closeButtons = document.querySelectorAll('.modal-content .close-button'); 
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
-    const loginEmailPhoneInput = document.getElementById('login-email-phone');
+    const loginEmailInput = document.getElementById('login-email');
     const loginPasswordInput = document.getElementById('login-password');
     const loginMessageDiv = document.getElementById('login-message');
     const signupPhoneInput = document.getElementById('signup-phone'); // Dùng cho input "Phone number"
@@ -104,12 +104,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const myBookingsTableBody = document.getElementById('my-bookings-table-body'); // NEW
     const myBookingsListMessage = document.getElementById('my-bookings-list-message'); // NEW
 
+
+        // NEW variables for Promotion Logic
+        const promotionCodeInput = document.getElementById('promotion-code'); // Cập nhật ID từ 'promotionCode' -> 'promotion-code'
+        const applyPromotionBtn = document.getElementById('applyPromotionBtn');
+        const promotionMessageDiv = document.getElementById('promotionMessage');
+        const baseTotalPriceDisplay = document.getElementById('baseTotalPriceDisplay');
+        const discountDisplayGroup = document.getElementById('discountDisplayGroup');
+        const discountAmountDisplay = document.getElementById('discountAmountDisplay');
+        const finalTotalPriceDisplay = document.getElementById('finalTotalPriceDisplay');
+    
+
+
+
+
      // Global variable để lưu trữ người dùng hiện tại
      let currentUser = null; 
     // Slider variables
     let itemsPerSlide = 3; // Fixed to 3 items per slide
     let currentSlideStartIndex = 0;
     let allFeaturedCars = [];
+
+    let currentAppliedPromotion = null; // store currently applied valid promotion details
 
     // --- UTILITY FUNCTIONS ---
 
@@ -389,7 +405,7 @@ if (locationSelect) {
                 const result = await response.json();
 
                 if (response.ok) {
-                    signupMessageDiv.textContent = result.message || 'Registration successful!';
+                    signupMessageDiv.textContent = result.message || 'Registration successful! Please log in.';
                     signupMessageDiv.classList.add('success');
                     signupForm.reset(); 
                     setTimeout(() => {
@@ -397,7 +413,8 @@ if (locationSelect) {
                         openModal(loginModal); 
                     }, 1500);
                 } else {
-                    signupMessageDiv.textContent = result.message || 'Registration failed.';
+                    // Hiển thị lỗi cụ thể từ backend (ví dụ: "Email already exists")
+                    signupMessageDiv.textContent = result.message || 'Registration failed. Please try again.';
                     signupMessageDiv.classList.add('error');
                 }
             } catch (error) {
@@ -414,11 +431,17 @@ if (locationSelect) {
             loginMessageDiv.textContent = ''; 
             loginMessageDiv.className = 'form-message-placeholder';
 
-            const identifier = loginEmailPhoneInput.value.trim(); 
+            const email = loginEmailInput.value.trim(); // Đổi từ loginEmailPhoneInput
             const password = loginPasswordInput.value;
 
-            if (!identifier || !password) {
-                loginMessageDiv.textContent = 'Please enter your email/phone and password.';
+            if (!email || !password) {
+                loginMessageDiv.textContent = 'Please enter your email and password.';
+                loginMessageDiv.classList.add('error');
+                return;
+            }
+            // Kiểm tra định dạng email
+            if (!validateEmail(email)) {
+                loginMessageDiv.textContent = 'Please enter a valid email address.';
                 loginMessageDiv.classList.add('error');
                 return;
             }
@@ -427,14 +450,14 @@ if (locationSelect) {
                 const response = await fetch('/api/login', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ identifier, password })
+                    body: JSON.stringify({ email, password }) // Sử dụng email thay vì identifier
                 });
                 const result = await response.json();
 
                 if (response.ok) {
-                    currentUser = result.user; // Store user info in global var
+                    currentUser = result.customer; // Store user info in global var, thay result.user 
                     localStorage.setItem('vshare_currentUser', JSON.stringify(currentUser)); // Persist login status
-                    loginMessageDiv.textContent = `Welcome, ${currentUser.name || currentUser.email || currentUser.phone}!`;
+                    loginMessageDiv.textContent = `Welcome, ${currentUser.name || currentUser.email}!`;
                     loginMessageDiv.classList.add('success');
                     loginForm.reset();
                     setTimeout(() => {
@@ -848,14 +871,18 @@ if (locationSelect) {
         }
     }
 
-    function calculatePrice() { 
+  function calculatePrice() { 
         if (!currentSelectedCarData || !currentBookingDetails.pickupDateTime || !currentBookingDetails.returnDateTime) return;
         const pickup = new Date(currentBookingDetails.pickupDateTime);
         const ret = new Date(currentBookingDetails.returnDateTime);
         const diffTime = Math.abs(ret - pickup);
-        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        // THAY ĐỔI: +1 ngày để tính đúng số ngày thuê nếu ngày nhận/trả là cùng một ngày hoặc qua đêm.
+        let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end day
         currentBookingDetails.rentalDurationDays = diffDays > 0 ? diffDays : 1; 
-        currentBookingDetails.baseCost = currentSelectedCarData.pricePerDay * currentBookingDetails.rentalDurationDays;
+        
+        let baseCostWithoutServices = currentSelectedCarData.pricePerDay * currentBookingDetails.rentalDurationDays;
+        currentBookingDetails.baseCost = baseCostWithoutServices; // baseCost is now just car price * days
+
         currentBookingDetails.servicesCost = 0;
         if (vehicleInsuranceCheckbox && vehicleInsuranceCheckbox.checked) {
             currentBookingDetails.servicesCost += parseFloat(vehicleInsuranceCheckbox.dataset.price) * currentBookingDetails.rentalDurationDays;
@@ -863,15 +890,65 @@ if (locationSelect) {
         if (includeDriverCheckbox && includeDriverCheckbox.checked) {
             currentBookingDetails.servicesCost += parseFloat(includeDriverCheckbox.dataset.price) * currentBookingDetails.rentalDurationDays;
         }
-        currentBookingDetails.totalPrice = currentBookingDetails.baseCost + currentBookingDetails.servicesCost;
+
+        // Tính tổng giá trước khuyến mại
+        let totalBeforeDiscount = currentBookingDetails.baseCost + currentBookingDetails.servicesCost;
+        
+        let discountAmount = 0;
+        let finalTotalPrice = totalBeforeDiscount;
+
+        // Áp dụng khuyến mại nếu có và hợp lệ
+        if (currentAppliedPromotion) {
+            const promo = currentAppliedPromotion.promotion;
+            
+            // Re-validate promotion on client-side (basic checks)
+            const isPromoApplicable = 
+                (promo.applicableCarMakes.length === 0 || promo.applicableCarMakes.includes(currentSelectedCarData.make)) &&
+                (promo.applicableLocations.length === 0 || promo.applicableLocations.includes(currentSelectedCarData.location)) &&
+                (currentBookingDetails.rentalDurationDays >= promo.minRentalDays) &&
+                (!promo.maxRentalDays || currentBookingDetails.rentalDurationDays <= promo.maxRentalDays) &&
+                (totalBeforeDiscount >= promo.minTotalPrice);
+
+            if (isPromoApplicable) {
+                if (promo.discountType === 'percentage') {
+                    discountAmount = totalBeforeDiscount * (promo.discountValue / 100);
+                } else { // fixed
+                    discountAmount = promo.discountValue;
+                }
+                finalTotalPrice = Math.max(0, totalBeforeDiscount - discountAmount); // Ensure price doesn't go negative
+
+                // Display discount line
+                if (discountAmountDisplay) discountAmountDisplay.textContent = `-$${discountAmount.toLocaleString('en-US')}`;
+                if (discountDisplayGroup) discountDisplayGroup.style.display = 'flex';
+            } else {
+                // Promotion is no longer applicable for current selection
+                currentAppliedPromotion = null; // Clear applied promotion
+                if (promotionMessageDiv) {
+                    promotionMessageDiv.textContent = 'Promotion code not applicable to current selection.';
+                    promotionMessageDiv.className = 'message-area error';
+                }
+                if (discountDisplayGroup) discountDisplayGroup.style.display = 'none';
+            }
+        } else {
+            // No promotion or promotion cleared, hide discount line
+            if (discountDisplayGroup) discountDisplayGroup.style.display = 'none';
+        }
+
+        currentBookingDetails.totalPrice = finalTotalPrice; // Cập nhật tổng giá cuối cùng sau giảm giá
+        // Cập nhật hiển thị UI
         if(detailUnitPrice) detailUnitPrice.textContent = currentSelectedCarData.pricePerDay.toLocaleString('en-US');
         if(detailRentalDuration) detailRentalDuration.textContent = currentBookingDetails.rentalDurationDays;
         if(detailBaseCost) detailBaseCost.textContent = currentBookingDetails.baseCost.toLocaleString('en-US');
         if(detailServicesCost) detailServicesCost.textContent = currentBookingDetails.servicesCost.toLocaleString('en-US');
-        if(detailTotalPrice) detailTotalPrice.textContent = currentBookingDetails.totalPrice.toLocaleString('en-US');
-        updateDepositDisplay();    // Gọi sau khi tính xong
+        if(detailTotalPrice) detailTotalPrice.textContent = currentBookingDetails.totalPrice.toLocaleString('en-US'); // Tổng giá sau giảm (trên trang chi tiết xe)
+        
+        // Cập nhật hiển thị trên trang khách hàng
+        if(baseTotalPriceDisplay) baseTotalPriceDisplay.textContent = `$${totalBeforeDiscount.toLocaleString('en-US')}`; // Hiển thị giá gốc
+        if(finalTotalPriceDisplay) finalTotalPriceDisplay.textContent = `$${finalTotalPrice.toLocaleString('en-US')}`; // Hiển thị giá cuối cùng
+
+        updateDepositDisplay(); // Gọi sau khi tính xong
     }
-    
+
      // Cập nhật hàm displayCarDetails để hiển thị thông tin chi tiết xe
 
     async function displayCarDetails() { 
@@ -1009,12 +1086,41 @@ if (locationSelect) {
         if (customerSummaryReturnDateTime) customerSummaryReturnDateTime.textContent = formatDateTimeForDisplay(currentBookingDetails.returnDateTime);
     
         // Điền thông tin Price Summary
-        if (customerSummaryUnitPrice) customerSummaryUnitPrice.textContent = currentSelectedCarData.pricePerDay.toLocaleString('en-US');
-        if (customerSummaryRentalDuration) customerSummaryRentalDuration.textContent = currentBookingDetails.rentalDurationDays;
-        if (customerSummaryBaseCost) customerSummaryBaseCost.textContent = currentBookingDetails.baseCost.toLocaleString('en-US');
-        if (customerSummaryServicesCost) customerSummaryServicesCost.textContent = currentBookingDetails.servicesCost.toLocaleString('en-US');
-        if (customerSummaryTotalPrice) customerSummaryTotalPrice.textContent = currentBookingDetails.totalPrice.toLocaleString('en-US');
-        if (customerSummaryDepositPrice) customerSummaryDepositPrice.textContent = currentBookingDetails.depositAmount.toLocaleString('en-US'); // Sẽ được cập nhật lại bởi updateDepositDisplay()
+// Cập nhật thông tin Price Summary trong cột tóm tắt bên trái (customer-info-view)
+if (customerSummaryUnitPrice) customerSummaryUnitPrice.textContent = currentSelectedCarData.pricePerDay.toLocaleString('en-US');
+if (customerSummaryRentalDuration) customerSummaryRentalDuration.textContent = currentBookingDetails.rentalDurationDays;
+if (customerSummaryBaseCost) customerSummaryBaseCost.textContent = currentBookingDetails.baseCost.toLocaleString('en-US');
+if (customerSummaryServicesCost) customerSummaryServicesCost.textContent = currentBookingDetails.servicesCost.toLocaleString('en-US');
+
+// THAY ĐỔI LỚN TẠI ĐÂY: Sử dụng các giá trị đã tính toán từ calculatePrice()
+if (customerSummaryTotalPrice) customerSummaryTotalPrice.textContent = currentBookingDetails.totalPrice.toLocaleString('en-US'); // This is the final price after discount
+
+// Hiển thị giá gốc và giảm giá nếu có trên cột tóm tắt khách hàng
+const totalBeforeDiscount = currentBookingDetails.baseCost + currentBookingDetails.servicesCost;
+if (baseTotalPriceDisplay && document.getElementById('customer-page-content')) { // Check if these elements exist on customer info page
+    const promoSection = document.getElementById('customer-page-content').querySelector('.price-summary-updated');
+    if (promoSection) {
+        promoSection.querySelector('#baseTotalPriceDisplay').textContent = `$${totalBeforeDiscount.toLocaleString('en-US')}`;
+        promoSection.querySelector('#finalTotalPriceDisplay').textContent = `$${currentBookingDetails.totalPrice.toLocaleString('en-US')}`;
+
+        if (currentAppliedPromotion) {
+            const promo = currentAppliedPromotion.promotion;
+            let discountAmount = 0;
+            if (promo.discountType === 'percentage') {
+                discountAmount = totalBeforeDiscount * (promo.discountValue / 100);
+            } else { // fixed
+                discountAmount = promo.discountValue;
+            }
+            promoSection.querySelector('#discountAmountDisplay').textContent = `-$${discountAmount.toLocaleString('en-US')}`;
+            promoSection.querySelector('#discountDisplayGroup').style.display = 'flex';
+        } else {
+            promoSection.querySelector('#discountDisplayGroup').style.display = 'none';
+        }
+    }
+}
+
+
+if (customerSummaryDepositPrice) customerSummaryDepositPrice.textContent = currentBookingDetails.depositAmount.toLocaleString('en-US'); // Sẽ được cập nhật lại bởi updateDepositDisplay()
     
         // Khôi phục trạng thái form nếu có
 // === LOGIC MỚI ĐỂ TỰ ĐỘNG ĐIỀN THÔNG TIN KHÁCH HÀNG ===
@@ -1090,7 +1196,10 @@ if (currentUser) { // Kiểm tra nếu có người dùng đang đăng nhập
                 pickupLocation: currentBookingDetails.location, // Đảm bảo trường này cũng được gửi nếu cần
                 baseCost: currentBookingDetails.baseCost, // Đảm bảo trường này cũng được gửi
                 servicesCost: currentBookingDetails.servicesCost, // Đảm bảo trường này cũng được gửi
-                depositAmount: currentBookingDetails.depositAmount // Đảm bảo trường này cũng được gửi
+                depositAmount: currentBookingDetails.depositAmount, // Đảm bảo trường này cũng được gửi
+                status: 'Pending',
+                // THÊM DÒNG NÀY ĐỂ GỬI MÃ KHUYẾN MẠI ĐÃ ÁP DỤNG
+                appliedPromotionCode: currentAppliedPromotion ? currentAppliedPromotion.promotion.code : null
             };
             console.log("[customerBookingForm] Submitting booking:", bookingPayload); 
             try {
@@ -1128,7 +1237,30 @@ if (currentUser) { // Kiểm tra nếu có người dùng đang đăng nhập
         if(confRentalPeriod) {
             confRentalPeriod.innerHTML = `<h4>Rental Period</h4><p><strong>Pick-up:</strong> ${formatDateTimeForDisplay(booking.startDate)}</p><p><strong>Return:</strong> ${formatDateTimeForDisplay(booking.endDate)}</p>`;
         }
-        if(confTotalPrice) confTotalPrice.innerHTML = `<h4>Total Amount: $${currentBookingDetails.totalPrice.toLocaleString('en-US')}</h4>`;
+        // THAY ĐỔI: Hiển thị chi tiết giá, bao gồm giảm giá nếu có
+        if(confTotalPrice) {
+            let totalHtml = `<h4>Total Amount: $${Number(booking.totalPrice).toLocaleString('en-US')}</h4>`;
+            if (currentAppliedPromotion) {
+                const totalBeforeDiscount = currentBookingDetails.baseCost + currentBookingDetails.servicesCost;
+                const promo = currentAppliedPromotion.promotion;
+                let discountAmount = 0;
+                if (promo.discountType === 'percentage') {
+                    discountAmount = totalBeforeDiscount * (promo.discountValue / 100);
+                } else {
+                    discountAmount = promo.discountValue;
+                }
+                totalHtml = `
+                    <h4>Price Summary</h4>
+                    <p>Base Cost: $${currentBookingDetails.baseCost.toLocaleString('en-US')}</p>
+                    <p>Additional Services: $${currentBookingDetails.servicesCost.toLocaleString('en-US')}</p>
+                    <p class="discount-line">Discount (${promo.code}): -$${discountAmount.toLocaleString('en-US')}</p>
+                    <p class="total-price-final"><strong>Total: $${Number(booking.totalPrice).toLocaleString('en-US')}</strong></p>
+                `;
+            }
+            confTotalPrice.innerHTML = totalHtml;
+        }
+
+        
         if(confPaymentMethod) {
             confPaymentMethod.innerHTML = `<p><strong>Payment Method:</strong> ${currentBookingDetails.paymentMethod}</p>`;
             if (currentBookingDetails.paymentMethod === "Pay Later" && currentBookingDetails.depositAmount > 0) {
@@ -1220,6 +1352,182 @@ if (currentUser) { // Kiểm tra nếu có người dùng đang đăng nhập
             if (event.target === popupOverlayEl) {
                 popupOverlayEl.classList.add('hidden');
             }
+        });
+    }
+
+// NEW: Event Listener for Apply Promotion Button
+if (applyPromotionBtn) {
+    applyPromotionBtn.addEventListener('click', async () => {
+        const promoCode = promotionCodeInput.value.trim().toUpperCase();
+        if (!promoCode) {
+            if(promotionMessageDiv) {
+                promotionMessageDiv.textContent = 'Please enter a promotion code.';
+                promotionMessageDiv.className = 'message-area error';
+            }
+            return;
+        }
+
+        if (!currentSelectedCarData) {
+            if(promotionMessageDiv) {
+                promotionMessageDiv.textContent = 'Please select a car before applying the code.';
+                promotionMessageDiv.className = 'message-area error';
+            }
+            return;
+        }
+        
+        const pickupDateVal = pickupDateTimeInput.value; // Từ form chính
+        const returnDateVal = returnDateTimeInput.value; // Từ form chính
+
+        if (!pickupDateVal || !returnDateVal) {
+            if(promotionMessageDiv) {
+                promotionMessageDiv.textContent = 'Please select pick-up and return dates.';
+                promotionMessageDiv.className = 'message-area error';
+            }
+            return;
+        }
+
+        const startDate = new Date(pickupDateVal);
+        const endDate = new Date(returnDateVal);
+        startDate.setHours(0, 0, 0, 0); // Reset hours for accurate day calculation
+        endDate.setHours(0, 0, 0, 0); // Reset hours for accurate day calculation
+
+        if (endDate < startDate) {
+            if(promotionMessageDiv) {
+                promotionMessageDiv.textContent = 'Return date must be on or after pick-up date.';
+                promotionMessageDiv.className = 'message-area error';
+            }
+            return;
+        }
+        
+        const timeDiff = Math.abs(endDate.getTime() - startDate.getTime());
+        const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+        const basePrice = currentSelectedCarData.pricePerDay * diffDays; // Base price for selected period
+
+        try {
+            applyPromotionBtn.disabled = true;
+            applyPromotionBtn.textContent = 'Applying...';
+            if(promotionMessageDiv) {
+                promotionMessageDiv.textContent = '';
+                promotionMessageDiv.className = 'message-area';
+            }
+
+            const response = await fetch('/api/apply-promotion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    code: promoCode,
+                    carId: currentSelectedCarData.id,
+                    startDate: startDate.toISOString(),
+                    endDate: endDate.toISOString(),
+                    basePrice: basePrice,
+                    location: currentSelectedCarData.location, // Gửi cả location và make
+                    carMake: currentSelectedCarData.make
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                currentAppliedPromotion = result; // Store the valid promotion details
+                if(promotionMessageDiv) {
+                    promotionMessageDiv.textContent = result.message || 'Promotion code applied successfully!';
+                    promotionMessageDiv.className = 'message-area success';
+                }
+                calculatePrice(); // Recalculate with applied promo
+            } else {
+                currentAppliedPromotion = null; // Clear any previously applied promo
+                if(promotionMessageDiv) {
+                    promotionMessageDiv.textContent = result.message || 'Invalid promotion code.';
+                    promotionMessageDiv.className = 'message-area error';
+                }
+                calculatePrice(); // Recalculate without promo
+            }
+        } catch (error) {
+            console.error('Error applying promotion:', error);
+            if(promotionMessageDiv) {
+                promotionMessageDiv.textContent = 'Connection error. Please try again.';
+                promotionMessageDiv.className = 'message-area error';
+            }
+            currentAppliedPromotion = null;
+            calculatePrice();
+        } finally {
+            if(applyPromotionBtn) {
+                applyPromotionBtn.disabled = false;
+                applyPromotionBtn.textContent = 'Apply';
+            }
+        }
+    });
+}
+
+// NEW: Reset promotion when car selection or dates change
+    // Thêm các event listener cho việc thay đổi xe và ngày giờ để reset mã khuyến mại
+    const carSelectionButtons = document.querySelectorAll('.view-detail-btn, .select-car-btn');
+    carSelectionButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            currentAppliedPromotion = null;
+            if(promotionCodeInput) promotionCodeInput.value = '';
+            if(promotionMessageDiv) { promotionMessageDiv.textContent = ''; promotionMessageDiv.className = 'message-area'; }
+            // calculatePrice() sẽ được gọi tự động sau khi car details được hiển thị
+        });
+    });
+
+    if (pickupDateTimeInput) { // Đây là input datetime-local trên homepage
+        pickupDateTimeInput.addEventListener('change', () => {
+            currentAppliedPromotion = null;
+            if(promotionCodeInput) promotionCodeInput.value = '';
+            if(promotionMessageDiv) { promotionMessageDiv.textContent = ''; promotionMessageDiv.className = 'message-area'; }
+            // calculatePrice() sẽ được gọi tự động sau khi car details được hiển thị nếu đó là bước chuyển tiếp
+        });
+    }
+    if (returnDateTimeInput) { // Đây là input datetime-local trên homepage
+        returnDateTimeInput.addEventListener('change', () => {
+            currentAppliedPromotion = null;
+            if(promotionCodeInput) promotionCodeInput.value = '';
+            if(promotionMessageDiv) { promotionMessageDiv.textContent = ''; promotionMessageDiv.className = 'message-area'; }
+            // calculatePrice() sẽ được gọi tự động sau khi car details được hiển thị nếu đó là bước chuyển tiếp
+        });
+    }
+    // Khi hiển thị chi tiết xe, các inputs này sẽ xuất hiện và cũng cần reset promo
+    if (document.getElementById('detail-pickup-datetime')) { // Giả sử ID này là của input ngày/giờ trên trang detail
+        // Bạn cần thay thế bằng ID thực sự của input datetime-local trên trang detail nếu có
+        // Hoặc gắn listener vào proceedToCustomerInfoBtn để reset khi chuyển trang
+        document.getElementById('detail-pickup-datetime').addEventListener('DOMSubtreeModified', (event) => { // Lắng nghe thay đổi nội dung textContent
+             // Hơi hacky, nhưng nếu không có input datetime-local trực tiếp
+             // Bạn có thể lắng nghe sự kiện của các checkbox hoặc của nút proceed
+            if (event.target.textContent.trim() !== '') {
+                currentAppliedPromotion = null;
+                if(promotionCodeInput) promotionCodeInput.value = '';
+                if(promotionMessageDiv) { promotionMessageDiv.textContent = ''; promotionMessageDiv.className = 'message-area'; }
+            }
+        });
+    }
+    if (document.getElementById('detail-return-datetime')) { // Giả sử ID này là của input ngày/giờ trên trang detail
+        document.getElementById('detail-return-datetime').addEventListener('DOMSubtreeModified', (event) => {
+             if (event.target.textContent.trim() !== '') {
+                currentAppliedPromotion = null;
+                if(promotionCodeInput) promotionCodeInput.value = '';
+                if(promotionMessageDiv) { promotionMessageDiv.textContent = ''; promotionMessageDiv.className = 'message-area'; }
+            }
+        });
+    }
+    // Khi di chuyển từ trang chi tiết xe sang trang thông tin khách hàng, ta cần lấy thông tin booking từ currentBookingDetails
+    // và cập nhật lại các span trên trang thông tin khách hàng
+    if (proceedToCustomerInfoBtn) {
+        proceedToCustomerInfoBtn.addEventListener('click', () => {
+            // Reset promotion code input and message when proceeding to customer info view
+            // It's already done by listeners above, but good to ensure
+            // currentAppliedPromotion will be carried over by the calculatePrice() and displayCustomerInfoForm() functions
+            if(promotionCodeInput) promotionCodeInput.value = currentAppliedPromotion ? currentAppliedPromotion.promotion.code : '';
+            if(promotionMessageDiv) {
+                if (currentAppliedPromotion) {
+                    promotionMessageDiv.textContent = currentAppliedPromotion.message || 'Mã khuyến mại đã được áp dụng!';
+                    promotionMessageDiv.className = 'message-area success';
+                } else {
+                    promotionMessageDiv.textContent = '';
+                    promotionMessageDiv.className = 'message-area';
+                }
+            }
+            // displayCustomerInfoForm() will be called next, which updates customer-info-view prices
         });
     }
 

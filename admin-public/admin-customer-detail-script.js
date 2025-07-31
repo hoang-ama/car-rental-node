@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- APIs ---
     const ADMIN_CUSTOMERS_API_URL = '/admin/customers';
-    const ADMIN_BOOKINGS_API_URL = '/admin/bookings';
+    const ADMIN_BOOKINGS_API_URL = '/api/bookings'; // Adjusted to match your API endpoint
 
     // --- Utility Functions ---
     function getQueryParam(name) {
