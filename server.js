@@ -2,9 +2,10 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
-const mongoose = require('mongoose'); // THÊM: Import Mongoose
+const mongoose = require('mongoose');
 const nodemailer = require('nodemailer');
-
+const bcrypt = require('bcrypt');
+const rateLimit = require('express-rate-limit');
 
 require('dotenv').config();
 
@@ -78,7 +79,7 @@ ${booking.depositAmount > 0 ? `<li style="margin-bottom: 8px;"><strong>Deposit A
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGODB_URI; // THÊM: Lấy chuỗi kết nối từ biến môi trường
+const MONGODB_URI = process.env.MONGODB_URI;
 
 // Middleware
 app.use(cors());
@@ -86,14 +87,14 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/admin', express.static(path.join(__dirname, 'admin-public')));
 
-// NEW: Redirect /admin to admin-login.html
+// Redirect /admin to admin-login.html
 app.get('/admin', (req, res) => {
     res.redirect('/admin/admin-login.html');
 });
 
 
 // ----------------------------------------------------
-// THÊM: MONGODB CONNECTION VÀ SCHEMAS
+// MONGODB CONNECTION VÀ SCHEMAS
 // ----------------------------------------------------
 
 // Kết nối đến MongoDB
@@ -103,7 +104,7 @@ mongoose.connect(MONGODB_URI)
 
 // Định nghĩa Car Schema
 const carSchema = new mongoose.Schema({
-    id: { type: String, required: true, unique: true }, // ID duy nhất của xe (ví dụ: biển số)
+    id: { type: String, required: true, unique: true },
     make: { type: String, required: true },
     model: { type: String, required: true },
     year: { type: Number, required: true },
@@ -118,12 +119,12 @@ const carSchema = new mongoose.Schema({
         seats: { type: Number, default: 4 }
     },
     features: [{ type: String }],
-    isFeatured: { type: Boolean, default: false } // Mới: Để đánh dấu xe nổi bật
+    isFeatured: { type: Boolean, default: false }
 });
 
 // Định nghĩa Booking Schema
 const bookingSchema = new mongoose.Schema({
-    id: { type: Number, unique: true }, // Sẽ được quản lý auto-increment trong code Node.js
+    id: { type: Number, unique: true },
     carId: { type: String, required: true },
     carMake: { type: String, required: true },
     carModel: { type: String, required: true },
@@ -139,21 +140,20 @@ const bookingSchema = new mongoose.Schema({
     baseCost: { type: Number },
     servicesCost: { type: Number },
     depositAmount: { type: Number },
-    status: { type: String, default: 'Pending' }, // Pending, Confirmed, Cancelled, Rented Out, Completed
+    status: { type: String, default: 'Pending' },
     bookingDate: { type: Date, default: Date.now },
-    appliedPromotionCode: { type: String } // MỚI: Lưu mã khuyến mại đã áp dụng
+    appliedPromotionCode: { type: String }
 
 });
 
 // Định nghĩa Customer Schema
 const customerSchema = new mongoose.Schema({
-    id: { type: String, required: true, unique: true }, // VD: customer_1, customer_2
+    id: { type: String, required: true, unique: true },
     name: { type: String, required: true },
     phone: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true }, // Trường lưu mật khẩu đã băm
+    password: { type: String, required: true },
     registeredAt: { type: Date, default: Date.now },
-    // Các trường bổ sung cho mục đích demo admin dashboard
     cccd_passport: { type: String, default: 'N/A' },
     driving_license: { type: String, default: 'N/A' },
     other_doc: { type: String, default: 'N/A' },
@@ -165,58 +165,46 @@ const customerSchema = new mongoose.Schema({
     status: { type: String, default: 'Active' }
 });
 
-// Định nghĩa Promotion Schema (MỚI)
+// Định nghĩa Promotion Schema
 const promotionSchema = new mongoose.Schema({
     code: { type: String, required: true, unique: true, uppercase: true, trim: true },
     description: { type: String },
-    discountType: { type: String, required: true, enum: ['percentage', 'fixed'] }, // 'percentage' or 'fixed'
+    discountType: { type: String, required: true, enum: ['percentage', 'fixed'] },
     discountValue: { type: Number, required: true, min: 0 },
-    applicableCarMakes: [{ type: String }], // e.g., ["VinFast", "Toyota"]
-    applicableLocations: [{ type: String }], // e.g., ["Hanoi", "Da Nang"]
+    applicableCarMakes: [{ type: String }],
+    applicableLocations: [{ type: String }],
     minRentalDays: { type: Number, min: 1, default: 1 },
-    maxRentalDays: { type: Number, min: 1 }, // Max rental days, if any
-    minTotalPrice: { type: Number, min: 0, default: 0 }, // Minimum total price for eligibility
+    maxRentalDays: { type: Number, min: 1 },
+    minTotalPrice: { type: Number, min: 0, default: 0 },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     isActive: { type: Boolean, default: true },
-    usageLimit: { type: Number, min: 1 }, // Global usage limit
-    usedCount: { type: Number, default: 0 } // How many times this code has been used
+    usageLimit: { type: Number, min: 1 },
+    usedCount: { type: Number, default: 0 }
 });
 
-// MỚI: Định nghĩa AdditionalService Schema
+// Định nghĩa AdditionalService Schema
 const additionalServiceSchema = new mongoose.Schema({
     name: { type: String, required: true, unique: true, trim: true },
     pricePerDay: { type: Number, required: true, min: 0 }
 });
 
-// MỚI: Định nghĩa Setting Schema (chứa các cấu hình chung)
+// Định nghĩa Setting Schema
 const settingSchema = new mongoose.Schema({
-    // Vì đây là một tài liệu cài đặt toàn cầu duy nhất, chúng ta có thể không cần _id tùy chỉnh
-    // Mongoose sẽ tạo _id mặc định. Hoặc có thể thêm một trường cố định như key: 'global_settings'
     key: { type: String, required: true, unique: true, default: 'global_settings' },
     systemName: { type: String, default: 'Vshare Car Rental' },
-    defaultPickupTime: { type: String, default: '07:00' }, // HH:mm
-    defaultReturnTime: { type: String, default: '19:00' }, // HH:mm
-    
-    // Cấu hình xe
-    masterCarMakes: [{ type: String }], // Danh sách các hãng xe duy nhất
-    masterCarFeatures: [{ type: String }], // Danh sách các tính năng xe duy nhất (ADAS, Car Play, etc.)
-
-    // Cấu hình địa điểm thuê xe
-    rentalLocations: [{ type: String }], // Danh sách các địa điểm thuê xe
-
-    // Cấu hình thủ tục thuê xe (có thể là một đối tượng chứa các chuỗi hoặc mảng chuỗi)
+    defaultPickupTime: { type: String, default: '07:00' },
+    defaultReturnTime: { type: String, default: '19:00' },
+    masterCarMakes: [{ type: String }],
+    masterCarFeatures: [{ type: String }],
+    rentalLocations: [{ type: String }],
     rentalProcedures: {
         requiredDocuments: [{ type: String }],
         securityDepositOptions: [{ type: String }],
         distanceLimitations: [{ type: String }],
         otherRegulations: [{ type: String }]
     },
-    
-    // Default values for new customers/bookings (if needed, or keep in respective schemas)
-    // Example: defaultCustomerLoyalty: { type: String, default: 'Good (90/100)' }
-}, { timestamps: true }); // Thêm timestamps để theo dõi thời gian tạo/cập nhật
-
+}, { timestamps: true });
 
 
 // Tạo Models từ Schemas
@@ -224,15 +212,8 @@ const Car = mongoose.model('Car', carSchema);
 const Booking = mongoose.model('Booking', bookingSchema);
 const Customer = mongoose.model('Customer', customerSchema);
 const Promotion = mongoose.model('Promotion', promotionSchema); 
-
-const AdditionalService = mongoose.model('AdditionalService', additionalServiceSchema); // MỚI
-const Setting = mongoose.model('Setting', settingSchema); // MỚI
-
-
-
-// ----------------------------------------------------
-// THAY ĐỔI: Chuyển logic đọc/ghi từ file JSON sang Mongoose
-// ----------------------------------------------------
+const AdditionalService = mongoose.model('AdditionalService', additionalServiceSchema);
+const Setting = mongoose.model('Setting', settingSchema);
 
 
 // Hàm để lấy ID booking tiếp theo (tự tăng)
@@ -243,7 +224,7 @@ async function getNextBookingId() {
 
 // Hàm để lấy ID khách hàng tiếp theo (tự tăng)
 async function getNextCustomerId() {
-    const lastCustomer = await Customer.findOne().sort({ _id: -1 }); // Sắp xếp theo _id mặc định của MongoDB
+    const lastCustomer = await Customer.findOne().sort({ _id: -1 });
     if (lastCustomer && lastCustomer.id) {
         const idNum = parseInt(lastCustomer.id.replace('customer_', ''));
         return `customer_${idNum + 1}`;
@@ -251,7 +232,7 @@ async function getNextCustomerId() {
     return 'customer_1';
 }
 
-// Hàm để cập nhật trạng thái khả dụng của xe (được gọi sau khi booking được tạo/cập nhật/xóa)
+// Hàm để cập nhật trạng thái khả dụng của xe
 async function updateCarAvailability(carId, isAvailable) {
     try {
         const car = await Car.findOne({ id: carId });
@@ -266,15 +247,15 @@ async function updateCarAvailability(carId, isAvailable) {
 }
 
 // ----------------------------------------------------
-// THAY ĐỔI: API Endpoints để sử dụng Mongoose Models
+// API Endpoints để sử dụng Mongoose Models
 // ----------------------------------------------------
 
 // API endpoint to fetch cars
 app.get('/api/cars', async (req, res) => {
     try {
         const location = req.query.location;
-        let query = { available: true }; // Chỉ trả về xe khả dụng
-        if (location && location !== "Any Location") { // Đã sửa từ "AnyLocation" thành "Any Location" để khớp với frontend
+        let query = { available: true };
+        if (location && location !== "Any Location") {
             query.location = location;
         }
         const cars = await Car.find(query);
@@ -319,39 +300,36 @@ app.post('/api/bookings', async (req, res) => {
             return res.status(404).json({ message: `Car with ID ${carId} not found for booking.` });
         }
 
-
-        // MỚI: Kiểm tra mã khuyến mại đã áp dụng
         if (!car.available) {
             return res.status(400).json({ message: 'Car is not available.' });
         }
 
         const sDate = new Date(startDate);
         const eDate = new Date(endDate);
-        sDate.setHours(0, 0, 0, 0); // Reset hours for consistent day calculation
-        eDate.setHours(0, 0, 0, 0); // Reset hours for consistent day calculation
+        sDate.setHours(0, 0, 0, 0);
+        eDate.setHours(0, 0, 0, 0);
 
         if (eDate < sDate) {
             return res.status(400).json({ message: 'Return date must be on or after pick-up date.' });
         }
 
         const timeDiff = Math.abs(eDate.getTime() - sDate.getTime());
-        const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1; // +1 to include both start and end day
+        const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
         let basePrice = car.pricePerDay * diffDays;
         let finalPrice = basePrice;
         let discountAmount = 0;
 
         let appliedPromotion = null;
-        // Server-side re-validation and application of promotion
         if (appliedPromotionCode) {
             const promotion = await Promotion.findOne({ code: appliedPromotionCode.toUpperCase(), isActive: true });
 
             if (promotion) {
-                const now = new Date(); // Current time on server
+                const now = new Date();
                 const promoStartDate = new Date(promotion.startDate);
                 const promoEndDate = new Date(promotion.endDate);
 
-                const isPromoValid = (now >= promoStartDate && now <= promoEndDate) && // Check promo active period
-                                     (!promotion.usageLimit || promotion.usedCount < promotion.usageLimit) && // Check usage limit
+                const isPromoValid = (now >= promoStartDate && now <= promoEndDate) &&
+                                     (!promotion.usageLimit || promotion.usedCount < promotion.usageLimit) &&
                                      (promotion.applicableCarMakes.length === 0 || promotion.applicableCarMakes.includes(car.make)) &&
                                      (promotion.applicableLocations.length === 0 || promotion.applicableLocations.includes(car.location)) &&
                                      (diffDays >= promotion.minRentalDays) &&
@@ -361,11 +339,11 @@ app.post('/api/bookings', async (req, res) => {
                 if (isPromoValid) {
                     if (promotion.discountType === 'percentage') {
                         discountAmount = basePrice * (promotion.discountValue / 100);
-                    } else { // fixed
+                    } else {
                         discountAmount = promotion.discountValue;
                     }
-                    finalPrice = Math.max(0, basePrice - discountAmount); // Ensure price doesn't go negative
-                    appliedPromotion = promotion; // Store the promotion object if valid
+                    finalPrice = Math.max(0, basePrice - discountAmount);
+                    appliedPromotion = promotion;
                 } else {
                     console.warn(`Promotion ${appliedPromotionCode} found but not applicable or invalid for this specific booking criteria.`);
                 }
@@ -373,8 +351,6 @@ app.post('/api/bookings', async (req, res) => {
                 console.warn(`Promotion code ${appliedPromotionCode} not found or inactive in database.`);
             }
         }
-
-        // End of promotion logic
 
         const newBookingId = await getNextBookingId();
 
@@ -391,27 +367,24 @@ app.post('/api/bookings', async (req, res) => {
             startDate: new Date(startDate),
             endDate: new Date(endDate),
             paymentMethod,
-            totalPrice: finalPrice, // Use finalPrice after discount
+            totalPrice: finalPrice,
             baseCost: basePrice,
             servicesCost: 0,
             depositAmount: 0,
             status: 'Pending',
             bookingDate: new Date(),
-            appliedPromotionCode: appliedPromotion ? appliedPromotion.code : null // Store the code if applied
+            appliedPromotionCode: appliedPromotion ? appliedPromotion.code : null
 
         });
 
         await newBooking.save();
         console.log('New Booking by client:', newBooking);
 
-        // Increment usedCount for the applied promotion if it was valid and used
         if (appliedPromotion) {
             await Promotion.updateOne({ _id: appliedPromotion._id }, { $inc: { usedCount: 1 } });
             console.log(`Promotion ${appliedPromotion.code} used. New count for this promo: ${appliedPromotion.usedCount + 1}`);
         }
 
-          // Send confirmation email
-        // IMPORTANT: Ensure EMAIL_USER and EMAIL_PASS are correctly set in your .env file
         if (customerEmail && process.env.EMAIL_USER && process.env.EMAIL_PASS) {
             await sendBookingConfirmationEmail(newBooking);
         } else {
@@ -420,7 +393,6 @@ app.post('/api/bookings', async (req, res) => {
         
         console.log('New booking created:', newBooking);
         res.status(201).json({ message: 'Booking successful!', booking: newBooking });
-
 
 
     } catch (error) {
@@ -444,7 +416,7 @@ app.get('/api/my-bookings', async (req, res) => {
     }
 });
 
-// API to apply promotion code (for client-side validation and price calculation before final booking)
+// API to apply promotion code
 app.post('/api/apply-promotion', async (req, res) => {
     const { code, carId, startDate, endDate, basePrice, location, carMake } = req.body;
 
@@ -459,7 +431,6 @@ app.post('/api/apply-promotion', async (req, res) => {
             return res.status(404).json({ message: 'Promotion code does not exist or is inactive.' });
         }
 
-        // Check date validity
         const now = new Date();
         const promoStartDate = new Date(promotion.startDate);
         const promoEndDate = new Date(promotion.endDate);
@@ -468,7 +439,6 @@ app.post('/api/apply-promotion', async (req, res) => {
             return res.status(400).json({ message: 'Promotion code has expired or is not yet active.' });
         }
 
-        // Check usage limit (NOTE: This check is done again in /api/bookings to ensure atomicity for incrementing usedCount)
         if (promotion.usageLimit && promotion.usedCount >= promotion.usageLimit) {
             return res.status(400).json({ message: 'Promotion code has reached its usage limit.' });
         }
@@ -481,9 +451,8 @@ app.post('/api/apply-promotion', async (req, res) => {
         const rentalStartDate = new Date(startDate);
         const rentalEndDate = new Date(endDate);
         const timeDiff = Math.abs(rentalEndDate.getTime() - rentalStartDate.getTime());
-        const rentalDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+        const rentalDays = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) + 1;
 
-        // Check applicability criteria
         if (promotion.applicableCarMakes && promotion.applicableCarMakes.length > 0 && !promotion.applicableCarMakes.includes(car.make)) {
             return res.status(400).json({ message: `Promotion code does not apply to ${car.make} vehicles.` });
         }
@@ -503,7 +472,7 @@ app.post('/api/apply-promotion', async (req, res) => {
         let discountAmount = 0;
         if (promotion.discountType === 'percentage') {
             discountAmount = basePrice * (promotion.discountValue / 100);
-        } else { // fixed
+        } else {
             discountAmount = promotion.discountValue;
         }
 
@@ -511,7 +480,7 @@ app.post('/api/apply-promotion', async (req, res) => {
 
         res.json({
             message: 'Promotion code is valid.',
-            promotion: promotion.toObject(), // Return full promotion object for client-side calculation/display
+            promotion: promotion.toObject(),
             discountAmount: discountAmount,
             finalPrice: finalPrice
         });
@@ -523,7 +492,7 @@ app.post('/api/apply-promotion', async (req, res) => {
 });
 
 
-// --- Admin API Endpoints for listing all bookings/customers (used by admin-dashboard, admin-notifications-all) ---
+// --- Admin API Endpoints for listing all bookings/customers ---
 
 // GET all bookings (for admin list)
 app.get('/api/bookings', async (req, res) => {
@@ -615,11 +584,11 @@ app.put('/admin/cars/:carIdToUpdate', async (req, res) => {
                 available: Boolean(available),
                 imageUrl,
                 location,
-                specifications, // Mongoose sẽ xử lý việc cập nhật sub-document
+                specifications,
                 features: Array.isArray(features) ? features : [],
                 isFeatured: Boolean(isFeatured)
             },
-            { new: true } // Trả về tài liệu đã cập nhật
+            { new: true }
         );
 
         if (!updatedCar) {
@@ -659,7 +628,7 @@ app.delete('/admin/cars/:carIdToDelete', async (req, res) => {
 app.post('/admin/bookings', async (req, res) => {
     const {
         customerName, customerPhone, customerEmail, notes,
-        carId, // vehicleId của xe
+        carId,
         pickupLocation, startDate, endDate,
         paymentMethod, totalPrice, baseCost, servicesCost, depositAmount, status
     } = req.body;
@@ -711,7 +680,7 @@ app.put('/admin/bookings/:bookingId', async (req, res) => {
     const bookingIdParam = parseInt(req.params.bookingId);
     const {
         customerName, customerPhone, customerEmail, notes,
-        carId, // vehicleId của xe
+        carId,
         pickupLocation, startDate, endDate,
         paymentMethod, totalPrice, baseCost, servicesCost, depositAmount, status
     } = req.body;
@@ -756,22 +725,18 @@ app.put('/admin/bookings/:bookingId', async (req, res) => {
 
         console.log('Admin updated booking ID:', bookingIdParam, updatedBooking);
 
-        // Logic cập nhật trạng thái available của xe
         if (oldStatus !== updatedBooking.status || (carId !== undefined && carId !== currentCarId)) {
-            // Nếu xe thay đổi hoặc trạng thái booking thay đổi
-            // Xe cũ có thể trở lại available
             if (oldStatus === 'Confirmed' || oldStatus === 'Rented Out') {
                 const carStillBookedOld = await Booking.findOne({
                     carId: currentCarId,
                     $or: [{ status: 'Confirmed' }, { status: 'Rented Out' }],
-                    id: { $ne: updatedBooking.id } // Loại trừ booking hiện tại
+                    id: { $ne: updatedBooking.id }
                 });
                 if (!carStillBookedOld) {
                     await updateCarAvailability(currentCarId, true);
                 }
             }
 
-            // Xe mới có thể trở thành unavailable
             if (updatedBooking.status === 'Confirmed' || updatedBooking.status === 'Rented Out') {
                 await updateCarAvailability(updatedBooking.carId, false);
             } else if (updatedBooking.status === 'Cancelled by Customer' || updatedBooking.status === 'Cancelled by Admin' || updatedBooking.status === 'Completed') {
@@ -820,8 +785,7 @@ app.delete('/admin/bookings/:bookingId', async (req, res) => {
 // --- Admin Customer API Endpoints ---
 app.get('/admin/customers', async (req, res) => {
     try {
-        // Không gửi mật khẩu ra frontend
-        const customersWithoutPasswords = await Customer.find({}, { password: 0 }); // Chọn tất cả trừ password
+        const customersWithoutPasswords = await Customer.find({}, { password: 0 });
         res.json(customersWithoutPasswords);
     } catch (error) {
         console.error('Error fetching admin customers:', error);
@@ -833,7 +797,7 @@ app.get('/admin/customers', async (req, res) => {
 app.get('/admin/customers/:customerId', async (req, res) => {
     const customerIdParam = req.params.customerId;
     try {
-        const customer = await Customer.findOne({ id: customerIdParam }, { password: 0 }); // Loại trừ password
+        const customer = await Customer.findOne({ id: customerIdParam }, { password: 0 });
         if (customer) {
             res.json(customer);
         } else {
@@ -867,12 +831,11 @@ app.post('/admin/customers', async (req, res) => {
             name,
             phone,
             email,
-            password, // Trong thực tế: HASH THIS PASSWORD!
+            password,
             registeredAt: new Date()
         });
         await newCustomer.save();
         console.log('Admin added new customer:', newCustomer.id);
-        // Trả về thông tin khách hàng không có mật khẩu
         const { password: _, ...customerWithoutPassword } = newCustomer.toObject();
         res.status(201).json({ message: 'Customer added successfully', customer: customerWithoutPassword });
     } catch (error) {
@@ -892,13 +855,14 @@ app.put('/admin/customers/:customerId', async (req, res) => {
         if (phone !== undefined) updatedFields.phone = phone;
         if (email !== undefined) updatedFields.email = email;
         if (password !== undefined && password !== '') {
-            updatedFields.password = password; // In thực tế: HASH MẬT KHẨU!
+            const saltRounds = 10;
+            updatedFields.password = await bcrypt.hash(password, saltRounds);
         }
 
         const updatedCustomer = await Customer.findOneAndUpdate(
             { id: customerIdParam },
             { $set: updatedFields },
-            { new: true, projection: { password: 0 } } // Trả về tài liệu đã cập nhật, không bao gồm password
+            { new: true, projection: { password: 0 } }
         );
 
         if (!updatedCustomer) {
@@ -936,7 +900,7 @@ app.delete('/admin/customers/:customerId', async (req, res) => {
 });
 
 
-// --- Admin Promotion API Endpoints (MỚI) ---
+// --- Admin Promotion API Endpoints ---
 
 // GET all promotions
 app.get('/admin/promotions', async (req, res) => {
@@ -974,7 +938,6 @@ app.post('/admin/promotions', async (req, res) => {
         startDate, endDate, isActive, usageLimit
     } = req.body;
 
-    // Basic validation
     if (!code || !discountType || discountValue === undefined || !startDate || !endDate) {
         return res.status(400).json({ message: 'Code, Discount Type, Discount Value, Start Date, and End Date are required.' });
     }
@@ -1005,7 +968,7 @@ app.post('/admin/promotions', async (req, res) => {
             endDate: new Date(endDate),
             isActive: isActive !== undefined ? Boolean(isActive) : true,
             usageLimit: usageLimit ? parseInt(usageLimit) : undefined,
-            usedCount: 0 // Initialize usedCount
+            usedCount: 0
         });
 
         await newPromotion.save();
@@ -1024,7 +987,7 @@ app.put('/admin/promotions/:code', async (req, res) => {
         description, discountType, discountValue,
         applicableCarMakes, applicableLocations,
         minRentalDays, maxRentalDays, minTotalPrice,
-        startDate, endDate, isActive, usageLimit, usedCount // Include usedCount for potential manual adjustment
+        startDate, endDate, isActive, usageLimit, usedCount
     } = req.body;
 
     try {
@@ -1041,13 +1004,13 @@ app.put('/admin/promotions/:code', async (req, res) => {
             endDate: new Date(endDate),
             isActive: isActive !== undefined ? Boolean(isActive) : true,
             usageLimit: usageLimit ? parseInt(usageLimit) : undefined,
-            usedCount: usedCount !== undefined ? parseInt(usedCount) : undefined // Allow updating usedCount
+            usedCount: usedCount !== undefined ? parseInt(usedCount) : undefined
         };
 
         const updatedPromotion = await Promotion.findOneAndUpdate(
             { code: promoCode },
             { $set: updatedFields },
-            { new: true } // Return the updated document
+            { new: true }
         );
 
         if (!updatedPromotion) {
@@ -1078,7 +1041,7 @@ app.delete('/admin/promotions/:code', async (req, res) => {
     }
 });
 
-// --- Admin Additional Services API Endpoints (MỚI) ---
+// --- Admin Additional Services API Endpoints ---
 
 // GET all additional services
 app.get('/admin/additional-services', async (req, res) => {
@@ -1114,7 +1077,7 @@ app.post('/admin/additional-services', async (req, res) => {
 
 // PUT (Update) an existing additional service
 app.put('/admin/additional-services/:id', async (req, res) => {
-    const serviceId = req.params.id; // Mongoose _id
+    const serviceId = req.params.id;
     const { name, pricePerDay } = req.body;
     if (!name || pricePerDay === undefined || pricePerDay < 0) {
         return res.status(400).json({ message: 'Service Name and Price are required, and price must be non-negative.' });
@@ -1152,7 +1115,7 @@ app.delete('/admin/additional-services/:id', async (req, res) => {
     }
 });
 
-// --- Admin Settings API Endpoints (MỚI) ---
+// --- Admin Settings API Endpoints ---
 
 // Helper to ensure a single settings document exists
 async function getGlobalSettings() {
@@ -1182,7 +1145,6 @@ app.put('/admin/settings', async (req, res) => {
             masterCarMakes, masterCarFeatures, rentalLocations,
             rentalProcedures } = req.body;
     try {
-        // Find and update the single global settings document
         const updatedSettings = await Setting.findOneAndUpdate(
             { key: 'global_settings' },
             {
@@ -1192,9 +1154,9 @@ app.put('/admin/settings', async (req, res) => {
                 masterCarMakes: Array.isArray(masterCarMakes) ? masterCarMakes : [],
                 masterCarFeatures: Array.isArray(masterCarFeatures) ? masterCarFeatures : [],
                 rentalLocations: Array.isArray(rentalLocations) ? rentalLocations : [],
-                rentalProcedures: rentalProcedures // This expects an object or undefined
+                rentalProcedures: rentalProcedures
             },
-            { new: true, upsert: true } // Create if not exists, return new document
+            { new: true, upsert: true }
         );
         console.log('Admin updated settings:', updatedSettings);
         res.json({ message: 'Settings updated successfully', settings: updatedSettings });
@@ -1204,24 +1166,22 @@ app.put('/admin/settings', async (req, res) => {
     }
 });
 
-// --- Admin Reports API Endpoints (MỚI) ---
+// --- Admin Reports API Endpoints ---
 
 // GET Bookings & Revenue Report
 app.get('/admin/reports/bookings-revenue', async (req, res) => {
-    const { period, location } = req.query; // period: 'weekly', 'monthly', 'all', location: 'Hanoi', etc.
+    const { period, location } = req.query;
     try {
         let matchQuery = {};
         let groupFormat = {};
         
-        // Filter by location if provided
         if (location && location !== 'All') {
             matchQuery.pickupLocation = location;
         }
 
-        // Determine aggregation grouping based on period
         const now = new Date();
         if (period === 'weekly') {
-            const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay())); // Start of current week (Sunday)
+            const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
             matchQuery.bookingDate = { $gte: startOfWeek };
             groupFormat = {
                 year: { $year: "$bookingDate" },
@@ -1235,18 +1195,17 @@ app.get('/admin/reports/bookings-revenue', async (req, res) => {
                 month: { $month: "$bookingDate" }
             };
         }
-        // If period is 'all' or not specified, no date filter is applied
 
         const reportData = await Booking.aggregate([
             { $match: matchQuery },
             { $group: {
-                _id: groupFormat.year && groupFormat.month ? groupFormat : null, // Group by period or null for overall
+                _id: groupFormat.year && groupFormat.month ? groupFormat : null,
                 totalBookings: { $sum: 1 },
                 totalRevenue: { $sum: "$totalPrice" },
                 confirmedBookings: { $sum: { $cond: [{ $eq: ["$status", "Confirmed"] }, 1, 0] } },
-                cancelledBookings: { $sum: { $cond: [{ $regex: ["$status", "Cancelled", "i"] }, 1, 0] } }
+                cancelledBookings: { $sum: { $regex: ["$status", "Cancelled", "i"] } }
             }},
-            { $sort: { "_id.year": 1, "_id.month": 1, "_id.week": 1 } } // Sort by period
+            { $sort: { "_id.year": 1, "_id.month": 1, "_id.week": 1 } }
         ]);
 
         res.json(reportData);
@@ -1258,12 +1217,11 @@ app.get('/admin/reports/bookings-revenue', async (req, res) => {
 
 // GET Car Exploitation Report
 app.get('/admin/reports/car-exploitation', async (req, res) => {
-    const { period, carId } = req.query; // period: 'weekly', 'monthly', 'all', carId: 'VF8-...'
+    const { period, carId } = req.query;
     try {
         let matchQuery = {};
         let groupFormat = {};
 
-        // Filter by carId if provided
         if (carId && carId !== 'All') {
             matchQuery.carId = carId;
         }
@@ -1286,14 +1244,14 @@ app.get('/admin/reports/car-exploitation', async (req, res) => {
                     carId: "$carId",
                     carMake: "$carMake",
                     carModel: "$carModel",
-                    period: groupFormat.year ? groupFormat : null // Group by period if specified
+                    period: groupFormat.year ? groupFormat : null
                 },
                 totalBookings: { $sum: 1 },
                 totalExploitationDays: { 
                     $sum: { 
                         $add: [
                             { $divide: [{ $subtract: ["$endDate", "$startDate"] }, 1000 * 60 * 60 * 24] },
-                            1 // +1 to include both start and end day
+                            1
                         ] 
                     } 
                 },
@@ -1310,10 +1268,8 @@ app.get('/admin/reports/car-exploitation', async (req, res) => {
 });
 
 
-// NEW: Client-side Login API
+// Client-side Login API
 // POST /api/signup
-const bcrypt = require('bcrypt'); // dùng bcrypt để hash mật khẩu trong thực tế
-
 app.post('/api/signup', async (req, res) => {
     const { name, phone, email, password } = req.body;
 
@@ -1326,8 +1282,7 @@ app.post('/api/signup', async (req, res) => {
         if (customerExists) {
             return res.status(400).json({ message: 'User with this phone number or email already exists.' });
         }
-            // Băm mật khẩu
-        const saltRounds = 10; // Số vòng băm (10 là giá trị khuyến nghị)
+            const saltRounds = 10;
         const hashedPassword = await bcrypt.hash(password, saltRounds);    
 
         const newCustomerId = await getNextCustomerId();
@@ -1337,12 +1292,12 @@ app.post('/api/signup', async (req, res) => {
             name,
             phone,
             email,
-            password: hashedPassword, // Lưu mật khẩu đã băm
+            password: hashedPassword,
             registeredAt: new Date()
         });
         await newCustomer.save();
         console.log('Client registered new user:', newCustomer.id);
-        const { password: _, ...userWithoutPassword } = newCustomer.toObject(); // Xem có cần thay bằng customerWithoutPassword không??
+        const { password: _, ...userWithoutPassword } = newCustomer.toObject();
         res.status(201).json({ message: 'Registration successful! You can now log in.', user: userWithoutPassword });
     } catch (error) {
         console.error('Error during client signup:', error);
@@ -1351,48 +1306,86 @@ app.post('/api/signup', async (req, res) => {
 });
 
 // Cấu hình rate limiter cho /api/login
-const rateLimit = require('express-rate-limit'); // Thêm express-rate-limit
 const loginRateLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 phút
-    max: 5, // Giới hạn 5 yêu cầu từ một IP
+    windowMs: 15 * 60 * 1000,
+    max: 5,
     message: "Too many login attempts from this IP, please try again after 15 minutes",
-    standardHeaders: true, // Trả về header RateLimit
-    legacyHeaders: false, // Không sử dụng header X-RateLimit
-  });
-
-app.use('/login', loginRateLimiter); // Áp dụng rate limiter cho tất cả các route bắt đầu bằng /login
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res, next) => {
+        console.warn(`Rate limit hit for IP: ${req.ip} on /api/login`);
+        res.status(429).json({ message: "Too many login attempts from this IP, please try again after 15 minutes" });
+    }
+});
   
 // POST /api/login
-app.post('/api/login', loginRateLimiter, async (req, res) => {   // Áp dụng loginRateLimiter làm middleware cho /api/login.
-    const { email, password } = req.body; // identifier can be email/ not phone
+app.post('/api/login', loginRateLimiter, async (req, res) => {
+    const { email, password } = req.body;
     
+    console.log(`Login attempt for email: ${email}`);
+
     try {
-         // Kiểm tra dữ liệu đầu vào
          if (!email || !password) {
+            console.log('Login failed: Missing email or password');
             return res.status(400).json({ error: 'Email and password are required' });
         }
 
-
-        // Tìm khách hàng theo email
         const customer = await Customer.findOne({ email });
         if (!customer) {
-            return res.status(400).json({ error: 'Invalid email' });
+            console.log(`Login failed for email ${email}: Customer not found`);
+            return res.status(400).json({ error: 'Invalid email or password' });
         }
 
+        const isMatch = await bcrypt.compare(password, customer.password);
+        if (!isMatch) {
+            console.log(`Login failed for email ${email}: Invalid password`);
+            return res.status(400).json({ error: 'Invalid email or password' });
+        }
 
-         // So sánh mật khẩu
-         const isMatch = await bcrypt.compare(password, customer.password);
-         if (!isMatch) {
-             return res.status(400).json({ error: 'Invalid password' });
-         }
-
-       // Loại bỏ mật khẩu khỏi phản hồi
        const { password: _, ...customerWithoutPassword } = customer.toObject();
+       console.log(`Login successful for email: ${email}`);
        res.json({ message: 'Login successful', customer: customerWithoutPassword });
 
     } catch (error) {
         console.error('Error during client login:', error);
         res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// NEW: Admin Login API Endpoint with Rate Limiting
+const adminLoginRateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // Limit 5 requests per IP per window
+    message: "Too many login attempts from this IP. Please try again after 15 minutes.",
+    standardHeaders: true,
+    legacyHeaders: false,
+    handler: (req, res, next) => {
+        console.warn(`Admin Rate limit hit for IP: ${req.ip} on /api/admin/login`);
+        res.status(429).json({ message: "Too many login attempts from this IP. Please try again after 15 minutes." });
+    }
+});
+
+app.post('/api/admin/login', adminLoginRateLimiter, (req, res) => {
+    const { email, password } = req.body;
+
+    // Hardcoded credentials for demo purposes (as per your original admin-login-script.js)
+    const ADMIN_EMAIL = 'admin@vshare.asia';
+    const ADMIN_PASSWORD = 'vsh@re@123';
+
+    console.log(`Admin login attempt for email: ${email}`);
+
+    if (!email || !password) {
+        console.log('Admin login failed: Missing email or password');
+        return res.status(400).json({ message: 'Email and password are required.' });
+    }
+
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+        console.log(`Admin login successful for email: ${email}`);
+        // In a real application, you would issue a JWT here
+        res.json({ message: 'Login successful!', redirect: '/admin/admin-dashboard.html' });
+    } else {
+        console.log(`Admin login failed for email ${email}: Invalid credentials`);
+        res.status(401).json({ message: 'Invalid email or password.' });
     }
 });
 

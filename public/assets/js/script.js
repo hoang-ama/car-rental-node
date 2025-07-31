@@ -431,7 +431,7 @@ if (locationSelect) {
             loginMessageDiv.textContent = ''; 
             loginMessageDiv.className = 'form-message-placeholder';
 
-            const email = loginEmailInput.value.trim(); // Đổi từ loginEmailPhoneInput
+            const email = loginEmailInput.value.trim();
             const password = loginPasswordInput.value;
 
             if (!email || !password) {
@@ -450,22 +450,31 @@ if (locationSelect) {
                 const response = await fetch('/api/login', { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password }) // Sử dụng email thay vì identifier
+                    body: JSON.stringify({ email, password })
                 });
                 const result = await response.json();
 
                 if (response.ok) {
-                    currentUser = result.customer; // Store user info in global var, thay result.user 
-                    localStorage.setItem('vshare_currentUser', JSON.stringify(currentUser)); // Persist login status
+                    currentUser = result.customer;
+                    localStorage.setItem('vshare_currentUser', JSON.stringify(currentUser));
                     loginMessageDiv.textContent = `Welcome, ${currentUser.name || currentUser.email}!`;
                     loginMessageDiv.classList.add('success');
                     loginForm.reset();
                     setTimeout(() => {
                         closeModal(loginModal);
                         updateLoginStateUI(); // Update header button
+                        // Nếu đang ở trang booking, cập nhật thông tin khách hàng
+                        if (document.body.classList.contains('customer-info-page-active')) { // Giả sử có class này khi ở trang customer info
+                            displayCustomerInfoForm(); // Gọi lại để điền thông tin sau khi đăng nhập
+                        }
                     }, 1000);
                 } else {
-                    loginMessageDiv.textContent = result.message || 'Invalid credentials. Please try again.';
+                    // Xử lý lỗi từ server, bao gồm cả 429 Too Many Requests
+                    if (response.status === 429) {
+                        loginMessageDiv.textContent = result.message; // Thông báo từ rate limiter
+                    } else {
+                        loginMessageDiv.textContent = result.error || 'Invalid credentials. Please try again.'; // Thông báo lỗi chung
+                    }
                     loginMessageDiv.classList.add('error');
                 }
             } catch (error) {
@@ -612,14 +621,17 @@ if (locationSelect) {
         const mainPageHeader = document.getElementById('main-page-header'); 
         let foundView = false;
 
+        // Thêm/bỏ class để đánh dấu view hiện tại, giúp CSS hoặc JS khác dễ dàng nhận diện
         views.forEach(view => {
             if (view) { 
                 if (view.id === viewId) {
                     console.log(`[showView] Showing: #${view.id}`);
                     view.classList.remove('hidden');
+                    document.body.classList.add(`${view.id}-active`); // Thêm class active cho body
                     foundView = true;
                 } else {
                     view.classList.add('hidden');
+                    document.body.classList.remove(`${view.id}-active`); // Xóa class active
                 }
             }
         });
@@ -627,6 +639,7 @@ if (locationSelect) {
         if (!foundView) {
             console.error(`[showView] View with ID '${viewId}' not found or its element is null. Defaulting to home-view.`);
             if (homeView) homeView.classList.remove('hidden');
+            document.body.classList.add('home-view-active'); // Đảm bảo home-view active nếu không tìm thấy
         }
 
         if (mainPageHeader) {
@@ -1297,7 +1310,8 @@ if (currentUser) { // Kiểm tra nếu có người dùng đang đăng nhập
             .finally(() => { if(button) { button.disabled = false; button.textContent = "Sign-up"; }});
     }
     
-    function validateEmail(email) { const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; return re.test(String(email).toLowerCase()); }
+    // Hàm validate email (đã có)
+    // function validateEmail(email) { const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; return re.test(String(email).toLowerCase()); }
     
     const commonNavButtons = { 
         'nav-home-from-listing': 'home-view', 'nav-home-from-detail': 'home-view',
@@ -1400,7 +1414,7 @@ if (applyPromotionBtn) {
         }
         
         const timeDiff = Math.abs(endDate.getTime() - startDate.getTime());
-        const diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)) + 1;
+        const diffDays = Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) + 1;
         const basePrice = currentSelectedCarData.pricePerDay * diffDays; // Base price for selected period
 
         try {
