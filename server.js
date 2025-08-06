@@ -492,25 +492,6 @@ app.post('/api/apply-promotion', async (req, res) => {
 });
 
 
-// --- Admin API Endpoints for listing all bookings/customers ---
-
-// GET all bookings (for admin list)
-app.get('/api/bookings', async (req, res) => {
-    const customerEmail = req.query.email;
-    try {
-        if (customerEmail) {
-            const filteredBookings = await Booking.find({ customerEmail: customerEmail });
-            res.json(filteredBookings);
-        } else {
-            const allBookings = await Booking.find({});
-            res.json(allBookings);
-        }
-    } catch (error) {
-        console.error('Error fetching bookings (admin/api):', error);
-        res.status(500).json({ message: 'Internal server error' });
-    }
-});
-
 
 // --- Admin Car API Endpoints ---
 app.get('/admin/cars', async (req, res) => {
@@ -624,6 +605,23 @@ app.delete('/admin/cars/:carIdToDelete', async (req, res) => {
 });
 
 // Admin Bookings API Endpoints
+
+// GET all bookings (for admin list)
+app.get('/admin/bookings', async (req, res) => {
+    const customerEmail = req.query.email;
+    try {
+        if (customerEmail) {
+            const filteredBookings = await Booking.find({ customerEmail: customerEmail });
+            res.json(filteredBookings);
+        } else {
+            const allBookings = await Booking.find({});
+            res.json(allBookings);
+        }
+    } catch (error) {
+        console.error('Error fetching bookings (admin/api):', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 app.post('/admin/bookings', async (req, res) => {
     const {

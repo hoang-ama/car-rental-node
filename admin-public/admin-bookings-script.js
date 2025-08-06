@@ -1,4 +1,4 @@
-// admin-public/admin-bookings-script.js
+// admin-public/admin-bookings-script.js - (Final Fix)
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Admin Bookings Script Initializing...");
 
@@ -24,16 +24,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const notesInputBooking = document.getElementById('notes-booking');
 
     const submitBookingBtn = document.getElementById('submit-booking-button');
-    const cancelEditBookingBtn = document.getElementById('cancel-edit-booking-button'); // Renamed from cancelEditBookingBtn for consistency
+    const cancelEditBookingBtn = document.getElementById('cancel-edit-booking-button');
     const bookingFormMessage = document.getElementById('booking-form-message'); // Message for form actions
 
     // NEW DOM Elements for view switching
     const listViewWrapper = document.getElementById('list-view-wrapper');
     const formViewWrapper = document.getElementById('form-view-wrapper');
-    const showAddFormButton = document.getElementById('show-add-form-btn'); // The "Add" button in the list view
+    const showAddFormButton = document.getElementById('show-add-form-btn');
 
-    const ADMIN_BOOKINGS_API_URL = '/api/bookings'; // API endpoint for admin bookings
-    const PUBLIC_CARS_API_URL = '/api/cars'; // To populate car selection dropdown
+    // === FIX HERE: Change API endpoint to match the server.js route ===
+    const ADMIN_BOOKINGS_API_URL = '/admin/bookings';
+    const PUBLIC_CARS_API_URL = '/api/cars';
 
     // --- Utility Functions ---
     /**
@@ -236,7 +237,13 @@ document.addEventListener('DOMContentLoaded', () => {
             let method = editingBookingId ? 'PUT' : 'POST';
             let url = editingBookingId ? `${ADMIN_BOOKINGS_API_URL}/${editingBookingId}` : ADMIN_BOOKINGS_API_URL;
 
-            console.log("Submitting booking data:", bookingData, "Method:", method, "URL:", url);
+            // --- DEBUGGING LOGS ---
+            console.log("--- Submitting Booking Form ---");
+            console.log("Editing Booking ID:", editingBookingId);
+            console.log("HTTP Method:", method);
+            console.log("API URL:", url);
+            console.log("Payload:", bookingData);
+            // --- END DEBUGGING LOGS ---
 
             try {
                 if(submitBookingBtn) {
@@ -338,6 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     console.error("Error parsing booking data for edit:", e);
                     showMessage(bookingActionMessageDiv, "Error: Could not load booking data for editing.", "error");
+                    if(submitBookingBtn) submitBookingBtn.textContent = 'Update Booking';
                 }
             }
 
@@ -394,12 +402,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Event Listeners for view switching ---
     if (showAddFormButton) {
-        showAddFormButton.addEventListener('click', async () => { // Make async to await loadCarsIntoBookingSelect
-            resetBookingForm(); // Clear form before opening
-            await loadCarsIntoBookingSelect(); // Ensure cars are loaded
-            showView('form'); // Show the form view
-            // The submit button text is already set to 'Add Booking' by resetBookingForm()
-            // The cancel button display is handled by showView('form')
+        showAddFormButton.addEventListener('click', async () => {
+            resetBookingForm();
+            await loadCarsIntoBookingSelect();
+            showView('form');
         });
     }
 
@@ -414,9 +420,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initial Data Load ---
     async function initializePage() {
         console.log("Initializing Admin Bookings Page...");
-        await loadCarsIntoBookingSelect(); // Load cars first for the dropdown
-        await fetchAndDisplayBookings();   // Then load bookings for the table
-        showView('list'); // Default to showing the list view on page load
+        await loadCarsIntoBookingSelect();
+        await fetchAndDisplayBookings();
+        showView('list');
     }
 
     initializePage();

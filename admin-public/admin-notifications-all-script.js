@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const notificationsActionMessageDiv = document.getElementById('notifications-action-message');
     const notificationsPaginationInfo = document.getElementById('notifications-pagination-info');
 
-    const ADMIN_BOOKINGS_API_URL = '/api/bookings';
+    const ADMIN_BOOKINGS_API_URL = '/admin/bookings';
     const ADMIN_CUSTOMERS_API_URL = '/admin/customers';
 
     // --- Utility Functions ---
