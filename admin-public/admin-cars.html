@@ -23,7 +23,19 @@
                 <ul>
                     <li><a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
                     <li><a href="admin-cars.html" class="active"><i class="fas fa-car"></i> <span>Car</span></a></li>
-                    <li><a href="admin-bookings.html"><i class="fas fa-calendar-check"></i> <span>Booking</span></a></li>
+                <!-- submenu -->
+                    <li class="has-submenu">
+                        <a href="admin-bookings.html" class="menu-item-with-toggle">
+                            <i class="fas fa-calendar"></i> Booking
+                            <span class="submenu-toggle">
+                                <i class="fas fa-chevron-down chevron-down"></i>
+                            </span>
+                        </a>
+                        <ul class="submenu">
+                            <li><a href="admin-calendar.html"><i class="fas fa-calendar-alt"></i>Calendar</a></li>
+                        </ul>
+                    </li>
+                <!-- End--> 
                     <li><a href="admin-customers.html"><i class="fas fa-users"></i> <span>Customer</span></a></li>
                     <li><a href="admin-promotions.html"><i class="fas fa-tags"></i> <span>Promotion</span></a></li>
                     <li><a href="admin-notifications-all.html"><i class="fas fa-bell"></i> <span>Notifications</span></a></li>
@@ -67,7 +79,7 @@
                         <div class="user-profile-dropdown" id="user-profile-dropdown">
                             <ul>
                                 <li><a href="#" id="view-profile-link"><i class="fas fa-user-circle"></i> View Profile</a></li>
-                                <li><a href="#" id="settings-link"><i class="fas fa-cog"></i> Settings</a></li>
+                                <li><a href="admin-settings.html" id="settings-link"><i class="fas fa-cog"></i> Settings</a></li>
                                 <li><a href="#" id="logout-button" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                             </ul>
                         </div>

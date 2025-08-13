@@ -147,6 +147,87 @@ body {
     border-top: 1px solid #343a40; /* Đường viền nhẹ */
 }
 
+/* Sidebar Menu Item with Toggle */
+.menu-item-with-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px; /* Adjust padding as needed to match existing sidebar items */
+    text-decoration: none;
+    color: var(--sidebar-text);
+    position: relative; /* Ensure relative positioning for absolute children */
+    transition: background-color 0.2s ease;
+}
+
+.menu-item-with-toggle:hover,
+.menu-item-with-toggle.active {
+    background-color: var(--sidebar-active-bg);
+    color: var(--primary-color-vshare);
+}
+
+
+
+/* Sidebar Submenu Styles */
+.sidebar nav ul li .submenu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    height: 0;
+    overflow: hidden;
+    transition: height 0.3s ease-in-out;
+    background-color: #2b3035;
+}
+
+.sidebar nav ul li .submenu.show {
+    height: auto;
+}
+
+.sidebar nav ul li .submenu li {
+    margin-bottom: 0px;
+}
+
+.sidebar nav ul li .submenu li a {
+    display: block;
+    padding: 10px 20px 10px 40px;
+    color: var(--sidebar-text);
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+}
+
+.sidebar nav ul li .submenu li a.active,
+.sidebar nav ul li .submenu li a:hover {
+    background-color: var(--sidebar-active-bg);
+    color: var(--primary-color-vshare); /* Màu chữ active/hover */
+    border-left: 4px solid var(--primary-color-vshare); /* Đường highlight bên trái */
+}
+
+/* Submenu Toggle Icons */
+.submenu-toggle {
+    font-size: 0.8em;
+    cursor: pointer;
+    display: flex;
+    align-items: center; /* Vertically center the icon */
+    margin-left: auto; /* Push to the right */
+}
+
+.submenu-toggle i {
+    margin-left: 5px; /* Space between any text and icon, if needed */
+}
+
+.has-submenu.active .fa-chevron-down {
+    display: none;
+}
+
+.has-submenu .fa-chevron-up {
+    display: none;
+}
+
+.has-submenu.active .fa-chevron-up {
+    display: inline-block;
+}
+
+
 /* Main Content Area */
 .main-content {
     flex-grow: 1; /* Cho phép khu vực này chiếm hết không gian còn lại */
@@ -1226,6 +1307,213 @@ fieldset > div:last-child {
     border: 1px solid white; /* Viền trắng để nổi bật */
     animation: pulse 1.5s infinite; /* Hiệu ứng nhấp nháy */
 }
+
+
+/* --- Rental Calendar Styles --- */
+#bookings-calendar-section {
+    background-color: var(--section-bg);
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    border: 1px solid var(--border-light);
+    margin-bottom: 25px;
+}
+
+.calendar-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.calendar-controls .button {
+    padding: 8px 12px;
+    font-size: 0.9em;
+    border: none; /* Loại bỏ viền mặc định */
+}
+
+.calendar-period-buttons {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+}
+
+#calendar-period-display {
+    font-weight: 600;
+    font-size: 1.2em;
+    color: var(--text-dark);
+}
+
+.calendar-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed var(--border-light);
+}
+
+.calendar-filters .filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.calendar-filters .filter-group span {
+    font-weight: 600;
+    font-size: 0.9em;
+    color: #555;
+}
+
+.calendar-filters .button {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.85em;
+    color: var(--text-dark);
+    background-color: #e9ecef;
+    border: 1px solid #dee2e6;
+    transition: all 0.2s ease;
+}
+
+.calendar-filters .button:hover,
+.calendar-filters .button.active {
+    background-color: var(--primary-color-vshare);
+    color: white;
+    border-color: var(--primary-color-vshare);
+}
+
+#rental-calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Đảm bảo các cột có chiều rộng bằng nhau */
+    min-width: 900px; /* Chiều rộng tối thiểu để không bị co lại quá nhiều */
+}
+
+#rental-calendar-table th { /* Định dạng cho Header của bảng */
+    border: 1px solid var(--border-light);
+    padding: 5px;
+    text-align: center;
+    vertical-align: top;
+    height: auto; /* Chiều cao tự động */
+    position: relative;
+}
+
+#rental-calendar-table td {
+    border: 1px solid var(--border-light);
+    padding: 5px;
+    text-align: center;
+    vertical-align: top;
+    height: 80px; /* Chiều cao cố định cho mỗi ô ngày */
+    position: relative;
+}
+
+#rental-calendar-table thead th {
+    background-color: #f2f2f2;
+    font-weight: 600;
+}
+
+.day-header {
+    font-size: 0.9em;
+    line-height: 1.3;
+}
+
+.car-info-column {
+    width: 200px; /* Chiều rộng cố định cho cột thông tin xe */
+    text-align: left;
+}
+
+.car-info-cell {
+    display: flex;
+    align-items: left;
+    gap: 8px;
+}
+
+.car-thumb {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.car-details {
+    line-height: 1.2;
+    text-align: left; /* Căn trái thông tin xe */
+}
+
+.car-name {
+    font-weight: 600;
+    font-size: 0.9em;
+    color: var(--text-dark);
+}
+
+.car-id {
+    font-size: 0.8em;
+    color: #777;
+}
+
+/* Styling for car price in the calendar view */
+.car-price {
+    font-size: 0.9em;
+    font-weight: 500;
+    color: var(--primary-color-vshare);
+}
+
+/* Booking Blocks */
+.booking-block {
+    position: absolute;
+    height: 20px;
+    left: 0;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    margin: 2px;
+    border-radius: 4px;
+    color: white;
+    font-size: 0.8em;
+    font-weight: 500;
+    line-height: 20px;
+    padding: 0 5px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: center;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+/* Các màu sắc trạng thái booking */
+.booking-block.status-pending {
+    background-color: var(--status-pending); /* Yellow */
+    color: var(--text-dark);
+}
+.booking-block.status-confirmed {
+    background-color: var(--status-confirmed); /* Green */
+}
+.booking-block.status-rented-out {
+    background-color: var(--status-rented-out); /* Blue */
+}
+.booking-block.status-completed {
+    background-color: var(--status-completed); /* Gray */
+}
+.booking-block.status-cancelled {
+    background-color: var(--status-cancelled); /* Red */
+}
+
+/* --- New styles for calendar grid colors --- */
+.calendar-day-cell.today,
+.day-header.today {
+    background-color: #f8f9e4; /* Màu vàng nhạt cho ngày hôm nay */
+    border: 1px solid #f1eea1 !important;
+}
+
+.calendar-day-cell.saturday,
+.day-header.saturday {
+    background-color:  #f8edee;  /* Màu hồng nhạt cho thứ 7 */
+}
+
+.calendar-day-cell.sunday,
+.day-header.sunday {
+    background-color: #f7dde6;/* Màu đỏ nhạt hơn cho Chủ nhật */
+}
+
 
 @keyframes pulse {
     0% {
